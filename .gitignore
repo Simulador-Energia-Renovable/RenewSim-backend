@@ -1,34 +1,55 @@
-HELP.md
+# 🚀 Ignorar archivos de compilación y dependencias
+bin/
+build/
 target/
-!.mvn/wrapper/maven-wrapper.jar
-!**/src/main/**/target/
-!**/src/test/**/target/
+out/
+*.class
 
-### STS ###
-.apt_generated
-.classpath
-.factorypath
+# ⚙️ Ignorar configuraciones específicas de Maven y Gradle
+.mvn/
+.gradle/
+gradle-app.setting
+.gradle-local/
+!gradle-wrapper.jar
+
+# 📦 Ignorar dependencias de librerías (si no están en el repositorio)
+lib/
+*.jar
+*.war
+*.ear
+
+# ⚡ Ignorar archivos de logs y debugging
+*.log
+*.tmp
+hs_err_pid*
+replay_pid*
+heapdump*.hprof
+*.swp
+
+# 🛠️ Ignorar configuraciones de IDEs (Eclipse, IntelliJ, NetBeans, VSCode)
+# Eclipse
+.settings/
 .project
-.settings
-.springBeans
-.sts4-cache
+.classpath
 
-### IntelliJ IDEA ###
-.idea
-*.iws
+# IntelliJ IDEA
+.idea/
 *.iml
 *.ipr
+*.iws
 
-### NetBeans ###
-/nbproject/private/
-/nbbuild/
-/dist/
-/nbdist/
-/.nb-gradle/
-build/
-!**/src/main/**/build/
-!**/src/test/**/build/
+# NetBeans
+nbproject/private/
 
-### VS Code ###
+# VSCode
 .vscode/
-src/main/resources/application.properties
+
+# 🔑 Ignorar archivos de configuración sensibles
+*.env
+*.properties
+*.yml
+*.yaml
+
+# 🖼️ Ignorar archivos del sistema (Mac y Windows)
+Thumbs.db
+.DS_Store
