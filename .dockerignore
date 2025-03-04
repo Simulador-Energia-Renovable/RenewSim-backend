@@ -1,0 +1,6 @@
+# Ignorar archivos y carpetas innecesarias
+*.md
+*.log
+target/
+.dockerignore
+Dockerfile
