@@ -1,0 +1,35 @@
+name: CI Pipeline for RenewSim
+
+on:
+  push:
+    branches:
+      - develop
+  pull_request:
+    branches:
+      - develop
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Set up JDK 17
+      uses: actions/setup-java@v2
+      with:
+        java-version: '17'
+        distribution: 'adoptopenjdk'
+
+    - name: Build and test backend (Spring Boot)
+      run: |
+        cd RenewSim-backend
+        ./mvnw clean install -DskipTests
+        ./mvnw test
+
+    - name: Build and test frontend (React)
+      run: |
+        cd RenewSim-frontend
+        npm install
+        npm run test -- --watchAll=false
