@@ -58,6 +58,17 @@
 
 	<build>
 		<plugins>
+		<plugin>
+      <groupId>org.apache.maven.plugins</groupId>
+      <artifactId>maven-checkstyle-plugin</artifactId>
+      <version>3.1.0</version> <!-- Versión más reciente de Checkstyle -->
+      <configuration>
+        <configLocation>google_checks.xml</configLocation> <!-- Configuración predeterminada de Google -->
+        <encoding>UTF-8</encoding>
+        <consoleOutput>true</consoleOutput>
+        <failsOnError>true</failsOnError>
+      </configuration>
+    </plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
