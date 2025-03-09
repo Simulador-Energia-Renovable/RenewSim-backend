@@ -7,13 +7,14 @@ import org.springframework.stereotype.Service;
 import com.renewsim.backend.models.TestEntity;
 import com.renewsim.backend.repositories.TestRepository;
 
-
+import org.springframework.beans.factory.annotation.Autowired;
 
 @Service
 public class TestService {
 
     private final TestRepository testRepository;
 
+    @Autowired // ✅ Inyección explícita (opcional)
     public TestService(TestRepository testRepository) {
         this.testRepository = testRepository;
     }
@@ -26,4 +27,3 @@ public class TestService {
         return testRepository.save(new TestEntity(message));
     }
 }
-
