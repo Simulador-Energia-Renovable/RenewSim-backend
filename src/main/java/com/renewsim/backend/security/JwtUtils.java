@@ -2,6 +2,8 @@ package com.renewsim.backend.security;
 
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
+import jakarta.annotation.PostConstruct;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -15,7 +17,15 @@ public class JwtUtils {
     private String secret;
 
     @Value("${jwt.expiration}")
-    private long expiration;
+private String expirationStr;
+
+private long expiration;
+
+@PostConstruct
+public void init() {
+    this.expiration = Long.parseLong(expirationStr);
+}
+
 
     private Key getSigningKey() {
         return Keys.hmacShaKeyFor(secret.getBytes());
