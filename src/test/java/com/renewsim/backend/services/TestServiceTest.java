@@ -1,37 +1,45 @@
 package com.renewsim.backend.services;
 
-import com.renewsim.backend.models.TestEntity;
-import com.renewsim.backend.repositories.TestRepository;
-import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
-import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import com.renewsim.backend.models.TestEntity;
+import com.renewsim.backend.repositories.TestRepository;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+
+import java.util.List;
+
 class TestServiceTest {
 
-    private final TestRepository testRepository = mock(TestRepository.class);
-    private final TestService testService = new TestService(testRepository);
+    @Mock
+    private TestRepository testRepository;
 
-    @Test
-    void testCreateTest() {
-        String message = "Test Message";
-        TestEntity testEntity = new TestEntity(message);
+    @InjectMocks
+    private TestService testService;
 
-        when(testRepository.save(any(TestEntity.class))).thenReturn(testEntity);
-
-        TestEntity result = testService.createTest(message);
-
-        assertNotNull(result);
-        assertEquals(message, result.getMessage());
+    @BeforeEach
+    void setUp() {
+        MockitoAnnotations.openMocks(this);
     }
 
     @Test
-    void testGetAllTests() {
-        when(testRepository.findAll()).thenReturn(List.of(new TestEntity("Message 1"), new TestEntity("Message 2")));
-
+    void shouldReturnAllTests() {
+        when(testRepository.findAll()).thenReturn(List.of(new TestEntity(1L, "Test Name")));
         List<TestEntity> result = testService.getAllTests();
+        assertEquals(1, result.size());
+        assertEquals("Test Name", result.get(0).getName());
+    }
 
-        assertEquals(2, result.size());
+    @Test
+    void shouldCreateNewTest() {
+        TestEntity newTest = new TestEntity(null, "New Test");
+        when(testRepository.save(any(TestEntity.class))).thenReturn(new TestEntity(2L, "New Test"));
+        TestEntity result = testService.createTest("New Test");
+        assertNotNull(result.getId());
+        assertEquals("New Test", result.getName());
     }
 }

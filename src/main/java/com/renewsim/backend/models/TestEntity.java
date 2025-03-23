@@ -10,23 +10,20 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-
+import lombok.*;
 
 @Entity
 @Table(name = "test_data")
 @Getter
 @Setter
 @NoArgsConstructor
+@AllArgsConstructor
 public class TestEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, length = 255)
-    private String message;
-
-    public TestEntity(String message) {
-        this.message = message;
-    }
+    @Column(nullable = false)
+    private String name;
 }
