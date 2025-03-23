@@ -1,7 +1,8 @@
 package com.renewsim.backend.controllers.user;
 
 import org.springframework.web.bind.annotation.PostMapping;
-import java.util.Collections;
+import java.util.Map;
+
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -19,9 +20,14 @@ public class AuthController {
     }
 
     @PostMapping("/register")
+    public UserEntity register(@RequestParam String username, @RequestParam String password) {
+        return userService.registerUser(username, password, "USER");
+    }
 
-    public UserEntity regiter(@RequestParam String username, @RequestParam String password) {
-        return userService.registerUser(username, password, Collections.singleton("USER"));
+    @PostMapping("/login")
+    public Map<String, String> login(@RequestParam String username, @RequestParam String password) {
+        String token = userService.authenticate(username, password);
+        return Map.of("token", token);
     }
 
 }
