@@ -11,7 +11,7 @@ import com.renewsim.backend.models.ExampleEntity;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/example")
+@RequestMapping("/api/examples")
 public class ExampleController {
 
     private final ExampleService exampleService;
