@@ -1,24 +1,30 @@
 package com.renewsim.backend.controllers;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
-@WebMvcTest(BaseController.class)
+@SpringBootTest
+@ActiveProfiles("test")
+@AutoConfigureMockMvc
 public class BaseControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
 
     @Test
-    void testHealthCheck() throws Exception {
-        mockMvc.perform(get("/api/v1/health"))
+    public void testStatusEndpoint() throws Exception {
+        mockMvc.perform(get("/api/v1/status"))
                 .andExpect(status().isOk())
-                .andExpect(content().string("API v1 is running"));
+                .andExpect(jsonPath("$.service").value("Renewable Energy Simulator API"))
+                .andExpect(jsonPath("$.status").value("running"))
+                .andExpect(jsonPath("$.version").value("1.0.0"));
     }
 }
