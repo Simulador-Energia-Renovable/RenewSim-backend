@@ -1,24 +1,31 @@
 package com.renewsim.backend.controllers;
 
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.test.web.servlet.MockMvc;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(BaseController.class)
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.test.web.servlet.MockMvc;
+
+@SpringBootTest
+@AutoConfigureMockMvc
+@ActiveProfiles("test")  // Usa el perfil de prueba (application-test.properties)
 public class TestControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
 
     @Test
-void testEndpoint_Response() throws Exception {
-    mockMvc.perform(get("/api/v1/health"))
-           .andExpect(status().isOk())
-           .andExpect(content().string("API v1 is running"));
+    public void testEndpointShouldReturnBackendIsRunningMessage() throws Exception {
+        mockMvc.perform(get("/api/test"))
+               .andExpect(status().isOk())
+               .andExpect(content().string("🚀 Backend is running!"));
+    }
 }
 
-}
+
+
