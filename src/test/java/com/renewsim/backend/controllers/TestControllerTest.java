@@ -20,10 +20,10 @@ public class TestControllerTest {
     private MockMvc mockMvc;
 
     @Test
-    public void testEndpointShouldReturnBackendIsRunningMessage() throws Exception {
-        mockMvc.perform(get("/api/test"))
-               .andExpect(status().isOk())
-               .andExpect(content().string("🚀 Backend is running!"));
+    public void testTestEndpoint() throws Exception {
+        mockMvc.perform(get("/api/v1/test"))
+                .andExpect(status().isOk())
+                .andExpect(content().string("API test endpoint is working!"));
     }
 }
 
