@@ -1,4 +1,4 @@
-package com.renewsim.backend.models;
+package com.renewsim.backend.model;
 
 
 
