@@ -3,8 +3,10 @@ package com.renewsim.backend.services;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-import com.renewsim.backend.models.TestEntity;
+import com.renewsim.backend.model.TestEntity;
 import com.renewsim.backend.repositories.TestRepository;
+import com.renewsim.backend.service.TestService;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;

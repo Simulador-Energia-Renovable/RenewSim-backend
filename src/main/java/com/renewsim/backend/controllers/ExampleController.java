@@ -1,12 +1,9 @@
 package com.renewsim.backend.controllers;
 
-import com.renewsim.backend.services.ExampleService;
+import com.renewsim.backend.model.ExampleEntity;
+import com.renewsim.backend.service.ExampleService;
+
 import org.springframework.web.bind.annotation.*;
-
-
-
-import com.renewsim.backend.models.ExampleEntity;
-
 
 import java.util.List;
 

@@ -1,10 +1,10 @@
-package com.renewsim.backend.services;
+package com.renewsim.backend.service;
 
 import java.util.List;
 
 import org.springframework.stereotype.Service;
 
-import com.renewsim.backend.models.TestEntity;
+import com.renewsim.backend.model.TestEntity;
 import com.renewsim.backend.repositories.TestRepository;
 
 @Service

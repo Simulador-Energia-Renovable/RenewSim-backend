@@ -1,11 +1,9 @@
-package com.renewsim.backend.services;
+package com.renewsim.backend.service;
 
 import org.springframework.stereotype.Service;
 
-
-import com.renewsim.backend.models.ExampleEntity;
+import com.renewsim.backend.model.ExampleEntity;
 import com.renewsim.backend.repositories.ExampleRepository;
-
 
 import java.util.List;
 
@@ -27,4 +25,3 @@ public class ExampleService {
         return exampleRepository.save(entity);
     }
 }
-

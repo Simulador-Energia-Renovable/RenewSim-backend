@@ -4,8 +4,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.renewsim.backend.models.TestEntity;
-import com.renewsim.backend.services.TestService;
+import com.renewsim.backend.model.TestEntity;
+import com.renewsim.backend.service.TestService;
+
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;

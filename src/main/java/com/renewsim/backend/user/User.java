@@ -1,4 +1,4 @@
-package com.renewsim.backend.models.user;
+package com.renewsim.backend.user;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -7,9 +7,11 @@ import java.util.Set;
 
 @Entity
 @Table(name = "users")
-@Getter @Setter
-@NoArgsConstructor @AllArgsConstructor
-public class UserEntity {
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -21,10 +23,8 @@ public class UserEntity {
     @Column(nullable = false)
     private String password;
 
-    @ElementCollection(fetch = FetchType.LAZY) 
+    @ElementCollection(fetch = FetchType.LAZY)
     @CollectionTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"))
     @Column(name = "role")
     private Set<String> roles;
 }
-
-
