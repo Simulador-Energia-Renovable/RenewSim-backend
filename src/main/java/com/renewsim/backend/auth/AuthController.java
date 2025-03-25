@@ -2,7 +2,6 @@ package com.renewsim.backend.auth;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -24,12 +23,12 @@ public class AuthController {
         this.userMapper = userMapper;
     }
 
-   @PostMapping("/register")
-public ResponseEntity<UserResponseDTO> register(@RequestBody AuthRequestDTO request) {
-    User user = authService.registerUser(request.getUsername(), request.getPassword(), request.getRole());
-   return ResponseEntity.status(HttpStatus.OK).body(new UserResponseDTO(user));
+    @PostMapping("/register")
+    public ResponseEntity<UserResponseDTO> register(@RequestBody AuthRequestDTO request) {
+        User user = authService.registerUser(request.getUsername(), request.getPassword(), request.getRole());
+        return ResponseEntity.status(HttpStatus.OK).body(new UserResponseDTO(user));
 
-}
+    }
 
     @PostMapping("/login")
     public AuthResponseDTO login(@RequestBody AuthRequestDTO request) {
