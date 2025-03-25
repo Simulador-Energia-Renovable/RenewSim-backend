@@ -1,9 +1,7 @@
-package com.renewsim.backend.service;
+package com.renewsim.backend.user;
 
 import java.util.List;
 
-import com.renewsim.backend.dto.UserResponseDTO;
-import com.renewsim.backend.dto.UserRequestDTO;
 
 public interface UserService {
 

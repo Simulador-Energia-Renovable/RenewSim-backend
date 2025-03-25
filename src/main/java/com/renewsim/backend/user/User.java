@@ -1,4 +1,4 @@
-package com.renewsim.backend.model;
+package com.renewsim.backend.user;
 
 import jakarta.persistence.*;
 import lombok.*;

@@ -1,12 +1,12 @@
-package com.renewsim.backend.service;
+package com.renewsim.backend.auth;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import com.renewsim.backend.model.User;
-import com.renewsim.backend.repositories.UserRepository;
 import com.renewsim.backend.security.JwtUtils;
+import com.renewsim.backend.user.User;
+import com.renewsim.backend.user.UserRepository;
 
 import java.util.Optional;
 import java.util.Set;

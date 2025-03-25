@@ -1,19 +1,14 @@
-package com.renewsim.backend.controllers;
+package com.renewsim.backend.auth;
 
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
-import java.util.Map;
-
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.renewsim.backend.dto.AuthRequestDTO;
-import com.renewsim.backend.dto.AuthResponseDTO;
-import com.renewsim.backend.dto.UserResponseDTO;
-import com.renewsim.backend.mapper.UserMapper;
-import com.renewsim.backend.model.User;
-import com.renewsim.backend.service.AuthService;
+import com.renewsim.backend.user.User;
+import com.renewsim.backend.user.UserMapper;
+import com.renewsim.backend.user.UserResponseDTO;
 
 @RestController
 @RequestMapping("/api/v1/auth")

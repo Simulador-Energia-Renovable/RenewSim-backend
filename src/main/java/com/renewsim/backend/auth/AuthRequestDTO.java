@@ -1,4 +1,4 @@
-package com.renewsim.backend.dto;
+package com.renewsim.backend.auth;
 
 public class AuthRequestDTO {
     private String username;

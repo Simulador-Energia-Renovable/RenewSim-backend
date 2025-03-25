@@ -1,12 +1,6 @@
-package com.renewsim.backend.service;
+package com.renewsim.backend.user;
 
 import org.springframework.stereotype.Service;
-
-import com.renewsim.backend.dto.UserRequestDTO;
-import com.renewsim.backend.dto.UserResponseDTO;
-import com.renewsim.backend.mapper.UserMapper;
-import com.renewsim.backend.model.User;
-import com.renewsim.backend.repositories.UserRepository;
 
 import java.util.List;
 import java.util.stream.Collectors;

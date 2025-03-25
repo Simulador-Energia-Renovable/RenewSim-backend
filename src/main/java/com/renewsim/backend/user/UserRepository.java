@@ -1,10 +1,8 @@
-package com.renewsim.backend.repositories;
+package com.renewsim.backend.user;
 
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-
-import com.renewsim.backend.model.User;
 
 public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByUsername(String username);
