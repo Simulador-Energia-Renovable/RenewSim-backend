@@ -5,8 +5,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-
-
 @Configuration
 public class CorsConfig {
 
@@ -15,13 +13,12 @@ public class CorsConfig {
         return new WebMvcConfigurer() {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
-                registry.addMapping("/api/**") // Permitir todas las rutas bajo /api
-                        .allowedOrigins("http://localhost:5173") // Permitir llamadas desde React (Vite)
-                        .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS") // Métodos permitidos
-                        .allowedHeaders("*") // Permitir todos los headers
-                        .allowCredentials(true); // Permitir credenciales (cookies, auth)
+                registry.addMapping("/api/**")
+                        .allowedOrigins("http://localhost:5173") // Asegúrate de que esto coincida con el frontend
+                        .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+                        .allowedHeaders("*")
+                        .allowCredentials(true);
             }
         };
     }
 }
-

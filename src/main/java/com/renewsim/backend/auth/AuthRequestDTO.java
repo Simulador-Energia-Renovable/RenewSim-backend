@@ -3,9 +3,9 @@ package com.renewsim.backend.auth;
 public class AuthRequestDTO {
     private String username;
     private String password;
+    private String role;
 
-    public AuthRequestDTO() {
-    }
+    public AuthRequestDTO() {}
 
     public String getUsername() {
         return username;
@@ -22,4 +22,13 @@ public class AuthRequestDTO {
     public void setPassword(String password) {
         this.password = password;
     }
+
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
+    }
 }
+
