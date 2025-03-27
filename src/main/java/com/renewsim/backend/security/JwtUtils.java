@@ -17,23 +17,23 @@ public class JwtUtils {
     private String secret;
 
     @Value("${jwt.expiration}")
-private String expirationStr;
+    private String expirationStr;
 
-private long expiration;
+    private long expiration;
 
-@PostConstruct
-public void init() {
-    this.expiration = Long.parseLong(expirationStr);
-}
-
+    @PostConstruct
+    public void init() {
+        this.expiration = Long.parseLong(expirationStr);
+    }
 
     private Key getSigningKey() {
         return Keys.hmacShaKeyFor(secret.getBytes());
     }
 
-    public String generateToken(String username) {
+    public String generateToken(String username, String role) {
         return Jwts.builder()
                 .setSubject(username)
+                .claim("role", role) // Incluir el rol
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + expiration))
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)
@@ -43,9 +43,9 @@ public void init() {
     public boolean validateToken(String token) {
         try {
             Jwts.parserBuilder()
-                .setSigningKey(getSigningKey())
-                .build()
-                .parseClaimsJws(token);
+                    .setSigningKey(getSigningKey())
+                    .build()
+                    .parseClaimsJws(token);
             return true;
         } catch (JwtException | IllegalArgumentException e) {
             return false;
@@ -58,5 +58,14 @@ public void init() {
                 .getBody()
                 .getSubject();
     }
-}
 
+    public String extractRole(String token) {
+        return Jwts.parserBuilder()
+                .setSigningKey(getSigningKey())
+                .build()
+                .parseClaimsJws(token)
+                .getBody()
+                .get("role", String.class); //Extrae el claim "role"
+    }
+
+}
