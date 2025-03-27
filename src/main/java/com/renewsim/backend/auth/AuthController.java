@@ -31,9 +31,17 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public AuthResponseDTO login(@RequestBody AuthRequestDTO request) {
-        String token = authService.authenticate(request.getUsername(), request.getPassword());
-        return new AuthResponseDTO(token);
-    }
+public ResponseEntity<AuthResponseDTO> login(@RequestBody AuthRequestDTO request) {
+    String token = authService.authenticate(request.getUsername(), request.getPassword());
+    String role = authService
+                    .findByUsername(request.getUsername())
+                    .orElseThrow()
+                    .getRoles()
+                    .iterator()
+                    .next()
+                    .getName().toString(); // 👈 toma el primer rol (puedes adaptar esto si hay más de uno)
+    return ResponseEntity.ok(new AuthResponseDTO(token, role));
+}
+
 
 }
