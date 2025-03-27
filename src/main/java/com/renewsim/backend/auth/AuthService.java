@@ -14,14 +14,11 @@ import com.renewsim.backend.user.UserRepository;
 import java.util.Optional;
 import java.util.Set;
 
-//lógica de login/registro con JWT y contraseña encriptada
-
 @Service
 public class AuthService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    // private final RoleRepository roleRepository;
     private final RoleService roleService;
     private final JwtUtils jwtUtils;
 
@@ -53,8 +50,12 @@ public class AuthService {
     public String authenticate(String username, String password) {
         Optional<User> userOpt = userRepository.findByUsername(username);
         if (userOpt.isPresent() && passwordEncoder.matches(password, userOpt.get().getPassword())) {
-            return jwtUtils.generateToken(username);
+            User user = userOpt.get();
+            // Si el usuario tiene varios roles, aquí se toma el primero (o se puede concatenar)
+            String role = user.getRoles().iterator().next().getName().toString();
+            return jwtUtils.generateToken(username, role);
         }
         throw new RuntimeException("Credenciales inválidas");
     }
 }
+
