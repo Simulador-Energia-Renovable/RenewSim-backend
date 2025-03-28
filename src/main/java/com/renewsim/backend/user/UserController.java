@@ -1,0 +1,41 @@
+package com.renewsim.backend.user;
+
+import java.util.List;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.renewsim.backend.role.RoleDTO;
+
+@RestController
+@RequestMapping("/api/v1/users")
+public class UserController {
+
+    private final UserService userService;
+
+    public UserController(UserService userService) {
+        this.userService = userService;
+    }
+
+    @GetMapping
+    public List<UserResponseDTO> getAllUsers() {
+        return userService.getAll();
+    }
+
+    @GetMapping("/{id}")
+    public UserResponseDTO getUserById(@PathVariable Long id) {
+        return userService.getById(id);
+    }
+
+    @GetMapping("/{id}/roles")
+    public List<RoleDTO> getUserRoles(@PathVariable Long id) {
+        return userService.getRolesByUserId(id);
+    }
+    
+
+    
+}
+
