@@ -37,14 +37,21 @@ public class AuthService {
         return userRepository.findByUsername(username);
     }
 
-public User registerUser(String username, String password) {
+    public AuthResponseDTO registerUserAndReturnAuth(String username, String password) {
+     
         if (userRepository.findByUsername(username).isPresent()) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "El nombre de usuario ya existe");
         }
-
         Role defaultRole = roleService.getRoleByName(RoleName.USER);
-        User user = new User(username, passwordEncoder.encode(password), Set.of(defaultRole));
-        return userRepository.save(user);
+        Set<Role> roles = Set.of(defaultRole);
+
+         User user = new User(username, passwordEncoder.encode(password), roles);
+        userRepository.save(user);
+
+        String role = defaultRole.getName().name(); // Devuelve "USER"
+        String token = jwtUtils.generateToken(username, role);
+
+        return new AuthResponseDTO(token, username, Set.of(role));
     }
     
 
@@ -52,11 +59,11 @@ public User registerUser(String username, String password) {
         Optional<User> userOpt = userRepository.findByUsername(username);
         if (userOpt.isPresent() && passwordEncoder.matches(password, userOpt.get().getPassword())) {
             User user = userOpt.get();
-            // Si el usuario tiene varios roles, aquí se toma el primero (o se puede concatenar)
+            // Si el usuario tiene varios roles, aquí se toma el primero (o se puede
+            // concatenar)
             String role = user.getRoles().iterator().next().getName().toString();
             return jwtUtils.generateToken(username, role);
         }
         throw new RuntimeException("Credenciales inválidas");
     }
 }
-

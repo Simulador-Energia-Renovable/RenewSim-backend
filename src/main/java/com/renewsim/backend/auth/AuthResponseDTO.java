@@ -1,26 +1,28 @@
 package com.renewsim.backend.auth;
 
+import java.util.Set;
+
 public class AuthResponseDTO {
-    private String token;
-    private String role;
 
-    public AuthResponseDTO() {
-    }
+    private final String token;
+    private final String username;
+    private final Set<String> roles;
 
-    public AuthResponseDTO(String token,String role) {
+    public AuthResponseDTO(String token, String username, Set<String> roles) {
         this.token = token;
-        this.role = role;
+        this.username = username;
+        this.roles = roles;
     }
 
     public String getToken() {
         return token;
     }
 
-    public void setToken(String token) {
-        this.token = token;
+    public String getUsername() {
+        return username;
     }
 
-    public String getRole() {
-        return role;
+    public Set<String> getRoles() {
+        return roles;
     }
 }
