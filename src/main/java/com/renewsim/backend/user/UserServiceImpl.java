@@ -2,6 +2,8 @@ package com.renewsim.backend.user;
 
 import org.springframework.stereotype.Service;
 
+import com.renewsim.backend.role.RoleDTO;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -42,5 +44,15 @@ public class UserServiceImpl implements UserService {
     public void deleteById(Long id) {
         userRepository.deleteById(id);
     }
-}
 
+    @Override
+    public List<RoleDTO> getRolesByUserId(Long id) {
+        User user = userRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("User not found"));
+    
+        return user.getRoles().stream()
+            .map(role -> new RoleDTO(role.getId(), role.getName().name()))
+            .collect(Collectors.toList());
+    }
+    
+}
