@@ -1,6 +1,9 @@
 package com.renewsim.backend.auth;
 
-import org.springframework.http.HttpStatus;
+
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -8,9 +11,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+
 import com.renewsim.backend.user.User;
 import com.renewsim.backend.user.UserMapper;
-import com.renewsim.backend.user.UserResponseDTO;
 
 @RestController
 @RequestMapping("/api/v1/auth")
@@ -24,23 +27,29 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<UserResponseDTO> register(@RequestBody AuthRequestDTO request) {
-        User user = authService.registerUser(request.getUsername(), request.getPassword());
-        return ResponseEntity.status(HttpStatus.OK).body(new UserResponseDTO(user));
-
+    public ResponseEntity<AuthResponseDTO> register(@RequestBody AuthRequestDTO request) {
+        AuthResponseDTO response = authService.registerUserAndReturnAuth(
+            request.getUsername(),
+            request.getPassword()
+        );
+        return ResponseEntity.ok(response);
     }
+    
 
-    @PostMapping("/login")
+   @PostMapping("/login")
 public ResponseEntity<AuthResponseDTO> login(@RequestBody AuthRequestDTO request) {
     String token = authService.authenticate(request.getUsername(), request.getPassword());
-    String role = authService
-                    .findByUsername(request.getUsername())
-                    .orElseThrow()
-                    .getRoles()
-                    .iterator()
-                    .next()
-                    .getName().toString(); // 👈 toma el primer rol (puedes adaptar esto si hay más de uno)
-    return ResponseEntity.ok(new AuthResponseDTO(token, role));
+
+    User user = authService.findByUsername(request.getUsername())
+            .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+    // Convertimos Set<Role> a Set<String>
+    Set<String> roles = user.getRoles()
+            .stream()
+            .map(role -> role.getName().name())
+            .collect(Collectors.toSet());
+
+    return ResponseEntity.ok(new AuthResponseDTO(token, user.getUsername(), roles));
 }
 
 
