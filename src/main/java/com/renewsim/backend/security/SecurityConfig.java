@@ -26,7 +26,7 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthenticationFilter jwtFilter)
             throws Exception {
         http
-                .cors(AbstractHttpConfigurer::disable) // Updated to avoid using deprecated method
+                .cors(cors -> { }) // habilita CORS y permite que use tu configuración de CorsConfig
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/v1/auth/**").permitAll()
@@ -44,17 +44,16 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
-    //Jerarquia de roles
+    // Jerarquia de roles
     @Bean
     public RoleHierarchy roleHierarchy() {
         RoleHierarchyImpl roleHierarchy = new RoleHierarchyImpl();
         String hierarchy = """
-            ROLE_ADMIN > ROLE_ADVANCED_USER
-            ROLE_ADVANCED_USER > ROLE_USER
-            """;
+                ROLE_ADMIN > ROLE_ADVANCED_USER
+                ROLE_ADVANCED_USER > ROLE_USER
+                """;
         roleHierarchy.setHierarchy(hierarchy);
         return roleHierarchy;
     }
-    
 
 }

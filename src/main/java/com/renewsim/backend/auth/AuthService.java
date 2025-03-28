@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.renewsim.backend.role.Role;
+import com.renewsim.backend.role.RoleName;
 import com.renewsim.backend.role.RoleService;
 import com.renewsim.backend.security.JwtUtils;
 import com.renewsim.backend.user.User;
@@ -36,16 +37,16 @@ public class AuthService {
         return userRepository.findByUsername(username);
     }
 
-    public User registerUser(String username, String password, String roleString) {
+public User registerUser(String username, String password) {
         if (userRepository.findByUsername(username).isPresent()) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "El nombre de usuario ya existe");
         }
-    
-        Set<Role> roles = roleService.getRolesFromStrings(Set.of(roleString));
-    
-        User user = new User(username, passwordEncoder.encode(password), roles);
+
+        Role defaultRole = roleService.getRoleByName(RoleName.USER);
+        User user = new User(username, passwordEncoder.encode(password), Set.of(defaultRole));
         return userRepository.save(user);
     }
+    
 
     public String authenticate(String username, String password) {
         Optional<User> userOpt = userRepository.findByUsername(username);
