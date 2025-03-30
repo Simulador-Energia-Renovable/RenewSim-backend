@@ -2,6 +2,7 @@ package com.renewsim.backend.simulation;
 
 import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.renewsim.backend.user.User;
 
 import jakarta.persistence.*;
@@ -40,6 +41,7 @@ public class Simulation {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
+    @JsonBackReference
     private User user;
 
 

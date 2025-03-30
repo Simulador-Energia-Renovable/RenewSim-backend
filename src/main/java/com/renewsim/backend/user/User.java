@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.renewsim.backend.role.Role;
 import com.renewsim.backend.simulation.Simulation;
 
@@ -44,6 +45,7 @@ public class User {
 
     // Simulaciones del usuario
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
     private List<Simulation> simulations = new ArrayList<>();
     
 }
