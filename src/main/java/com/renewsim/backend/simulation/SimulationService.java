@@ -30,7 +30,7 @@ public class SimulationService {
         double irradiance = 0;
         double efficiency = 0;
 
-        // 🛡️ Validaciones básicas
+        // Validaciones básicas
         if (dto.getProjectSize() <= 0 || dto.getProjectSize() > 500) {
             throw new IllegalArgumentException("El tamaño del proyecto debe ser entre 1 y 500 m².");
         }
@@ -43,7 +43,7 @@ public class SimulationService {
             throw new IllegalArgumentException("El consumo energético debe estar entre 50 y 100000 kWh/mes.");
         }
 
-        // 🌞 Selección de fuente
+        // Selección de fuente
         switch (dto.getEnergyType().toLowerCase()) {
             case "solar" -> {
                 irradiance = dto.getClimate().getIrradiance(); // kWh/m²/día
@@ -68,27 +68,28 @@ public class SimulationService {
             default -> throw new IllegalArgumentException("Tipo de energía no reconocido.");
         }
 
-        // ⚙️ Cálculo de energía generada anual
+        // Cálculo de energía generada anual
         double energyGenerated = irradiance * efficiency * dto.getProjectSize() * 365;
 
-        // 💶 Ahorro estimado
+        // Ahorro estimado
         double ahorro = energyGenerated * 0.2; // suponiendo 0.2€/kWh
 
-        // 📈 Retorno sobre inversión
+        // Retorno sobre inversión
         double roi = ahorro > 0 ? dto.getBudget() / ahorro : 0;
 
-        // 👁️‍🗨️ Mostrar en consola
+        // Mostrar en consola
         System.out.println("💰 Presupuesto: " + dto.getBudget());
         System.out.println("🔋 Energía generada: " + energyGenerated);
         System.out.println("💶 Ahorro estimado: " + ahorro);
         System.out.println("📈 ROI (años): " + roi);
 
-        // 💾 Guardar simulación
+        // Guardar simulación
         Simulation simulation = new Simulation();
         simulation.setLocation(dto.getLocation());
         simulation.setEnergyType(dto.getEnergyType());
         simulation.setProjectSize(dto.getProjectSize());
         simulation.setBudget(dto.getBudget());
+        simulation.setEnergyConsumption(dto.getEnergyConsumption());
         simulation.setEnergyGenerated(energyGenerated);
         simulation.setEstimatedSavings(ahorro);
         simulation.setReturnOnInvestment(roi);
