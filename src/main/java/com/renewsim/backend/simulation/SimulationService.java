@@ -27,18 +27,37 @@ public class SimulationService {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado"));
 
-        double eficiencia = 0.75;
-        double irradiancia = switch (dto.getEnergyType()) {
-            case "solar" -> dto.getClima().getIrradiancia();
-            case "wind" -> dto.getClima().getViento();
-            case "hydro" -> dto.getClima().getHidrologia();
-            default -> 0;
-        };
+        double irradiancia = 0;
+        double eficiencia = 0;
 
+        switch (dto.getEnergyType().toLowerCase()) {
+            case "solar" -> {
+                irradiancia = dto.getClima().getIrradiancia(); // kWh/m²/día
+                eficiencia = 0.18; // Eficiencia típica de panel solar
+                System.out.println("☀️ Irradiancia recibida: " + irradiancia);
+            }
+            case "wind" -> {
+                irradiancia = dto.getClima().getViento(); // velocidad promedio del viento
+                eficiencia = 0.40; // Eficiencia estimada de turbina
+            }
+            case "hydro" -> {
+                irradiancia = dto.getClima().getHidrologia(); // índice arbitrario
+                eficiencia = 0.50;
+            }
+            default -> {
+                irradiancia = 0;
+                eficiencia = 0;
+            }
+        }
+
+        // Cálculo de energía generada anual
         double energiaGenerada = irradiancia * eficiencia * dto.getProjectSize() * 365;
+
+        // Ahorro y retorno de inversión
         double ahorro = energiaGenerada * 0.2;
         double roi = ahorro > 0 ? dto.getBudget() / ahorro : 0;
 
+        // Guardar simulación
         Simulation simulation = new Simulation();
         simulation.setLocation(dto.getLocation());
         simulation.setEnergyType(dto.getEnergyType());
@@ -60,4 +79,3 @@ public class SimulationService {
         return simulationRepository.findAllByUser(user);
     }
 }
-
