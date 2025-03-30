@@ -6,6 +6,7 @@ public class SimulationRequestDTO {
     private double projectSize;
     private double budget;
     private ClimateData climate;
+    private double energyConsumption;
 
     public String getLocation() {
         return location;
@@ -49,5 +50,12 @@ public class SimulationRequestDTO {
 
     public void setClimate(ClimateData climate) {
         this.climate = climate;
+    }
+    public double getEnergyConsumption() {
+        return energyConsumption;
+    }
+
+    public void setEnergyConsumption(double energyConsumption) {
+        this.energyConsumption = energyConsumption;
     }
 }

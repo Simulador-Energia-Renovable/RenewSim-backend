@@ -39,6 +39,10 @@ public class SimulationService {
             throw new IllegalArgumentException("El presupuesto debe ser mayor que cero.");
         }
 
+        if (dto.getEnergyConsumption() < 50 || dto.getEnergyConsumption() > 100000) {
+            throw new IllegalArgumentException("El consumo energético debe estar entre 50 y 100000 kWh/mes.");
+        }
+
         // 🌞 Selección de fuente
         switch (dto.getEnergyType().toLowerCase()) {
             case "solar" -> {
