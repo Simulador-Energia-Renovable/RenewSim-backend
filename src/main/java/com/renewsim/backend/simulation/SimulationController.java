@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/v1/simulation")
-@CrossOrigin(origins = "http://localhost:5173") 
+@CrossOrigin(origins = "http://localhost:5173")
 public class SimulationController {
 
     private final SimulationService simulationService;
@@ -27,16 +27,29 @@ public class SimulationController {
     @PostMapping
     @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
     public ResponseEntity<SimulationResponseDTO> simulate(@RequestBody SimulationRequestDTO dto) {
+
         SimulationResponseDTO result = simulationService.simulateAndSave(dto);
+        
         return ResponseEntity.ok(result);
     }
 
     @GetMapping("/mis-simulaciones")
     @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
     public ResponseEntity<List<Simulation>> getUserSimulations() {
+
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String username = auth.getName();
         List<Simulation> simulations = simulationService.getUserSimulations(username);
+
         return ResponseEntity.ok(simulations);
+    }
+
+    @GetMapping("/history")
+    public List<Simulation> getSimulationHistory() {
+
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String username = auth.getName();
+
+        return simulationService.getUserSimulations(username);
     }
 }

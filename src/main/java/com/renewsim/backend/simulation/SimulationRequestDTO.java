@@ -2,6 +2,10 @@ package com.renewsim.backend.simulation;
 
 public class SimulationRequestDTO {
     private String location;
+    private String energyType;
+    private double projectSize;
+    private double budget;
+    private ClimateData climate;
 
     public String getLocation() {
         return location;
@@ -10,7 +14,7 @@ public class SimulationRequestDTO {
     public void setLocation(String location) {
         this.location = location;
     }
-    private String energyType;
+
 
     public String getEnergyType() {
         return energyType;
@@ -19,7 +23,7 @@ public class SimulationRequestDTO {
     public void setEnergyType(String energyType) {
         this.energyType = energyType;
     }
-    private double projectSize;
+  
 
     public double getProjectSize() {
         return projectSize;
@@ -28,7 +32,7 @@ public class SimulationRequestDTO {
     public void setProjectSize(double projectSize) {
         this.projectSize = projectSize;
     }
-    private double budget;
+
 
     public double getBudget() {
         return budget;
@@ -37,7 +41,7 @@ public class SimulationRequestDTO {
     public void setBudget(double budget) {
         this.budget = budget;
     }
-    private ClimateData climate;
+
 
     public ClimateData getClimate() {
         return climate;

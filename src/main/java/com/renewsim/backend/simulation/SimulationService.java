@@ -37,11 +37,11 @@ public class SimulationService {
                 System.out.println("☀️ Irradiancia recibida: " + irradiance);
             }
             case "wind" -> {
-                irradiance = dto.getClimate().getViento(); // velocidad promedio del viento
+                irradiance = dto.getClimate().getWind(); // velocidad promedio del viento
                 efficiency  = 0.40; // Eficiencia estimada de turbina
             }
             case "hydro" -> {
-                irradiance = dto.getClimate().getHidrologia(); // índice arbitrario
+                irradiance = dto.getClimate().getHydrology(); // índice arbitrario
                 efficiency  = 0.50;
             }
             default -> {
@@ -74,8 +74,10 @@ public class SimulationService {
     }
 
     public List<Simulation> getUserSimulations(String username) {
+
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado"));
+                
         return simulationRepository.findAllByUser(user);
     }
 }

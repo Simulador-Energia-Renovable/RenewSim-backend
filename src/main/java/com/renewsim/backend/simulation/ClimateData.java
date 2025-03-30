@@ -2,23 +2,24 @@ package com.renewsim.backend.simulation;
 
 public class ClimateData {
     private double irradiance;    
-    private double viento;
+    private double wind;
+    private double hydrology;
 
-    public double getViento() {
-        return viento;
+    public double getWind() {
+        return wind;
     }
 
-    public void setViento(double viento) {
-        this.viento = viento;
+    public void setWind(double wind) {
+        this.wind = wind;
     }
-    private double hidrologia;
+  
 
-    public double getHidrologia() {
-        return hidrologia;
+    public double getHydrology() {
+        return hydrology;
     }
 
-    public void setHidrologia(double hidrologia) {
-        this.hidrologia = hidrologia;
+    public void setHydrology(double hydrology) {
+        this.hydrology = hydrology;
     }
 
     public double getIrradiance() {
