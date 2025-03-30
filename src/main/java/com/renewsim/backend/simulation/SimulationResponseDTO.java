@@ -11,5 +11,15 @@ public class SimulationResponseDTO {
         this.retornoInversion = retornoInversion;
     }
 
-}
+    public double getRetornoInversion() {
+        return retornoInversion;
+    }
 
+    public double getEnergiaGenerada() {
+        return energiaGenerada;
+    }
+
+    public double getAhorroEstimado() {
+        return ahorroEstimado;
+    }
+}

@@ -2,7 +2,7 @@ package com.renewsim.backend.simulation;
 
 import java.time.LocalDateTime;
 
-import org.apache.catalina.User;
+import com.renewsim.backend.user.User;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
