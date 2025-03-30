@@ -4,16 +4,7 @@ import java.time.LocalDateTime;
 
 import com.renewsim.backend.user.User;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
 import jakarta.persistence.*;
-
 
 @Entity
 @Table(name = "simulations")
@@ -35,14 +26,14 @@ public class Simulation {
     @Column(nullable = false)
     private double budget;
 
-    @Column(name = "energia_generada", nullable = false)
-    private double energiaGenerada;
+    @Column(name = "energy_generated", nullable = false)
+    private double energyGenerated;
 
-    @Column(name = "ahorro_estimado", nullable = false)
-    private double ahorroEstimado;
+    @Column(name = "estimated_Savings", nullable = false)
+    private double estimatedSavings;
 
-    @Column(name = "retorno_inversion", nullable = false)
-    private double retornoInversion;
+    @Column(name = "return_investment", nullable = false)
+    private double returnOnInvestment;
 
     @Column(nullable = false)
     private LocalDateTime timestamp = LocalDateTime.now();
@@ -51,7 +42,6 @@ public class Simulation {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    // 🛠 Getters and Setters
 
     public Long getId() {
         return id;
@@ -73,16 +63,16 @@ public class Simulation {
         return budget;
     }
 
-    public double getEnergiaGenerada() {
-        return energiaGenerada;
+    public double getEnergyGenerated() {
+        return energyGenerated;
     }
 
-    public double getAhorroEstimado() {
-        return ahorroEstimado;
+    public double getEstimatedSavings() {
+        return estimatedSavings;
     }
 
-    public double getRetornoInversion() {
-        return retornoInversion;
+    public double getReturnOnInvestment() {
+        return returnOnInvestment;
     }
 
     public LocalDateTime getTimestamp() {
@@ -113,16 +103,16 @@ public class Simulation {
         this.budget = budget;
     }
 
-    public void setEnergiaGenerada(double energiaGenerada) {
-        this.energiaGenerada = energiaGenerada;
+    public void setEnergyGenerated(double energyGenerated) {
+        this.energyGenerated = energyGenerated;
     }
 
-    public void setAhorroEstimado(double ahorroEstimado) {
-        this.ahorroEstimado = ahorroEstimado;
+    public void setEstimatedSavings(double estimatedSavings) {
+        this.estimatedSavings = estimatedSavings;
     }
 
-    public void setRetornoInversion(double retornoInversion) {
-        this.retornoInversion = retornoInversion;
+    public void setReturnOnInvestment(double returnOnInvestment) {
+        this.returnOnInvestment = returnOnInvestment;
     }
 
     public void setTimestamp(LocalDateTime timestamp) {
@@ -133,5 +123,3 @@ public class Simulation {
         this.user = user;
     }
 }
-
-

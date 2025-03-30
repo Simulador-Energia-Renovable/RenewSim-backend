@@ -37,13 +37,13 @@ public class SimulationRequestDTO {
     public void setBudget(double budget) {
         this.budget = budget;
     }
-    private ClimateData clima;
+    private ClimateData climate;
 
-    public ClimateData getClima() {
-        return clima;
+    public ClimateData getClimate() {
+        return climate;
     }
 
-    public void setClima(ClimateData clima) {
-        this.clima = clima;
+    public void setClimate(ClimateData climate) {
+        this.climate = climate;
     }
 }

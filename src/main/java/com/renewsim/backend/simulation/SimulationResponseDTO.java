@@ -1,25 +1,25 @@
 package com.renewsim.backend.simulation;
 
 public class SimulationResponseDTO {
-    private double energiaGenerada;
-    private double ahorroEstimado;
-    private double retornoInversion;
+    private double energyGenerated;
+    private double estimatedSavings;
+    private double returnOnInvestment;
 
-    public SimulationResponseDTO(double energiaGenerada, double ahorroEstimado, double retornoInversion) {
-        this.energiaGenerada = energiaGenerada;
-        this.ahorroEstimado = ahorroEstimado;
-        this.retornoInversion = retornoInversion;
+    public SimulationResponseDTO(double energyGenerated, double estimatedSavings, double returnOnInvestment) {
+        this.energyGenerated = energyGenerated;
+        this.estimatedSavings = estimatedSavings;
+        this.returnOnInvestment = returnOnInvestment;
     }
 
-    public double getRetornoInversion() {
-        return retornoInversion;
+    public double getReturnOnInvestment() {
+        return returnOnInvestment;
     }
 
-    public double getEnergiaGenerada() {
-        return energiaGenerada;
+    public double getEnergyGenerated() {
+        return energyGenerated;
     }
 
-    public double getAhorroEstimado() {
-        return ahorroEstimado;
+    public double getEstimatedSavings() {
+        return estimatedSavings;
     }
 }

@@ -27,34 +27,34 @@ public class SimulationService {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado"));
 
-        double irradiancia = 0;
-        double eficiencia = 0;
+        double irradiance = 0;
+        double efficiency  = 0;
 
         switch (dto.getEnergyType().toLowerCase()) {
             case "solar" -> {
-                irradiancia = dto.getClima().getIrradiancia(); // kWh/m²/día
-                eficiencia = 0.18; // Eficiencia típica de panel solar
-                System.out.println("☀️ Irradiancia recibida: " + irradiancia);
+                irradiance = dto.getClimate().getIrradiance(); // kWh/m²/día
+                efficiency  = 0.18; // Eficiencia típica de panel solar
+                System.out.println("☀️ Irradiancia recibida: " + irradiance);
             }
             case "wind" -> {
-                irradiancia = dto.getClima().getViento(); // velocidad promedio del viento
-                eficiencia = 0.40; // Eficiencia estimada de turbina
+                irradiance = dto.getClimate().getViento(); // velocidad promedio del viento
+                efficiency  = 0.40; // Eficiencia estimada de turbina
             }
             case "hydro" -> {
-                irradiancia = dto.getClima().getHidrologia(); // índice arbitrario
-                eficiencia = 0.50;
+                irradiance = dto.getClimate().getHidrologia(); // índice arbitrario
+                efficiency  = 0.50;
             }
             default -> {
-                irradiancia = 0;
-                eficiencia = 0;
+                irradiance = 0;
+                efficiency  = 0;
             }
         }
 
         // Cálculo de energía generada anual
-        double energiaGenerada = irradiancia * eficiencia * dto.getProjectSize() * 365;
+        double energyGenerated = irradiance * efficiency  * dto.getProjectSize() * 365;
 
         // Ahorro y retorno de inversión
-        double ahorro = energiaGenerada * 0.2;
+        double ahorro = energyGenerated * 0.2;
         double roi = ahorro > 0 ? dto.getBudget() / ahorro : 0;
 
         // Guardar simulación
@@ -63,14 +63,14 @@ public class SimulationService {
         simulation.setEnergyType(dto.getEnergyType());
         simulation.setProjectSize(dto.getProjectSize());
         simulation.setBudget(dto.getBudget());
-        simulation.setEnergiaGenerada(energiaGenerada);
-        simulation.setAhorroEstimado(ahorro);
-        simulation.setRetornoInversion(roi);
+        simulation.setEnergyGenerated(energyGenerated);
+        simulation.setEstimatedSavings(ahorro);
+        simulation.setReturnOnInvestment(roi);
         simulation.setUser(user);
 
         simulationRepository.save(simulation);
 
-        return new SimulationResponseDTO(energiaGenerada, ahorro, roi);
+        return new SimulationResponseDTO(energyGenerated, ahorro, roi);
     }
 
     public List<Simulation> getUserSimulations(String username) {
