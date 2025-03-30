@@ -3,10 +3,12 @@ package com.renewsim.backend.user;
 import jakarta.persistence.*;
 import lombok.*;
 
-
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 import com.renewsim.backend.role.Role;
+import com.renewsim.backend.simulation.Simulation;
 
 @Entity
 @Table(name = "users")
@@ -39,5 +41,9 @@ public class User {
         this.password = password;
         this.roles = roles;
     }
+
+    // Simulaciones del usuario
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Simulation> simulations = new ArrayList<>();
     
 }
