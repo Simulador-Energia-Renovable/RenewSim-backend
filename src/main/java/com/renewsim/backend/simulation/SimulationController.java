@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/v1/simulacion")
+@RequestMapping("/api/v1/simulation")
 @CrossOrigin(origins = "http://localhost:5173") 
 public class SimulationController {
 
