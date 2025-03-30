@@ -1,5 +1,10 @@
 package com.renewsim.backend.simulation;
 
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+
+@Data
+@EqualsAndHashCode
 public class SimulationRequestDTO {
     private String location;
     private String energyType;
