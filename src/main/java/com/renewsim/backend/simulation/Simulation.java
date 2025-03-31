@@ -39,11 +39,13 @@ public class Simulation {
     @Column(nullable = false)
     private LocalDateTime timestamp = LocalDateTime.now();
 
+    @Column(name = "energy_consumption")
+    private double energyConsumption;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     @JsonBackReference
     private User user;
-
 
     public Long getId() {
         return id;
@@ -123,5 +125,12 @@ public class Simulation {
 
     public void setUser(User user) {
         this.user = user;
+    }
+    public double getEnergyConsumption() {
+        return energyConsumption;
+    }
+    
+    public void setEnergyConsumption(double energyConsumption) {
+        this.energyConsumption = energyConsumption;
     }
 }

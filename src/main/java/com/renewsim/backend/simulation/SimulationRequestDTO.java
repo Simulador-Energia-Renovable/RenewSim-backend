@@ -1,11 +1,17 @@
 package com.renewsim.backend.simulation;
 
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+
+@Data
+@EqualsAndHashCode
 public class SimulationRequestDTO {
     private String location;
     private String energyType;
     private double projectSize;
     private double budget;
     private ClimateData climate;
+    private double energyConsumption;
 
     public String getLocation() {
         return location;
@@ -49,5 +55,12 @@ public class SimulationRequestDTO {
 
     public void setClimate(ClimateData climate) {
         this.climate = climate;
+    }
+    public double getEnergyConsumption() {
+        return energyConsumption;
+    }
+
+    public void setEnergyConsumption(double energyConsumption) {
+        this.energyConsumption = energyConsumption;
     }
 }
