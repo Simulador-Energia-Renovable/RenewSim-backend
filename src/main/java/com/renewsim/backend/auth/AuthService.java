@@ -14,6 +14,7 @@ import com.renewsim.backend.user.UserRepository;
 
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class AuthService {
@@ -41,30 +42,42 @@ public class AuthService {
         if (userRepository.findByUsername(username).isPresent()) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "El nombre de usuario ya existe");
         }
-    
+
         Role defaultRole = roleService.getRoleByName(RoleName.USER);
         Set<Role> roles = Set.of(defaultRole);
         User user = new User(username, passwordEncoder.encode(password), roles);
         userRepository.save(user);
-    
+
         Set<String> roleNames = Set.of(defaultRole.getName().name());
         Set<String> scopes = getScopesFromRole(defaultRole.getName());
-    
+
         String token = jwtUtils.generateToken(username, roleNames, scopes);
         return new AuthResponseDTO(token, username, roleNames);
     }
-    
-    
 
     public String authenticate(String username, String password) {
         Optional<User> userOpt = userRepository.findByUsername(username);
         if (userOpt.isPresent() && passwordEncoder.matches(password, userOpt.get().getPassword())) {
             User user = userOpt.get();
-            // Si el usuario tiene varios roles, aquí se toma el primero (o se puede
-            // concatenar)
-            String role = user.getRoles().iterator().next().getName().toString();
-            return jwtUtils.generateToken(username, role);
+            Set<String> roleNames = user.getRoles().stream()
+                    .map(r -> r.getName().name())
+                    .collect(Collectors.toSet());
+
+            Set<String> scopes = user.getRoles().stream()
+                    .flatMap(r -> getScopesFromRole(r.getName()).stream())
+                    .collect(Collectors.toSet());
+
+            return jwtUtils.generateToken(username, roleNames, scopes);
         }
         throw new RuntimeException("Credenciales inválidas");
     }
+
+    private Set<String> getScopesFromRole(RoleName roleName) {
+        return switch (roleName) {
+            case USER -> Set.of("read:simulations");
+            case ADVANCED_USER -> Set.of("read:simulations", "write:simulations");
+            case ADMIN -> Set.of("read:simulations", "write:simulations", "delete:simulations");
+        };
+    }
+
 }
