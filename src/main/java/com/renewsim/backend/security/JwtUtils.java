@@ -68,7 +68,7 @@ public class JwtUtils {
                 .build()
                 .parseClaimsJws(token)
                 .getBody()
-                .get("role", String.class); //Extrae el claim "role"
+                .get("roles", String.class); //Extrae el claim "role"
     }
 
 }

@@ -37,9 +37,9 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/user/**").hasAnyRole("USER", "ADVANCED_USER", "ADMIN")
                         .anyRequest().authenticated())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
-                .oauth2ResourceServer(oauth2 -> oauth2
-                        .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter())));
+                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+             //   .oauth2ResourceServer(oauth2 -> oauth2
+              //          .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter())));
 
         return http.build();
     }
