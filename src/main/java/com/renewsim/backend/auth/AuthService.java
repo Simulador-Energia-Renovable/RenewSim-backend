@@ -38,21 +38,22 @@ public class AuthService {
     }
 
     public AuthResponseDTO registerUserAndReturnAuth(String username, String password) {
-     
         if (userRepository.findByUsername(username).isPresent()) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "El nombre de usuario ya existe");
         }
+    
         Role defaultRole = roleService.getRoleByName(RoleName.USER);
         Set<Role> roles = Set.of(defaultRole);
-
-         User user = new User(username, passwordEncoder.encode(password), roles);
+        User user = new User(username, passwordEncoder.encode(password), roles);
         userRepository.save(user);
-
-        String role = defaultRole.getName().name(); // Devuelve "USER"
-        String token = jwtUtils.generateToken(username, role);
-
-        return new AuthResponseDTO(token, username, Set.of(role));
+    
+        Set<String> roleNames = Set.of(defaultRole.getName().name());
+        Set<String> scopes = getScopesFromRole(defaultRole.getName());
+    
+        String token = jwtUtils.generateToken(username, roleNames, scopes);
+        return new AuthResponseDTO(token, username, roleNames);
     }
+    
     
 
     public String authenticate(String username, String password) {

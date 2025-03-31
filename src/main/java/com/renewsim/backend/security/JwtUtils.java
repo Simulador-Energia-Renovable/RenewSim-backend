@@ -31,6 +31,7 @@ public class JwtUtils {
         return Keys.hmacShaKeyFor(secret.getBytes());
     }
 
+    //soporte para claim scope en el JWT generado
     public String generateToken(String username, Set<String> roles, Set<String> scopes) {
         return Jwts.builder()
                 .setSubject(username)
