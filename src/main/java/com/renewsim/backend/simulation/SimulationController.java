@@ -26,7 +26,7 @@ public class SimulationController {
     }
 
     @PostMapping
-    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('SCOPE_write: simualtion')")
     public ResponseEntity<SimulationResponseDTO> simulate(@RequestBody SimulationRequestDTO dto) {
 
         SimulationResponseDTO result = simulationService.simulateAndSave(dto);
@@ -35,7 +35,7 @@ public class SimulationController {
     }
 
     @GetMapping("/user")
-    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('SCOPE_read: simualtion')")
     public ResponseEntity<List<Simulation>> getUserSimulations() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String username = auth.getName();
@@ -44,6 +44,7 @@ public class SimulationController {
     }
 
     @GetMapping("/history")
+    @PreAuthorize("hasAuthority('SCOPE_read: simualtion')")
     public List<Simulation> getSimulationHistory() {
 
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
