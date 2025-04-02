@@ -3,19 +3,14 @@ package com.renewsim.backend.user;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
 import com.renewsim.backend.role.RoleDTO;
 import com.renewsim.backend.role.UpdateRolesRequestDTO;
 import com.renewsim.backend.security.UserDetailsImpl;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/users")
@@ -27,21 +22,25 @@ public class UserController {
         this.userService = userService;
     }
 
+    // Obtener todos los usuarios
     @GetMapping
     public List<UserResponseDTO> getAllUsers() {
         return userService.getAll();
     }
 
+    //Obtener usuario por ID
     @GetMapping("/{id}")
     public UserResponseDTO getUserById(@PathVariable Long id) {
         return userService.getById(id);
     }
 
+    //Obtener roles por ID de usuario
     @GetMapping("/{id}/roles")
     public List<RoleDTO> getUserRoles(@PathVariable Long id) {
         return userService.getRolesByUserId(id);
     }
 
+    // Obtener roles del usuario autenticado
     @GetMapping("/me/roles")
     public List<RoleDTO> getCurrentUserRoles(@AuthenticationPrincipal UserDetailsImpl userDetails) {
         return userDetails.getUser().getRoles().stream()
@@ -49,13 +48,32 @@ public class UserController {
                 .collect(Collectors.toList());
     }
 
+    //Actualizar roles de un usuario
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}/roles")
     public ResponseEntity<String> updateUserRoles(
             @PathVariable Long id,
             @RequestBody UpdateRolesRequestDTO request) {
         userService.updateUserRoles(id, request.getRoles());
-        return ResponseEntity.ok("Roles updated successfully");
+        return ResponseEntity.ok("Roles actualizados correctamente");
     }
 
+    //Eliminar usuario (no se permite si es ADMIN)
+    @PreAuthorize("hasRole('ADMIN')")
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> deleteUser(@PathVariable Long id) {
+        boolean deleted = userService.deleteUser(id);
+        if (deleted) {
+            return ResponseEntity.ok("Usuario eliminado correctamente");
+        } else {
+            return ResponseEntity.badRequest().body("No se puede eliminar un usuario con rol protegido");
+        }
+    }
+
+    //Obtener usuarios sin roles
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/without-roles")
+    public List<UserResponseDTO> getUsersWithoutRoles() {
+        return userService.getUsersWithoutRoles();
+    }
 }
