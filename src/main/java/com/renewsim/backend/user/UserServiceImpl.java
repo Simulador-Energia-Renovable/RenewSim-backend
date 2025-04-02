@@ -12,7 +12,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
-public class UserServiceImpl implements UserService {  
+public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final UserMapper userMapper;
@@ -47,7 +47,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void deleteById(Long id) {
+    public void deleteUser(Long id) {
         userRepository.deleteById(id);
     }
 
@@ -60,8 +60,6 @@ public class UserServiceImpl implements UserService {
                 .map(role -> new RoleDTO(role.getId(), role.getName().name()))
                 .collect(Collectors.toList());
     }
-
-
 
     @Override
     public void updateUserRoles(Long userId, List<String> roleNames) {

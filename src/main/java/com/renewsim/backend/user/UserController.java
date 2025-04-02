@@ -62,12 +62,8 @@ public class UserController {
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteUser(@PathVariable Long id) {
-        boolean deleted = userService.deleteUser(id);
-        if (deleted) {
-            return ResponseEntity.ok("Usuario eliminado correctamente");
-        } else {
-            return ResponseEntity.badRequest().body("No se puede eliminar un usuario con rol protegido");
-        }
+        userService.deleteUser(id);
+        return ResponseEntity.ok("Usuario eliminado correctamente");
     }
 
     // Obtener usuarios sin roles
@@ -77,7 +73,7 @@ public class UserController {
         return userService.getUsersWithoutRoles();
     }
 
-    // Obtener datos del usuario autenticado   
+    // Obtener datos del usuario autenticado
     @GetMapping("/me")
     public UserResponseDTO getCurrentUser(@AuthenticationPrincipal UserDetailsImpl userDetails) {
         return userService.getCurrentUser(userDetails.getUser());
