@@ -28,13 +28,13 @@ public class UserController {
         return userService.getAll();
     }
 
-    //Obtener usuario por ID
+    // Obtener usuario por ID
     @GetMapping("/{id}")
     public UserResponseDTO getUserById(@PathVariable Long id) {
         return userService.getById(id);
     }
 
-    //Obtener roles por ID de usuario
+    // Obtener roles por ID de usuario
     @GetMapping("/{id}/roles")
     public List<RoleDTO> getUserRoles(@PathVariable Long id) {
         return userService.getRolesByUserId(id);
@@ -48,7 +48,7 @@ public class UserController {
                 .collect(Collectors.toList());
     }
 
-    //Actualizar roles de un usuario
+    // Actualizar roles de un usuario
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}/roles")
     public ResponseEntity<String> updateUserRoles(
@@ -58,7 +58,7 @@ public class UserController {
         return ResponseEntity.ok("Roles actualizados correctamente");
     }
 
-    //Eliminar usuario (no se permite si es ADMIN)
+    // Eliminar usuario (no se permite si es ADMIN)
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteUser(@PathVariable Long id) {
@@ -70,10 +70,17 @@ public class UserController {
         }
     }
 
-    //Obtener usuarios sin roles
+    // Obtener usuarios sin roles
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/without-roles")
     public List<UserResponseDTO> getUsersWithoutRoles() {
         return userService.getUsersWithoutRoles();
     }
+
+    // Obtener datos del usuario autenticado
+    @GetMapping("/me")
+    public UserResponseDTO getCurrentUser(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+        return userService.getById(userDetails.getUser().getId());
+    }
+
 }
