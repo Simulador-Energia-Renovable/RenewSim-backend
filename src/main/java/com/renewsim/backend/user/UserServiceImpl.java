@@ -12,15 +12,16 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
-public class UserServiceImpl implements UserService {
+public class UserServiceImpl implements UserService {  
 
     private final UserRepository userRepository;
     private final UserMapper userMapper;
     private RoleRepository roleRepository;
 
-    public UserServiceImpl(UserRepository userRepository, UserMapper userMapper) {
+    public UserServiceImpl(UserRepository userRepository, UserMapper userMapper, RoleRepository roleRepository) {
         this.userRepository = userRepository;
         this.userMapper = userMapper;
+        this.roleRepository = roleRepository;
     }
 
     @Override
@@ -74,6 +75,11 @@ public class UserServiceImpl implements UserService {
 
         user.setRoles(newRoles);
         userRepository.save(user);
+    }
+
+    @Override
+    public UserResponseDTO getCurrentUser(User user) {
+        return userMapper.toResponseDto(user);
     }
 
 }

@@ -16,6 +16,10 @@ public interface UserService {
     void deleteById(Long id);
 
     List<RoleDTO> getRolesByUserId(Long id);
+
     void updateUserRoles(Long userId, List<String> roleNames);
+
+    UserResponseDTO getCurrentUser(User user);
+
 
 }

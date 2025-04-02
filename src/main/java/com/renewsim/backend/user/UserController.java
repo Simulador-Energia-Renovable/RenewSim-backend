@@ -77,10 +77,10 @@ public class UserController {
         return userService.getUsersWithoutRoles();
     }
 
-    // Obtener datos del usuario autenticado
+    // Obtener datos del usuario autenticado   
     @GetMapping("/me")
     public UserResponseDTO getCurrentUser(@AuthenticationPrincipal UserDetailsImpl userDetails) {
-        return userService.getById(userDetails.getUser().getId());
+        return userService.getCurrentUser(userDetails.getUser());
     }
 
 }
