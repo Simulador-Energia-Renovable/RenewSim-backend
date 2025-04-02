@@ -16,7 +16,7 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final UserMapper userMapper;
-    private RoleRepository roleRepository;
+    private final RoleRepository roleRepository;
 
     public UserServiceImpl(UserRepository userRepository, UserMapper userMapper, RoleRepository roleRepository) {
         this.userRepository = userRepository;
@@ -88,5 +88,5 @@ public class UserServiceImpl implements UserService {
                 .map(userMapper::toResponseDto)
                 .collect(Collectors.toList());
     }
-
 }
+
