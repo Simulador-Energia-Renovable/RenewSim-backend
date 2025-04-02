@@ -12,7 +12,7 @@ public class UserResponseDTO {
     // Constructor vacío (necesario para deserialización)
     public UserResponseDTO() {}
 
-    // ✅ Constructor que convierte User a UserResponseDTO
+    // Constructor que convierte User a UserResponseDTO
     public UserResponseDTO(User user) {
         this.id = user.getId();
         this.username = user.getUsername();
