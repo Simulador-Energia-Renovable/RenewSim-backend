@@ -80,4 +80,12 @@ public class UserServiceImpl implements UserService {
         return userMapper.toResponseDto(user);
     }
 
+    @Override
+    public List<UserResponseDTO> getUsersWithoutRoles() {
+        return userRepository.findAll().stream()
+                .filter(user -> user.getRoles() == null || user.getRoles().isEmpty())
+                .map(userMapper::toResponseDto)
+                .collect(Collectors.toList());
+    }
+
 }

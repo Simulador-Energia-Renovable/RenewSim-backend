@@ -21,6 +21,6 @@ public interface UserService {
 
     UserResponseDTO getCurrentUser(User user);
 
-
+    List<UserResponseDTO> getUsersWithoutRoles();
 
 }

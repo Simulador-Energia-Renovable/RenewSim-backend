@@ -66,8 +66,7 @@ public class UserController {
         return ResponseEntity.ok("Usuario eliminado correctamente");
     }
 
-    // Obtener usuarios sin roles
-    @PreAuthorize("hasRole('ADMIN')")
+    // Obtener usuarios sin roles@PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/without-roles")
     public List<UserResponseDTO> getUsersWithoutRoles() {
         return userService.getUsersWithoutRoles();
