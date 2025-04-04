@@ -113,7 +113,7 @@ public class SimulationServiceImpl implements SimulationService {
         double ahorro = energyGenerated * 0.2;
         double roi = ahorro > 0 ? dto.getBudget() / ahorro : 0;
 
-        return new SimulationResponseDTO(energyGenerated, ahorro, roi, technologyDTOs);
+        return new SimulationResponseDTO( simulation.getId(),,energyGenerated, ahorro, roi, technologyDTOs);
     }
 
     @Override

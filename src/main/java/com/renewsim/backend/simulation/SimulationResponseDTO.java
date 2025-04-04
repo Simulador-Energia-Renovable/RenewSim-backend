@@ -9,8 +9,9 @@ public class SimulationResponseDTO {
     private double estimatedSavings;
     private double returnOnInvestment;
     private List<TechnologyComparisonResponseDTO> technologies;
+    private Long simulationId;
 
-    public SimulationResponseDTO(double energyGenerated, double estimatedSavings, double returnOnInvestment,
+    public SimulationResponseDTO(Long simulationId, double energyGenerated, double estimatedSavings, double returnOnInvestment,
             List<TechnologyComparisonResponseDTO> technologies) {
         this.energyGenerated = energyGenerated;
         this.estimatedSavings = estimatedSavings;
@@ -32,5 +33,9 @@ public class SimulationResponseDTO {
 
     public List<TechnologyComparisonResponseDTO> getTechnologies() {
         return technologies;
+    }
+
+    public Long getSimulationId() {
+        return simulationId;
     }
 }
