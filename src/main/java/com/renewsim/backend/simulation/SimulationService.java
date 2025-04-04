@@ -9,5 +9,7 @@ public interface SimulationService {
     SimulationResponseDTO calculateSimulation(SimulationRequestDTO dto);
 
     List<Simulation> getUserSimulations(String username);
+
+    Simulation getSimulationById(Long simulationId);
 }
 

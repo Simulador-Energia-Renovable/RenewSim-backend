@@ -122,4 +122,11 @@ public class SimulationServiceImpl implements SimulationService {
                 .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado"));
         return simulationRepository.findAllByUser(user);
     }
+
+    @Override
+public Simulation getSimulationById(Long simulationId) {
+    return simulationRepository.findById(simulationId)
+            .orElseThrow(() -> new IllegalArgumentException("Simulación no encontrada"));
+}
+
 }

@@ -2,16 +2,18 @@ package com.renewsim.backend.simulation;
 
 import java.util.List;
 
-
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import com.renewsim.backend.technologyComparison.TechnologyComparisonResponseDTO;
 
 @RestController
 @RequestMapping("/api/v1/simulation")
@@ -46,7 +48,15 @@ public class SimulationController {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         return ResponseEntity.ok(simulationUseCase.getUserSimulations(username));
     }
+
+    @GetMapping("/{simulationId}/technologies")
+    @PreAuthorize("hasAuthority('SCOPE_read: simualtion')")
+    public ResponseEntity<List<TechnologyComparisonResponseDTO>> getTechnologiesForSimulation(
+            @PathVariable Long simulationId) {
+
+        List<TechnologyComparisonResponseDTO> technologies = simulationUseCase
+                .getTechnologiesForSimulation(simulationId);
+        return ResponseEntity.ok(technologies);
+    }
+
 }
-
-
-

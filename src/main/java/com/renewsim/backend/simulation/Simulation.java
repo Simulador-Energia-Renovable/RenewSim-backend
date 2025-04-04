@@ -50,7 +50,7 @@ public class Simulation {
     private User user;
 
     @ManyToMany
-    @JoinTable(name = "simulation_technology", joinColumns = @JoinColumn(name = "simulation_id"), inverseJoinColumns = @JoinColumn(name = "technology_comparison_id"))
+    @JoinTable(name = "simulation_technologies", joinColumns = @JoinColumn(name = "simulation_id"), inverseJoinColumns = @JoinColumn(name = "technology_id"))
     private List<TechnologyComparison> technologies;
 
     public Long getId() {
@@ -141,6 +141,10 @@ public class Simulation {
         this.energyConsumption = energyConsumption;
     }
 
+    public List<TechnologyComparison> getTechnologies() {
+        return technologies;
+    }
+    
     public void setTechnologies(List<TechnologyComparison> technologies) {
         this.technologies = technologies;
     }
