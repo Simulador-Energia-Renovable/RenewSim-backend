@@ -34,9 +34,9 @@ public class TechnologyComparison {
     @Column(name = "energy_production")
     private Double energyProduction;
 
-    // Relación Many-to-Many con Simulation
-    @ManyToMany(mappedBy = "technologies")
-    private List<Simulation> simulations;
+    @ManyToMany
+    @JoinTable(name = "simulation_technologies", joinColumns = @JoinColumn(name = "simulation_id"), inverseJoinColumns = @JoinColumn(name = "technology_id"))
+    private List<TechnologyComparison> technologies;
 
     // Constructor vacío
     public TechnologyComparison() {
