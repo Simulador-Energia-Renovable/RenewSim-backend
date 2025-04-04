@@ -140,4 +140,8 @@ public class Simulation {
     public void setEnergyConsumption(double energyConsumption) {
         this.energyConsumption = energyConsumption;
     }
+
+    public void setTechnologies(List<TechnologyComparison> technologies) {
+        this.technologies = technologies;
+    }
 }

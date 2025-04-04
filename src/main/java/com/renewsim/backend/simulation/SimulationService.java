@@ -21,8 +21,8 @@ public class SimulationService {
     private final UserRepository userRepository;
     private final TechnologyComparisonRepository technologyComparisonRepository;
 
-    public SimulationService(SimulationRepository simulationRepository, UserRepository userRepository, 
-    TechnologyComparisonRepository technologyComparisonRepository) {
+    public SimulationService(SimulationRepository simulationRepository, UserRepository userRepository,
+            TechnologyComparisonRepository technologyComparisonRepository) {
 
         this.simulationRepository = simulationRepository;
         this.userRepository = userRepository;
@@ -63,6 +63,9 @@ public class SimulationService {
         simulation.setReturnOnInvestment(resultado.getReturnOnInvestment());
         simulation.setUser(user);
 
+        // Aquí añadimos la asociación con las tecnologías
+        simulation.setTechnologies(technologyComparisonRepository.findAll());
+
         simulationRepository.save(simulation);
 
         return resultado;
@@ -74,16 +77,15 @@ public class SimulationService {
         double efficiency = 0;
 
         List<TechnologyComparisonResponseDTO> technologyDTOs = technologyComparisonRepository.findAll().stream()
-    .map(tech -> new TechnologyComparisonResponseDTO(
-        tech.getTechnologyName(),
-        tech.getEfficiency(),
-        tech.getInstallationCost(),
-        tech.getMaintenanceCost(),
-        tech.getEnvironmentalImpact(),
-        tech.getCo2Reduction(),
-        tech.getEnergyProduction()
-    ))
-    .collect(Collectors.toList());
+                .map(tech -> new TechnologyComparisonResponseDTO(
+                        tech.getTechnologyName(),
+                        tech.getEfficiency(),
+                        tech.getInstallationCost(),
+                        tech.getMaintenanceCost(),
+                        tech.getEnvironmentalImpact(),
+                        tech.getCo2Reduction(),
+                        tech.getEnergyProduction()))
+                .collect(Collectors.toList());
 
         switch (dto.getEnergyType().toLowerCase()) {
             case "solar" -> {
