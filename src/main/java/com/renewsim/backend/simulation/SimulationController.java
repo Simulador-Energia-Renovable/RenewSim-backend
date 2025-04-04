@@ -3,7 +3,6 @@ package com.renewsim.backend.simulation;
 import java.util.List;
 
 import org.springframework.security.core.Authentication;
-
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -28,9 +27,7 @@ public class SimulationController {
     @PostMapping
     @PreAuthorize("hasAuthority('SCOPE_write: simualtion')")
     public ResponseEntity<SimulationResponseDTO> simulate(@RequestBody SimulationRequestDTO dto) {
-
         SimulationResponseDTO result = simulationService.simulateAndSave(dto);
-
         return ResponseEntity.ok(result);
     }
 
@@ -46,11 +43,9 @@ public class SimulationController {
     @GetMapping("/history")
     @PreAuthorize("hasAuthority('SCOPE_read: simualtion')")
     public List<Simulation> getSimulationHistory() {
-
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String username = auth.getName();
-
         return simulationService.getUserSimulations(username);
     }
-
 }
+
