@@ -1,8 +1,10 @@
 package com.renewsim.backend.simulation;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.renewsim.backend.technologyComparison.TechnologyComparison;
 import com.renewsim.backend.user.User;
 
 import jakarta.persistence.*;
@@ -46,6 +48,10 @@ public class Simulation {
     @JoinColumn(name = "user_id", nullable = false)
     @JsonBackReference
     private User user;
+
+    @ManyToMany
+    @JoinTable(name = "simulation_technology", joinColumns = @JoinColumn(name = "simulation_id"), inverseJoinColumns = @JoinColumn(name = "technology_comparison_id"))
+    private List<TechnologyComparison> technologies;
 
     public Long getId() {
         return id;
@@ -126,10 +132,11 @@ public class Simulation {
     public void setUser(User user) {
         this.user = user;
     }
+
     public double getEnergyConsumption() {
         return energyConsumption;
     }
-    
+
     public void setEnergyConsumption(double energyConsumption) {
         this.energyConsumption = energyConsumption;
     }
