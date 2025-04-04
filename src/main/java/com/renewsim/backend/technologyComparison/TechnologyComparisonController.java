@@ -65,8 +65,7 @@ public class TechnologyComparisonController {
 
     // Mapper de Entity a ResponseDTO
     private TechnologyComparisonResponseDTO mapToResponseDTO(TechnologyComparison entity) {
-        return new TechnologyComparisonResponseDTO(
-                entity.getId(),
+        return new TechnologyComparisonResponseDTO(             
                 entity.getTechnologyName(),
                 entity.getEfficiency(),
                 entity.getInstallationCost(),

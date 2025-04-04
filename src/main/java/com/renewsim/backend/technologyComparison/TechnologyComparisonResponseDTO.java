@@ -2,7 +2,6 @@ package com.renewsim.backend.technologyComparison;
 
 public class TechnologyComparisonResponseDTO {
 
-    private Long id;
     private String technologyName;
     private Double efficiency;
     private Double installationCost;
@@ -12,11 +11,11 @@ public class TechnologyComparisonResponseDTO {
     private Double energyProduction;
 
     // Constructor
-    public TechnologyComparisonResponseDTO(Long id, String technologyName, Double efficiency,
+    public TechnologyComparisonResponseDTO(String technologyName, Double efficiency,
             Double installationCost, Double maintenanceCost,
             String environmentalImpact, Double co2Reduction,
             Double energyProduction) {
-        this.id = id;
+    
         this.technologyName = technologyName;
         this.efficiency = efficiency;
         this.installationCost = installationCost;
@@ -28,9 +27,6 @@ public class TechnologyComparisonResponseDTO {
 
     // Getters
 
-    public Long getId() {
-        return id;
-    }
 
     public String getTechnologyName() {
         return technologyName;

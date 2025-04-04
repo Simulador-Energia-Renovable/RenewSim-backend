@@ -1,6 +1,7 @@
 package com.renewsim.backend.simulation;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -8,6 +9,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.cache.annotation.Cacheable;
 
+import com.renewsim.backend.technologyComparison.TechnologyComparisonRepository;
+import com.renewsim.backend.technologyComparison.TechnologyComparisonResponseDTO;
 import com.renewsim.backend.user.User;
 import com.renewsim.backend.user.UserRepository;
 
@@ -16,10 +19,14 @@ public class SimulationService {
 
     private final SimulationRepository simulationRepository;
     private final UserRepository userRepository;
+    private final TechnologyComparisonRepository technologyComparisonRepository;
 
-    public SimulationService(SimulationRepository simulationRepository, UserRepository userRepository) {
+    public SimulationService(SimulationRepository simulationRepository, UserRepository userRepository, 
+    TechnologyComparisonRepository technologyComparisonRepository) {
+
         this.simulationRepository = simulationRepository;
         this.userRepository = userRepository;
+        this.technologyComparisonRepository = technologyComparisonRepository;
     }
 
     public SimulationResponseDTO simulateAndSave(SimulationRequestDTO dto) {
@@ -66,6 +73,18 @@ public class SimulationService {
         double irradiance = 0;
         double efficiency = 0;
 
+        List<TechnologyComparisonResponseDTO> technologyDTOs = technologyComparisonRepository.findAll().stream()
+    .map(tech -> new TechnologyComparisonResponseDTO(
+        tech.getTechnologyName(),
+        tech.getEfficiency(),
+        tech.getInstallationCost(),
+        tech.getMaintenanceCost(),
+        tech.getEnvironmentalImpact(),
+        tech.getCo2Reduction(),
+        tech.getEnergyProduction()
+    ))
+    .collect(Collectors.toList());
+
         switch (dto.getEnergyType().toLowerCase()) {
             case "solar" -> {
                 irradiance = dto.getClimate().getIrradiance();
@@ -92,7 +111,7 @@ public class SimulationService {
         double ahorro = energyGenerated * 0.2;
         double roi = ahorro > 0 ? dto.getBudget() / ahorro : 0;
 
-        return new SimulationResponseDTO(energyGenerated, ahorro, roi);
+        return new SimulationResponseDTO(energyGenerated, ahorro, roi, technologyDTOs);
     }
 
     public List<Simulation> getUserSimulations(String username) {

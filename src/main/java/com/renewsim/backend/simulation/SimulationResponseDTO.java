@@ -1,14 +1,21 @@
 package com.renewsim.backend.simulation;
 
+import java.util.List;
+
+import com.renewsim.backend.technologyComparison.TechnologyComparisonResponseDTO;
+
 public class SimulationResponseDTO {
     private double energyGenerated;
     private double estimatedSavings;
     private double returnOnInvestment;
+    private List<TechnologyComparisonResponseDTO> technologies;
 
-    public SimulationResponseDTO(double energyGenerated, double estimatedSavings, double returnOnInvestment) {
+    public SimulationResponseDTO(double energyGenerated, double estimatedSavings, double returnOnInvestment,
+            List<TechnologyComparisonResponseDTO> technologies) {
         this.energyGenerated = energyGenerated;
         this.estimatedSavings = estimatedSavings;
         this.returnOnInvestment = returnOnInvestment;
+        this.technologies = technologies;
     }
 
     public double getReturnOnInvestment() {
@@ -21,5 +28,9 @@ public class SimulationResponseDTO {
 
     public double getEstimatedSavings() {
         return estimatedSavings;
+    }
+
+    public List<TechnologyComparisonResponseDTO> getTechnologies() {
+        return technologies;
     }
 }
