@@ -11,8 +11,10 @@ public class SimulationResponseDTO {
     private List<TechnologyComparisonResponseDTO> technologies;
     private Long simulationId;
 
-    public SimulationResponseDTO(Long simulationId, double energyGenerated, double estimatedSavings, double returnOnInvestment,
+    public SimulationResponseDTO(Long simulationId, double energyGenerated, double estimatedSavings,
+            double returnOnInvestment,
             List<TechnologyComparisonResponseDTO> technologies) {
+        this.simulationId = simulationId;
         this.energyGenerated = energyGenerated;
         this.estimatedSavings = estimatedSavings;
         this.returnOnInvestment = returnOnInvestment;
@@ -37,5 +39,9 @@ public class SimulationResponseDTO {
 
     public Long getSimulationId() {
         return simulationId;
+    }
+
+    public void setSimulationId(Long simulationId) {
+        this.simulationId = simulationId;
     }
 }

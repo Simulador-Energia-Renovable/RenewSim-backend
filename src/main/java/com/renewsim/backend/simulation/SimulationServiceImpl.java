@@ -29,50 +29,87 @@ public class SimulationServiceImpl implements SimulationService {
     }
 
     @Override
-    public SimulationResponseDTO simulateAndSave(SimulationRequestDTO dto) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        String username = auth.getName();
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado"));
+public SimulationResponseDTO simulateAndSave(SimulationRequestDTO dto) {
+    Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+    String username = auth.getName();
+    User user = userRepository.findByUsername(username)
+            .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado"));
 
-        // Validaciones básicas
-        if (dto.getProjectSize() <= 0 || dto.getProjectSize() > 500) {
-            throw new IllegalArgumentException("El tamaño del proyecto debe ser entre 1 y 500 m².");
-        }
-
-        if (dto.getBudget() <= 0) {
-            throw new IllegalArgumentException("El presupuesto debe ser mayor que cero.");
-        }
-
-        if (dto.getEnergyConsumption() < 50 || dto.getEnergyConsumption() > 100000) {
-            throw new IllegalArgumentException("El consumo energético debe estar entre 50 y 100000 kWh/mes.");
-        }
-
-        SimulationResponseDTO resultado = calculateSimulation(dto);
-
-        // Guardar simulación
-        Simulation simulation = new Simulation();
-        simulation.setLocation(dto.getLocation());
-        simulation.setEnergyType(dto.getEnergyType());
-        simulation.setProjectSize(dto.getProjectSize());
-        simulation.setBudget(dto.getBudget());
-        simulation.setEnergyConsumption(dto.getEnergyConsumption());
-        simulation.setEnergyGenerated(resultado.getEnergyGenerated());
-        simulation.setEstimatedSavings(resultado.getEstimatedSavings());
-        simulation.setReturnOnInvestment(resultado.getReturnOnInvestment());
-        simulation.setUser(user);
-
-        // Asociamos las tecnologías utilizadas
-        simulation.setTechnologies(technologyComparisonRepository.findAll());
-
-        simulationRepository.save(simulation);
-
-        return resultado;
+    // Validaciones básicas
+    if (dto.getProjectSize() <= 0 || dto.getProjectSize() > 500) {
+        throw new IllegalArgumentException("El tamaño del proyecto debe ser entre 1 y 500 m².");
     }
+
+    if (dto.getBudget() <= 0) {
+        throw new IllegalArgumentException("El presupuesto debe ser mayor que cero.");
+    }
+
+    if (dto.getEnergyConsumption() < 50 || dto.getEnergyConsumption() > 100000) {
+        throw new IllegalArgumentException("El consumo energético debe estar entre 50 y 100000 kWh/mes.");
+    }
+
+    // Primero hacemos el cálculo para tener los datos listos
+    List<TechnologyComparisonResponseDTO> technologyDTOs = technologyComparisonRepository.findAll().stream()
+            .map(tech -> new TechnologyComparisonResponseDTO(
+                    tech.getTechnologyName(),
+                    tech.getEfficiency(),
+                    tech.getInstallationCost(),
+                    tech.getMaintenanceCost(),
+                    tech.getEnvironmentalImpact(),
+                    tech.getCo2Reduction(),
+                    tech.getEnergyProduction()))
+            .collect(Collectors.toList());
+
+    double irradiance = switch (dto.getEnergyType().toLowerCase()) {
+        case "solar" -> dto.getClimate().getIrradiance();
+        case "wind" -> dto.getClimate().getWind();
+        case "hydro" -> dto.getClimate().getHydrology();
+        default -> throw new IllegalArgumentException("Tipo de energía no reconocido.");
+    };
+
+    double efficiency = switch (dto.getEnergyType().toLowerCase()) {
+        case "solar" -> 0.18;
+        case "wind" -> 0.40;
+        case "hydro" -> 0.50;
+        default -> throw new IllegalArgumentException("Tipo de energía no reconocido.");
+    };
+
+    double energyGenerated = irradiance * efficiency * dto.getProjectSize() * 365;
+    double ahorro = energyGenerated * 0.2;
+    double roi = ahorro > 0 ? dto.getBudget() / ahorro : 0;
+
+    // Creamos la simulación primero
+    Simulation simulation = new Simulation();
+    simulation.setLocation(dto.getLocation());
+    simulation.setEnergyType(dto.getEnergyType());
+    simulation.setProjectSize(dto.getProjectSize());
+    simulation.setBudget(dto.getBudget());
+    simulation.setEnergyConsumption(dto.getEnergyConsumption());
+    simulation.setEnergyGenerated(energyGenerated);
+    simulation.setEstimatedSavings(ahorro);
+    simulation.setReturnOnInvestment(roi);
+    simulation.setUser(user);
+
+    // Asociamos tecnologías
+    simulation.setTechnologies(technologyComparisonRepository.findAll());
+
+    // Guardamos para obtener el ID generado
+    simulationRepository.save(simulation);
+
+    // Ahora que tenemos el ID de la simulación, lo metemos en el DTO de respuesta
+    return new SimulationResponseDTO(
+            simulation.getId(),
+            energyGenerated,
+            ahorro,
+            roi,
+            technologyDTOs
+    );
+}
+
 
     @Override
     @Cacheable(value = "simulations", key = "#dto.hashCode()")
-    public SimulationResponseDTO calculateSimulation(SimulationRequestDTO dto) {
+    public SimulationResponseDTO calculateSimulation(SimulationRequestDTO dto, Long simulationId) {
         double irradiance = 0;
         double efficiency = 0;
 
@@ -113,7 +150,7 @@ public class SimulationServiceImpl implements SimulationService {
         double ahorro = energyGenerated * 0.2;
         double roi = ahorro > 0 ? dto.getBudget() / ahorro : 0;
 
-        return new SimulationResponseDTO( simulation.getId(),,energyGenerated, ahorro, roi, technologyDTOs);
+        return new SimulationResponseDTO( simulationId, energyGenerated, ahorro, roi, technologyDTOs);
     }
 
     @Override
