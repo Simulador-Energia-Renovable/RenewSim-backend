@@ -3,6 +3,8 @@ package com.renewsim.backend.technologyComparison;
 import com.renewsim.backend.simulation.Simulation;
 
 import jakarta.persistence.*;
+
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -34,10 +36,9 @@ public class TechnologyComparison {
     @Column(name = "energy_production")
     private Double energyProduction;
 
-   
     @ManyToMany(mappedBy = "technologies")
-    private List<Simulation> simulations;
-    
+    private List<Simulation> simulations = new ArrayList<>();
+
     // Constructor vacío
     public TechnologyComparison() {
     }

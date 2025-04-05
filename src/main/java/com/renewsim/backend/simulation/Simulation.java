@@ -1,6 +1,7 @@
 package com.renewsim.backend.simulation;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
@@ -49,9 +50,9 @@ public class Simulation {
     @JsonBackReference
     private User user;
 
-    @ManyToMany
+    @ManyToMany(cascade = CascadeType.PERSIST)
     @JoinTable(name = "simulation_technologies", joinColumns = @JoinColumn(name = "simulation_id"), inverseJoinColumns = @JoinColumn(name = "technology_id"))
-    private List<TechnologyComparison> technologies;
+    private List<TechnologyComparison> technologies = new ArrayList<>();
 
     public Long getId() {
         return id;
@@ -144,7 +145,7 @@ public class Simulation {
     public List<TechnologyComparison> getTechnologies() {
         return technologies;
     }
-    
+
     public void setTechnologies(List<TechnologyComparison> technologies) {
         this.technologies = technologies;
     }

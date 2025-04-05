@@ -96,6 +96,13 @@ public SimulationResponseDTO simulateAndSave(SimulationRequestDTO dto) {
     // Guardamos para obtener el ID generado
     simulationRepository.save(simulation);
 
+    simulation.getTechnologies().forEach(tech -> {
+        tech.getSimulations().add(simulation);
+    });
+    
+    // Vuelve a guardar para que se persista la relación
+    simulationRepository.save(simulation);
+
     // Ahora que tenemos el ID de la simulación, lo metemos en el DTO de respuesta
     return new SimulationResponseDTO(
             simulation.getId(),
