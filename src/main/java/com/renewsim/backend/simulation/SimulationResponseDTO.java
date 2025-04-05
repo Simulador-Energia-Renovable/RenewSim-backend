@@ -1,47 +1,26 @@
 package com.renewsim.backend.simulation;
-
 import java.util.List;
 
 import com.renewsim.backend.technologyComparison.TechnologyComparisonResponseDTO;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
 public class SimulationResponseDTO {
+    private Long simulationId;
     private double energyGenerated;
     private double estimatedSavings;
     private double returnOnInvestment;
     private List<TechnologyComparisonResponseDTO> technologies;
-    private Long simulationId;
-
-    public SimulationResponseDTO(Long simulationId, double energyGenerated, double estimatedSavings,
-            double returnOnInvestment,
-            List<TechnologyComparisonResponseDTO> technologies) {
-        this.simulationId = simulationId;
-        this.energyGenerated = energyGenerated;
-        this.estimatedSavings = estimatedSavings;
-        this.returnOnInvestment = returnOnInvestment;
-        this.technologies = technologies;
-    }
-
-    public double getReturnOnInvestment() {
-        return returnOnInvestment;
-    }
-
-    public double getEnergyGenerated() {
-        return energyGenerated;
-    }
-
-    public double getEstimatedSavings() {
-        return estimatedSavings;
-    }
-
-    public List<TechnologyComparisonResponseDTO> getTechnologies() {
-        return technologies;
-    }
-
-    public Long getSimulationId() {
-        return simulationId;
-    }
-
-    public void setSimulationId(Long simulationId) {
-        this.simulationId = simulationId;
-    }
+    private String recommendedTechnology;
 }
+
+
+
+
