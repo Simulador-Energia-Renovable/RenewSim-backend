@@ -16,11 +16,12 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final UserMapper userMapper;
-    private RoleRepository roleRepository;
+    private final RoleRepository roleRepository;
 
-    public UserServiceImpl(UserRepository userRepository, UserMapper userMapper) {
+    public UserServiceImpl(UserRepository userRepository, UserMapper userMapper, RoleRepository roleRepository) {
         this.userRepository = userRepository;
         this.userMapper = userMapper;
+        this.roleRepository = roleRepository;
     }
 
     @Override
@@ -46,7 +47,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void deleteById(Long id) {
+    public void deleteUser(Long id) {
+        System.out.println("Eliminando usuario con ID: " + id);
         userRepository.deleteById(id);
     }
 
@@ -59,8 +61,6 @@ public class UserServiceImpl implements UserService {
                 .map(role -> new RoleDTO(role.getId(), role.getName().name()))
                 .collect(Collectors.toList());
     }
-
-
 
     @Override
     public void updateUserRoles(Long userId, List<String> roleNames) {
@@ -76,4 +76,17 @@ public class UserServiceImpl implements UserService {
         userRepository.save(user);
     }
 
+    @Override
+    public UserResponseDTO getCurrentUser(User user) {
+        return userMapper.toResponseDto(user);
+    }
+
+    @Override
+    public List<UserResponseDTO> getUsersWithoutRoles() {
+        return userRepository.findAll().stream()
+                .filter(user -> user.getRoles() == null || user.getRoles().isEmpty())
+                .map(userMapper::toResponseDto)
+                .collect(Collectors.toList());
+    }
 }
+

@@ -8,13 +8,12 @@ import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 
-
 import org.springframework.boot.CommandLineRunner;
 
 import org.springframework.context.annotation.Bean;
 
 @SpringBootApplication
-@EnableCaching  //Habilita la caché en toda la aplicación
+@EnableCaching // Habilita la caché en toda la aplicación
 public class RenewSimBackendApplication {
     public static void main(String[] args) {
         SpringApplication.run(RenewSimBackendApplication.class, args);
@@ -29,5 +28,5 @@ public class RenewSimBackendApplication {
             }
         };
     }
-}
 
+}

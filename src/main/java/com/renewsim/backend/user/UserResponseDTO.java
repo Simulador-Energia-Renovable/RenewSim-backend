@@ -2,7 +2,7 @@ package com.renewsim.backend.user;
 
 import java.util.Set;
 
-import java.util.stream.Collectors;
+
 
 public class UserResponseDTO {
     private Long id;
@@ -12,14 +12,8 @@ public class UserResponseDTO {
     // Constructor vacío (necesario para deserialización)
     public UserResponseDTO() {}
 
-    // ✅ Constructor que convierte User a UserResponseDTO
-    public UserResponseDTO(User user) {
-        this.id = user.getId();
-        this.username = user.getUsername();
-        this.roles = user.getRoles().stream()
-                         .map(roleName -> roleName.toString())
-                         .collect(Collectors.toSet());
-    }
+
+    
 
     // Getters y setters
     public Long getId() {

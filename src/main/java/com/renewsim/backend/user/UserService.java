@@ -13,9 +13,14 @@ public interface UserService {
 
     UserResponseDTO save(UserRequestDTO dto);
 
-    void deleteById(Long id);
+    void deleteUser(Long id);
 
     List<RoleDTO> getRolesByUserId(Long id);
+
     void updateUserRoles(Long userId, List<String> roleNames);
+
+    UserResponseDTO getCurrentUser(User user);
+
+    List<UserResponseDTO> getUsersWithoutRoles();
 
 }

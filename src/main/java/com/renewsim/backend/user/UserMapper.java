@@ -8,30 +8,34 @@ import org.mapstruct.Mapping;
 import org.mapstruct.Named;
 
 import com.renewsim.backend.role.Role;
-import com.renewsim.backend.role.RoleName;
+import com.renewsim.backend.role.RoleName; // Ensure RoleName is imported
+
 
 @Mapper(componentModel = "spring")
 public interface UserMapper {
 
-    @Mapping(target = "id", ignore = true) // IGNORAR ID al crear
+    @Mapping(target = "roles", source = "roles", qualifiedByName = "mapRoleNames")
+    UserResponseDTO toResponseDto(User user);
+
+    @Mapping(target = "id", ignore = true)
     @Mapping(target = "roles", source = "roles", qualifiedByName = "mapRolesFromStrings")
     User toEntity(UserRequestDTO dto);
-    @Named("mapRolesFromStrings")
-    default Set<Role> mapRolesFromStrings(Set<String> roles) {   
+
+    @Named("mapRoleNames")
+    default Set<String> mapRoleNames(Set<Role> roles) {
         return roles.stream()
-                    .map(roleName -> {
-                        Role role = new Role();
-                        role.setName(RoleName.valueOf(roleName));
-                        return role;
-                    })
-                    .collect(Collectors.toSet());
+                .map(role -> role.getName().name())
+                .collect(Collectors.toSet());
     }
 
-    UserResponseDTO toResponseDto(User entity);
-
-    default Set<String> mapRoles(Set<Role> roles) {
+    @Named("mapRolesFromStrings")
+    default Set<Role> mapRolesFromStrings(Set<String> roles) {
         return roles.stream()
-                    .map(role -> role.getName().name())
-                    .collect(Collectors.toSet());
+                .map(roleName -> {
+                    Role role = new Role();
+                    role.setName(RoleName.valueOf(roleName));
+                    return role;
+                })
+                .collect(Collectors.toSet());
     }
 }
