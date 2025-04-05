@@ -35,18 +35,19 @@ public class SimulationController {
     }
 
     @GetMapping("/user")
-    @PreAuthorize("hasAuthority('SCOPE_read: simualtion')")
-    public ResponseEntity<List<Simulation>> getUserSimulations() {
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        List<Simulation> simulations = simulationUseCase.getUserSimulations(username);
-        return ResponseEntity.ok(simulations);
-    }
+@PreAuthorize("hasAuthority('SCOPE_read: simulation')")
+public ResponseEntity<List<SimulationHistoryDTO>> getUserSimulations() {
+    String username = SecurityContextHolder.getContext().getAuthentication().getName();
+    List<SimulationHistoryDTO> simulationHistoryList = simulationUseCase.getUserSimulationHistoryDTOs(username);
+    return ResponseEntity.ok(simulationHistoryList);
+}
+
 
     @GetMapping("/history")
-    @PreAuthorize("hasAuthority('SCOPE_read: simualtion')")
-    public ResponseEntity<List<Simulation>> getSimulationHistory() {
+    @PreAuthorize("hasAuthority('SCOPE_read:simualtion')")
+    public ResponseEntity<List<SimulationHistoryDTO>> getSimulationHistory() {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        return ResponseEntity.ok(simulationUseCase.getUserSimulations(username));
+        return ResponseEntity.ok(simulationUseCase.getUserSimulationHistoryDTOs(username));
     }
 
     @GetMapping("/{simulationId}/technologies")

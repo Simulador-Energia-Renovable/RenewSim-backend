@@ -22,7 +22,7 @@ public class SimulationUseCase {
 
     public List<Simulation> getUserSimulations(String username) {
         return simulationService.getUserSimulations(username);
-    }
+    }    
 
     public List<TechnologyComparisonResponseDTO> getTechnologiesForSimulation(Long simulationId) {
         Simulation simulation = simulationService.getSimulationById(simulationId);
@@ -38,6 +38,11 @@ public class SimulationUseCase {
                         tech.getEnergyProduction()))
                 .collect(Collectors.toList());
     }
+
+    public List<SimulationHistoryDTO> getUserSimulationHistoryDTOs(String username) {
+        return simulationService.getUserSimulationHistoryDTOs(username);
+    }
+    
     
     
 }

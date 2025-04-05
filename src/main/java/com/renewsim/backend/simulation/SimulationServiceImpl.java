@@ -56,10 +56,6 @@ public class SimulationServiceImpl implements SimulationService {
         List<TechnologyComparison> selectedTechnologies = technologyComparisonRepository
                 .findByEnergyType(dto.getEnergyType());
 
-        // Mensaje de debug para confirmar tecnologías encontradas
-        System.out.println("Tecnologías encontradas para el tipo de energía '" + dto.getEnergyType() + "': "
-                + selectedTechnologies.size());
-
         // Mapear tecnologías a DTOs de respuesta
         List<TechnologyComparisonResponseDTO> technologyDTOs = selectedTechnologies.stream()
                 .map(tech -> new TechnologyComparisonResponseDTO(
@@ -218,5 +214,17 @@ public class SimulationServiceImpl implements SimulationService {
         return simulationRepository.findById(simulationId)
                 .orElseThrow(() -> new IllegalArgumentException("Simulación no encontrada"));
     }
+
+    @Override
+    public List<SimulationHistoryDTO> getUserSimulationHistoryDTOs(String username) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado"));
+    
+        return simulationRepository.findAllByUser(user).stream()
+                .map(SimulationMapper::toHistoryDTO)
+                .collect(Collectors.toList());
+    }
+    
+
 
 }

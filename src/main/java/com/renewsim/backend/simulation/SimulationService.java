@@ -11,6 +11,9 @@ public interface SimulationService {
     List<Simulation> getUserSimulations(String username);
 
     Simulation getSimulationById(Long simulationId);
+
+    List<SimulationHistoryDTO> getUserSimulationHistoryDTOs(String username);
+
 }
 
 
