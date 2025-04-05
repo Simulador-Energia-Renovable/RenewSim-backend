@@ -90,7 +90,8 @@ public class TechnologyComparisonController {
                 dto.getMaintenanceCost(),
                 dto.getEnvironmentalImpact(),
                 dto.getCo2Reduction(),
-                dto.getEnergyProduction());
+                dto.getEnergyProduction(),
+                dto.getEnergyType());
                
     }
 

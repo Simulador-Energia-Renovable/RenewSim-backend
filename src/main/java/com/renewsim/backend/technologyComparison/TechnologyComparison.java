@@ -130,6 +130,7 @@ public class TechnologyComparison {
     public void setSimulations(List<Simulation> simulations) {
         this.simulations = simulations;
     }
+
     public String getEnergyType() {
         return energyType;
     }

@@ -50,7 +50,7 @@ public class Simulation {
     @JsonBackReference
     private User user;
 
-    @ManyToMany(cascade = CascadeType.PERSIST)
+    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(name = "simulation_technologies", joinColumns = @JoinColumn(name = "simulation_id"), inverseJoinColumns = @JoinColumn(name = "technology_id"))
     private List<TechnologyComparison> technologies = new ArrayList<>();
 

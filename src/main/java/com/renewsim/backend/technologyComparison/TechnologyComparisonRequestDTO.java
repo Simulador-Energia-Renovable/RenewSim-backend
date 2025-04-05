@@ -27,6 +27,8 @@ public class TechnologyComparisonRequestDTO {
     private Double co2Reduction;
 
     private Double energyProduction;
+    @NotNull(message = "El tipo de energía es obligatorio")
+    private String energyType;
 
     // Getters and Setters
 
@@ -84,6 +86,14 @@ public class TechnologyComparisonRequestDTO {
 
     public void setEnergyProduction(Double energyProduction) {
         this.energyProduction = energyProduction;
+    }
+
+    public String getEnergyType() {
+        return energyType;
+    }
+
+    public void setEnergyType(String energyType) {
+        this.energyType = energyType;
     }
 }
 
