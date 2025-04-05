@@ -91,6 +91,7 @@ public class TechnologyComparisonController {
                 dto.getEnvironmentalImpact(),
                 dto.getCo2Reduction(),
                 dto.getEnergyProduction());
+               
     }
 
     @GetMapping("/simulation/{simulationId}")

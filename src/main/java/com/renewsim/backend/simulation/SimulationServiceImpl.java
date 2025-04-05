@@ -9,6 +9,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import com.renewsim.backend.technologyComparison.TechnologyComparison;
 import com.renewsim.backend.technologyComparison.TechnologyComparisonRepository;
 import com.renewsim.backend.technologyComparison.TechnologyComparisonResponseDTO;
 import com.renewsim.backend.user.User;
@@ -39,17 +40,17 @@ public SimulationResponseDTO simulateAndSave(SimulationRequestDTO dto) {
     if (dto.getProjectSize() <= 0 || dto.getProjectSize() > 500) {
         throw new IllegalArgumentException("El tamaño del proyecto debe ser entre 1 y 500 m².");
     }
-
     if (dto.getBudget() <= 0) {
         throw new IllegalArgumentException("El presupuesto debe ser mayor que cero.");
     }
-
     if (dto.getEnergyConsumption() < 50 || dto.getEnergyConsumption() > 100000) {
         throw new IllegalArgumentException("El consumo energético debe estar entre 50 y 100000 kWh/mes.");
     }
 
-    // Primero hacemos el cálculo para tener los datos listos
-    List<TechnologyComparisonResponseDTO> technologyDTOs = technologyComparisonRepository.findAll().stream()
+    // 📌 Seleccionamos solo las tecnologías que coincidan con el tipo de energía
+    List<TechnologyComparison> selectedTechnologies = technologyComparisonRepository.findByEnergyType(dto.getEnergyType());
+
+    List<TechnologyComparisonResponseDTO> technologyDTOs = selectedTechnologies.stream()
             .map(tech -> new TechnologyComparisonResponseDTO(
                     tech.getTechnologyName(),
                     tech.getEfficiency(),
@@ -78,7 +79,7 @@ public SimulationResponseDTO simulateAndSave(SimulationRequestDTO dto) {
     double ahorro = energyGenerated * 0.2;
     double roi = ahorro > 0 ? dto.getBudget() / ahorro : 0;
 
-    // Creamos la simulación primero
+    // 🌱 Creamos la simulación
     Simulation simulation = new Simulation();
     simulation.setLocation(dto.getLocation());
     simulation.setEnergyType(dto.getEnergyType());
@@ -90,20 +91,15 @@ public SimulationResponseDTO simulateAndSave(SimulationRequestDTO dto) {
     simulation.setReturnOnInvestment(roi);
     simulation.setUser(user);
 
-    // Asociamos tecnologías
-    simulation.setTechnologies(technologyComparisonRepository.findAll());
+    // Asociamos las tecnologías correctas
+    simulation.setTechnologies(selectedTechnologies);
 
-    // Guardamos para obtener el ID generado
+    // Relación inversa (importante 👇)
+    selectedTechnologies.forEach(tech -> tech.getSimulations().add(simulation));
+
+    // Guardamos la simulación con las relaciones bidireccionales
     simulationRepository.save(simulation);
 
-    simulation.getTechnologies().forEach(tech -> {
-        tech.getSimulations().add(simulation);
-    });
-    
-    // Vuelve a guardar para que se persista la relación
-    simulationRepository.save(simulation);
-
-    // Ahora que tenemos el ID de la simulación, lo metemos en el DTO de respuesta
     return new SimulationResponseDTO(
             simulation.getId(),
             energyGenerated,
@@ -157,7 +153,7 @@ public SimulationResponseDTO simulateAndSave(SimulationRequestDTO dto) {
         double ahorro = energyGenerated * 0.2;
         double roi = ahorro > 0 ? dto.getBudget() / ahorro : 0;
 
-        return new SimulationResponseDTO( null, energyGenerated, ahorro, roi, technologyDTOs);
+        return new SimulationResponseDTO(null, energyGenerated, ahorro, roi, technologyDTOs);
     }
 
     @Override
@@ -168,9 +164,9 @@ public SimulationResponseDTO simulateAndSave(SimulationRequestDTO dto) {
     }
 
     @Override
-public Simulation getSimulationById(Long simulationId) {
-    return simulationRepository.findById(simulationId)
-            .orElseThrow(() -> new IllegalArgumentException("Simulación no encontrada"));
-}
+    public Simulation getSimulationById(Long simulationId) {
+        return simulationRepository.findById(simulationId)
+                .orElseThrow(() -> new IllegalArgumentException("Simulación no encontrada"));
+    }
 
 }

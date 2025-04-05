@@ -36,6 +36,9 @@ public class TechnologyComparison {
     @Column(name = "energy_production")
     private Double energyProduction;
 
+    @Column(name = "energy_type", nullable = false)
+    private String energyType;
+
     @ManyToMany(mappedBy = "technologies")
     private List<Simulation> simulations = new ArrayList<>();
 
@@ -47,7 +50,7 @@ public class TechnologyComparison {
     public TechnologyComparison(String technologyName, Double efficiency,
             Double installationCost, Double maintenanceCost,
             String environmentalImpact, Double co2Reduction,
-            Double energyProduction) {
+            Double energyProduction, String energyType) {
         this.technologyName = technologyName;
         this.efficiency = efficiency;
         this.installationCost = installationCost;
@@ -55,6 +58,7 @@ public class TechnologyComparison {
         this.environmentalImpact = environmentalImpact;
         this.co2Reduction = co2Reduction;
         this.energyProduction = energyProduction;
+        this.energyType = energyType;
     }
 
     // Getters y Setters (incluyendo lista de simulaciones)
@@ -125,6 +129,13 @@ public class TechnologyComparison {
 
     public void setSimulations(List<Simulation> simulations) {
         this.simulations = simulations;
+    }
+    public String getEnergyType() {
+        return energyType;
+    }
+
+    public void setEnergyType(String energyType) {
+        this.energyType = energyType;
     }
 
     @Override
