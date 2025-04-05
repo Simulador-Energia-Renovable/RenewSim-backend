@@ -109,7 +109,7 @@ public SimulationResponseDTO simulateAndSave(SimulationRequestDTO dto) {
 
     @Override
     @Cacheable(value = "simulations", key = "#dto.hashCode()")
-    public SimulationResponseDTO calculateSimulation(SimulationRequestDTO dto, Long simulationId) {
+    public SimulationResponseDTO calculateSimulation(SimulationRequestDTO dto) {
         double irradiance = 0;
         double efficiency = 0;
 
@@ -150,7 +150,7 @@ public SimulationResponseDTO simulateAndSave(SimulationRequestDTO dto) {
         double ahorro = energyGenerated * 0.2;
         double roi = ahorro > 0 ? dto.getBudget() / ahorro : 0;
 
-        return new SimulationResponseDTO( simulationId, energyGenerated, ahorro, roi, technologyDTOs);
+        return new SimulationResponseDTO( null, energyGenerated, ahorro, roi, technologyDTOs);
     }
 
     @Override

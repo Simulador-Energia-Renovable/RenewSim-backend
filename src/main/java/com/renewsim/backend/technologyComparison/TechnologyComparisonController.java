@@ -1,10 +1,13 @@
 package com.renewsim.backend.technologyComparison;
 
-
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
+import com.renewsim.backend.simulation.Simulation;
+import com.renewsim.backend.simulation.SimulationService;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -14,10 +17,13 @@ import java.util.stream.Collectors;
 public class TechnologyComparisonController {
 
     private final TechnologyComparisonService service;
+    private final SimulationService simulationService;
+
 
     @Autowired
-    public TechnologyComparisonController(TechnologyComparisonService service) {
+    public TechnologyComparisonController(TechnologyComparisonService service, SimulationService simulationService) {
         this.service = service;
+        this.simulationService = simulationService;
     }
 
     // Obtener todas las tecnologías
@@ -65,15 +71,14 @@ public class TechnologyComparisonController {
 
     // Mapper de Entity a ResponseDTO
     private TechnologyComparisonResponseDTO mapToResponseDTO(TechnologyComparison entity) {
-        return new TechnologyComparisonResponseDTO(             
+        return new TechnologyComparisonResponseDTO(
                 entity.getTechnologyName(),
                 entity.getEfficiency(),
                 entity.getInstallationCost(),
                 entity.getMaintenanceCost(),
                 entity.getEnvironmentalImpact(),
                 entity.getCo2Reduction(),
-                entity.getEnergyProduction()
-        );
+                entity.getEnergyProduction());
     }
 
     // Mapper de RequestDTO a Entity
@@ -85,7 +90,26 @@ public class TechnologyComparisonController {
                 dto.getMaintenanceCost(),
                 dto.getEnvironmentalImpact(),
                 dto.getCo2Reduction(),
-                dto.getEnergyProduction()
-        );
+                dto.getEnergyProduction());
     }
+
+    @GetMapping("/simulation/{simulationId}")
+    @PreAuthorize("hasAuthority('SCOPE_read:simulations')")
+    public ResponseEntity<List<TechnologyComparisonResponseDTO>> getTechnologiesBySimulation(
+            @PathVariable Long simulationId) {
+        Simulation simulation = simulationService.getSimulationById(simulationId);
+        List<TechnologyComparisonResponseDTO> dtos = simulation.getTechnologies().stream()
+                .map(tech -> new TechnologyComparisonResponseDTO(
+                        tech.getTechnologyName(),
+                        tech.getEfficiency(),
+                        tech.getInstallationCost(),
+                        tech.getMaintenanceCost(),
+                        tech.getEnvironmentalImpact(),
+                        tech.getCo2Reduction(),
+                        tech.getEnergyProduction()))
+                .toList();
+
+        return ResponseEntity.ok(dtos);
+    }
+
 }

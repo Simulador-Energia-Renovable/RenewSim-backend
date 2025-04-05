@@ -6,10 +6,11 @@ public interface SimulationService {
 
     SimulationResponseDTO simulateAndSave(SimulationRequestDTO dto);
 
-    SimulationResponseDTO calculateSimulation(SimulationRequestDTO dto,Long simulationId);
+    SimulationResponseDTO calculateSimulation(SimulationRequestDTO dto);
 
     List<Simulation> getUserSimulations(String username);
 
     Simulation getSimulationById(Long simulationId);
 }
+
 
