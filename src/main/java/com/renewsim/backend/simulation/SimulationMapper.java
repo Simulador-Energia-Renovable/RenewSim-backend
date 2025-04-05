@@ -1,15 +1,22 @@
 package com.renewsim.backend.simulation;
 
-public class SimulationMapper {
-    public static SimulationHistoryDTO toHistoryDTO(Simulation simulation) {
-        return new SimulationHistoryDTO(
-            simulation.getLocation(),
-            simulation.getEnergyType(),
-            simulation.getEnergyGenerated(),
-            simulation.getEstimatedSavings(),
-            simulation.getReturnOnInvestment(),
-            simulation.getTimestamp()
-        );
+import org.springframework.stereotype.Component;
+
+@Component
+public class SimulationMapper {   
+
+        public SimulationHistoryDTO toHistoryDTO(Simulation simulation) {
+            return SimulationHistoryDTO.builder()
+                .id(simulation.getId())
+                .location(simulation.getLocation())
+                .energyType(simulation.getEnergyType())
+                .energyGenerated(simulation.getEnergyGenerated())
+                .estimatedSavings(simulation.getEstimatedSavings())
+                .returnOnInvestment(simulation.getReturnOnInvestment())
+                .timestamp(simulation.getTimestamp())
+                .build();
+        }
     }
-}
+    
+
 

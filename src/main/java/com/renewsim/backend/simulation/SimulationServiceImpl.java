@@ -5,6 +5,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.core.Authentication;
@@ -19,18 +20,14 @@ import com.renewsim.backend.user.User;
 import com.renewsim.backend.user.UserRepository;
 
 @Service
+@RequiredArgsConstructor
 public class SimulationServiceImpl implements SimulationService {
 
     private final SimulationRepository simulationRepository;
     private final UserRepository userRepository;
     private final TechnologyComparisonRepository technologyComparisonRepository;
+    private final SimulationMapper simulationMapper;
 
-    public SimulationServiceImpl(SimulationRepository simulationRepository, UserRepository userRepository,
-            TechnologyComparisonRepository technologyComparisonRepository) {
-        this.simulationRepository = simulationRepository;
-        this.userRepository = userRepository;
-        this.technologyComparisonRepository = technologyComparisonRepository;
-    }
 
     @Override
     @Transactional
@@ -216,14 +213,15 @@ public class SimulationServiceImpl implements SimulationService {
     }
 
     @Override
-    public List<SimulationHistoryDTO> getUserSimulationHistoryDTOs(String username) {
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado"));
-    
-        return simulationRepository.findAllByUser(user).stream()
-                .map(SimulationMapper::toHistoryDTO)
-                .collect(Collectors.toList());
-    }
+public List<SimulationHistoryDTO> getUserSimulationHistoryDTOs(String username) {
+    User user = userRepository.findByUsername(username)
+            .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado"));
+
+    return simulationRepository.findAllByUser(user).stream()
+            .map(simulationMapper::toHistoryDTO)
+            .collect(Collectors.toList());
+}
+
     
 
 
