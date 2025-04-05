@@ -1,5 +1,7 @@
 package com.renewsim.backend.simulation;
 
+import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 import jakarta.transaction.Transactional;
@@ -77,6 +79,13 @@ public class SimulationServiceImpl implements SimulationService {
             case "hydro" -> dto.getClimate().getHydrology();
             default -> throw new IllegalArgumentException("Tipo de energía no reconocido.");
         };
+        // Calculamos la mejor tecnología basada en impacto-beneficio
+        String recommendedTechnology = selectedTechnologies.stream()
+                .max(Comparator.comparingDouble(tech -> (tech.getCo2Reduction() * 0.3) +
+                        (tech.getEnergyProduction() * 0.4) -
+                        (tech.getInstallationCost() * 0.3)))
+                .map(TechnologyComparison::getTechnologyName)
+                .orElse("No recommendation available");
 
         double efficiency = switch (dto.getEnergyType().toLowerCase()) {
             case "solar" -> 0.18;
@@ -114,7 +123,9 @@ public class SimulationServiceImpl implements SimulationService {
                 savedSimulation.getEnergyGenerated(),
                 savedSimulation.getEstimatedSavings(),
                 savedSimulation.getReturnOnInvestment(),
-                technologyDTOs);
+                savedSimulation.getTimestamp(),
+                technologyDTOs,
+                recommendedTechnology);
     }
 
     @Override
@@ -160,7 +171,39 @@ public class SimulationServiceImpl implements SimulationService {
         double ahorro = energyGenerated * 0.2;
         double roi = ahorro > 0 ? dto.getBudget() / ahorro : 0;
 
-        return new SimulationResponseDTO(null, energyGenerated, ahorro, roi, technologyDTOs);
+        String recommendedTechnology = technologyDTOs.isEmpty()
+                ? "No hay tecnologías disponibles para recomendar."
+                : technologyDTOs.stream()
+                        .sorted((t1, t2) -> Double.compare(calculateScore(t2), calculateScore(t1)))
+                        .map(TechnologyComparisonResponseDTO::getTechnologyName)
+                        .findFirst()
+                        .orElse("No se pudo determinar una recomendación.");
+
+        return SimulationResponseDTO.builder()
+                .simulationId(null)
+                .energyGenerated(energyGenerated)
+                .estimatedSavings(ahorro)
+                .returnOnInvestment(roi)
+                .timestamp(LocalDateTime.now())
+                .technologies(technologyDTOs)
+                .recommendedTechnology(recommendedTechnology)
+                .build();
+
+    }
+
+    private double calculateScore(TechnologyComparisonResponseDTO tech) {
+        double co2 = tech.getCo2Reduction();
+        double energyProduction = tech.getEnergyProduction();
+        double installationCost = tech.getInstallationCost();
+
+        // Supongamos rangos promedio para normalizar
+        double normalizedCo2 = co2 / 100; // si el máximo aproximado es 100
+        double normalizedEnergy = energyProduction / 10000; // supongamos máximo 10,000 kWh
+        double normalizedCost = installationCost / 10000; // supongamos máximo coste de instalación 10,000 €
+
+        return (normalizedCo2 * 0.3) +
+                (normalizedEnergy * 0.4) -
+                (normalizedCost * 0.3);
     }
 
     @Override
