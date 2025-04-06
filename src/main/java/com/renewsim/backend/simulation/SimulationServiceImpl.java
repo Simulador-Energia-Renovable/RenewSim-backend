@@ -1,5 +1,7 @@
 package com.renewsim.backend.simulation;
 
+import static com.renewsim.backend.simulation.util.TechnologyScoringUtil.*;
+
 import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
@@ -14,13 +16,15 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import com.renewsim.backend.simulation.dto.NormalizationStatsDTO;
+import com.renewsim.backend.simulation.dto.SimulationHistoryDTO;
+import com.renewsim.backend.simulation.dto.SimulationRequestDTO;
+import com.renewsim.backend.simulation.dto.SimulationResponseDTO;
 import com.renewsim.backend.technologyComparison.TechnologyComparison;
 import com.renewsim.backend.technologyComparison.TechnologyComparisonRepository;
 import com.renewsim.backend.technologyComparison.TechnologyComparisonResponseDTO;
 import com.renewsim.backend.user.User;
 import com.renewsim.backend.user.UserRepository;
-
-import static com.renewsim.backend.simulation.TechnologyScoringUtil.*;
 
 @Service
 @RequiredArgsConstructor
@@ -174,6 +178,13 @@ public class SimulationServiceImpl implements SimulationService {
                 .collect(Collectors.toList());
 
         return calculateNormalizationStats(techList);
+    }
+
+    @Override
+    public List<TechnologyComparisonResponseDTO> getAllTechnologies() {
+        return technologyComparisonRepository.findAll().stream()
+                .map(this::mapToDTO)
+                .collect(Collectors.toList());
     }
 
     // Helpers 🧩

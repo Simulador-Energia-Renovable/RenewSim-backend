@@ -1,4 +1,4 @@
-package com.renewsim.backend.simulation;
+package com.renewsim.backend.simulation.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

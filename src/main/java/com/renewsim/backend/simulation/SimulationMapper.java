@@ -2,6 +2,8 @@ package com.renewsim.backend.simulation;
 
 import org.springframework.stereotype.Component;
 
+import com.renewsim.backend.simulation.dto.SimulationHistoryDTO;
+
 @Component
 public class SimulationMapper {   
 

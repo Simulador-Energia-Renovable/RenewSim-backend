@@ -2,6 +2,12 @@ package com.renewsim.backend.simulation;
 
 import java.util.List;
 
+import com.renewsim.backend.simulation.dto.NormalizationStatsDTO;
+import com.renewsim.backend.simulation.dto.SimulationHistoryDTO;
+import com.renewsim.backend.simulation.dto.SimulationRequestDTO;
+import com.renewsim.backend.simulation.dto.SimulationResponseDTO;
+import com.renewsim.backend.technologyComparison.TechnologyComparisonResponseDTO;
+
 public interface SimulationService {
 
     SimulationResponseDTO simulateAndSave(SimulationRequestDTO dto);
@@ -17,5 +23,8 @@ public interface SimulationService {
     void deleteSimulationsByUser(String username);
 
     NormalizationStatsDTO getCurrentNormalizationStats();
+
+    List<TechnologyComparisonResponseDTO> getAllTechnologies();
+
 
 }

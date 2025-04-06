@@ -1,6 +1,6 @@
-package com.renewsim.backend.simulation;
+package com.renewsim.backend.simulation.util;
 
-
+import com.renewsim.backend.simulation.dto.NormalizationStatsDTO;
 import com.renewsim.backend.technologyComparison.TechnologyComparisonResponseDTO;
 
 import java.util.List;
@@ -8,7 +8,7 @@ import java.util.List;
 public class TechnologyScoringUtil {
 
     private TechnologyScoringUtil() {
-       
+        // Utility class — prevent instantiation
     }
 
     public static NormalizationStatsDTO calculateNormalizationStats(List<TechnologyComparisonResponseDTO> techList) {
@@ -41,7 +41,7 @@ public class TechnologyScoringUtil {
                (normalizedCost * 0.20);
     }
 
-    private static double normalize(double value, double min, double max) {
+    public static double normalize(double value, double min, double max) {
         if (max - min == 0) {
             return 0.0; // Avoid division by zero
         }

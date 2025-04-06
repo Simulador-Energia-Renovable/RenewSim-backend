@@ -8,6 +8,12 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import com.renewsim.backend.simulation.dto.NormalizationStatsDTO;
+import com.renewsim.backend.simulation.dto.NormalizationStatsResponseDTO;
+import com.renewsim.backend.simulation.dto.NormalizedTechnologyDTO;
+import com.renewsim.backend.simulation.dto.SimulationHistoryDTO;
+import com.renewsim.backend.simulation.dto.SimulationRequestDTO;
+import com.renewsim.backend.simulation.dto.SimulationResponseDTO;
 import com.renewsim.backend.technologyComparison.TechnologyComparisonResponseDTO;
 
 @RestController
@@ -83,6 +89,13 @@ public class SimulationController {
                 .build();
 
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/normalized-technologies")
+    @PreAuthorize("hasAuthority('SCOPE_read:simulations')")
+    public ResponseEntity<List<NormalizedTechnologyDTO>> getNormalizedTechnologies() {
+        List<NormalizedTechnologyDTO> normalizedTechnologies = simulationUseCase.getNormalizedTechnologies();
+        return ResponseEntity.ok(normalizedTechnologies);
     }
 
 }
