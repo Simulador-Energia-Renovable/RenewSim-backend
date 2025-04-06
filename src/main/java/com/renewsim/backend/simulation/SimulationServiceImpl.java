@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
+
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
@@ -28,17 +29,16 @@ public class SimulationServiceImpl implements SimulationService {
     private final TechnologyComparisonRepository technologyComparisonRepository;
     private final SimulationMapper simulationMapper;
 
-
+    // ✅ Simulate and save
     @Override
     @Transactional
     public SimulationResponseDTO simulateAndSave(SimulationRequestDTO dto) {
-        // Obtener usuario autenticado
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String username = auth.getName();
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado"));
 
-        // Validaciones de entrada
+        // Validations
         if (dto.getProjectSize() <= 0 || dto.getProjectSize() > 500) {
             throw new IllegalArgumentException("El tamaño del proyecto debe ser entre 1 y 500 m².");
         }
@@ -49,50 +49,27 @@ public class SimulationServiceImpl implements SimulationService {
             throw new IllegalArgumentException("El consumo energético debe estar entre 50 y 100000 kWh/mes.");
         }
 
-        // Buscar tecnologías por tipo de energía
         List<TechnologyComparison> selectedTechnologies = technologyComparisonRepository
                 .findByEnergyType(dto.getEnergyType());
 
-        // Mapear tecnologías a DTOs de respuesta
         List<TechnologyComparisonResponseDTO> technologyDTOs = selectedTechnologies.stream()
-                .map(tech -> new TechnologyComparisonResponseDTO(
-                        tech.getTechnologyName(),
-                        tech.getEfficiency(),
-                        tech.getInstallationCost(),
-                        tech.getMaintenanceCost(),
-                        tech.getEnvironmentalImpact(),
-                        tech.getCo2Reduction(),
-                        tech.getEnergyProduction()))
+                .map(this::mapToDTO)
                 .collect(Collectors.toList());
 
-        // Configurar parámetros según el tipo de energía
-        double irradiance = switch (dto.getEnergyType().toLowerCase()) {
-            case "solar" -> dto.getClimate().getIrradiance();
-            case "wind" -> dto.getClimate().getWind();
-            case "hydro" -> dto.getClimate().getHydrology();
-            default -> throw new IllegalArgumentException("Tipo de energía no reconocido.");
-        };
-        // Calculamos la mejor tecnología basada en impacto-beneficio
+        double irradiance = getIrradiance(dto);
+        double efficiency = getEfficiency(dto.getEnergyType());
+
         String recommendedTechnology = selectedTechnologies.stream()
-                .max(Comparator.comparingDouble(tech -> (tech.getCo2Reduction() * 0.3) +
-                        (tech.getEnergyProduction() * 0.4) -
-                        (tech.getInstallationCost() * 0.3)))
+                .max(Comparator.comparingDouble(tech -> (tech.getCo2Reduction() * 0.3)
+                        + (tech.getEnergyProduction() * 0.4)
+                        - (tech.getInstallationCost() * 0.3)))
                 .map(TechnologyComparison::getTechnologyName)
                 .orElse("No recommendation available");
 
-        double efficiency = switch (dto.getEnergyType().toLowerCase()) {
-            case "solar" -> 0.18;
-            case "wind" -> 0.40;
-            case "hydro" -> 0.50;
-            default -> throw new IllegalArgumentException("Tipo de energía no reconocido.");
-        };
-
-        // Cálculos de simulación
         double energyGenerated = irradiance * efficiency * dto.getProjectSize() * 365;
         double estimatedSavings = energyGenerated * 0.2;
         double returnOnInvestment = estimatedSavings > 0 ? dto.getBudget() / estimatedSavings : 0;
 
-        // Crear entidad de simulación
         Simulation simulation = new Simulation();
         simulation.setLocation(dto.getLocation());
         simulation.setEnergyType(dto.getEnergyType());
@@ -103,14 +80,10 @@ public class SimulationServiceImpl implements SimulationService {
         simulation.setEstimatedSavings(estimatedSavings);
         simulation.setReturnOnInvestment(returnOnInvestment);
         simulation.setUser(user);
-
-        // Asignar tecnologías a la simulación
         simulation.setTechnologies(selectedTechnologies);
 
-        // Guardar simulación en base de datos
         Simulation savedSimulation = simulationRepository.save(simulation);
 
-        // Devolver respuesta
         return new SimulationResponseDTO(
                 savedSimulation.getId(),
                 savedSimulation.getEnergyGenerated(),
@@ -118,51 +91,24 @@ public class SimulationServiceImpl implements SimulationService {
                 savedSimulation.getReturnOnInvestment(),
                 savedSimulation.getTimestamp(),
                 technologyDTOs,
-                recommendedTechnology);
+                recommendedTechnology
+        );
     }
 
+    // ✅ Calculate simulation without saving
     @Override
     @Cacheable(value = "simulations", key = "#dto.hashCode()")
     public SimulationResponseDTO calculateSimulation(SimulationRequestDTO dto) {
-        double irradiance = 0;
-        double efficiency = 0;
+        double irradiance = getIrradiance(dto);
+        double efficiency = getEfficiency(dto.getEnergyType());
 
         List<TechnologyComparisonResponseDTO> technologyDTOs = technologyComparisonRepository.findAll().stream()
-                .map(tech -> new TechnologyComparisonResponseDTO(
-                        tech.getTechnologyName(),
-                        tech.getEfficiency(),
-                        tech.getInstallationCost(),
-                        tech.getMaintenanceCost(),
-                        tech.getEnvironmentalImpact(),
-                        tech.getCo2Reduction(),
-                        tech.getEnergyProduction()))
+                .map(this::mapToDTO)
                 .collect(Collectors.toList());
 
-        switch (dto.getEnergyType().toLowerCase()) {
-            case "solar" -> {
-                irradiance = dto.getClimate().getIrradiance();
-                if (irradiance <= 0 || irradiance > 2000)
-                    throw new IllegalArgumentException("Irradiancia solar inválida.");
-                efficiency = 0.18;
-            }
-            case "wind" -> {
-                irradiance = dto.getClimate().getWind();
-                if (irradiance <= 0 || irradiance > 20)
-                    throw new IllegalArgumentException("Velocidad del viento inválida.");
-                efficiency = 0.40;
-            }
-            case "hydro" -> {
-                irradiance = dto.getClimate().getHydrology();
-                if (irradiance <= 0 || irradiance > 100)
-                    throw new IllegalArgumentException("Índice hidrológico inválido.");
-                efficiency = 0.50;
-            }
-            default -> throw new IllegalArgumentException("Tipo de energía no reconocido.");
-        }
-
         double energyGenerated = irradiance * efficiency * dto.getProjectSize() * 365;
-        double ahorro = energyGenerated * 0.2;
-        double roi = ahorro > 0 ? dto.getBudget() / ahorro : 0;
+        double estimatedSavings = energyGenerated * 0.2;
+        double returnOnInvestment = estimatedSavings > 0 ? dto.getBudget() / estimatedSavings : 0;
 
         String recommendedTechnology = technologyDTOs.isEmpty()
                 ? "No hay tecnologías disponibles para recomendar."
@@ -175,30 +121,15 @@ public class SimulationServiceImpl implements SimulationService {
         return SimulationResponseDTO.builder()
                 .simulationId(null)
                 .energyGenerated(energyGenerated)
-                .estimatedSavings(ahorro)
-                .returnOnInvestment(roi)
+                .estimatedSavings(estimatedSavings)
+                .returnOnInvestment(returnOnInvestment)
                 .timestamp(LocalDateTime.now())
                 .technologies(technologyDTOs)
                 .recommendedTechnology(recommendedTechnology)
                 .build();
-
     }
 
-    private double calculateScore(TechnologyComparisonResponseDTO tech) {
-        double co2 = tech.getCo2Reduction();
-        double energyProduction = tech.getEnergyProduction();
-        double installationCost = tech.getInstallationCost();
-
-        // Supongamos rangos promedio para normalizar
-        double normalizedCo2 = co2 / 100; // si el máximo aproximado es 100
-        double normalizedEnergy = energyProduction / 10000; // supongamos máximo 10,000 kWh
-        double normalizedCost = installationCost / 10000; // supongamos máximo coste de instalación 10,000 €
-
-        return (normalizedCo2 * 0.3) +
-                (normalizedEnergy * 0.4) -
-                (normalizedCost * 0.3);
-    }
-
+    // ✅ Get user simulations
     @Override
     public List<Simulation> getUserSimulations(String username) {
         User user = userRepository.findByUsername(username)
@@ -206,23 +137,77 @@ public class SimulationServiceImpl implements SimulationService {
         return simulationRepository.findAllByUser(user);
     }
 
+    // ✅ Get single simulation by ID
     @Override
     public Simulation getSimulationById(Long simulationId) {
         return simulationRepository.findById(simulationId)
                 .orElseThrow(() -> new IllegalArgumentException("Simulación no encontrada"));
     }
 
+    // ✅ Get simulation history DTOs
     @Override
-public List<SimulationHistoryDTO> getUserSimulationHistoryDTOs(String username) {
-    User user = userRepository.findByUsername(username)
-            .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado"));
+    public List<SimulationHistoryDTO> getUserSimulationHistoryDTOs(String username) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado"));
 
-    return simulationRepository.findAllByUser(user).stream()
-            .map(simulationMapper::toHistoryDTO)
-            .collect(Collectors.toList());
-}
+        return simulationRepository.findAllByUser(user).stream()
+                .map(simulationMapper::toHistoryDTO)
+                .collect(Collectors.toList());
+    }
 
-    
+    // ✅ Delete all simulations of a user
+    @Override
+    @Transactional
+    public void deleteSimulationsByUser(String username) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado"));
 
+        simulationRepository.deleteByUser(user);
+    }
 
+    // Helpers 🧩
+
+    private TechnologyComparisonResponseDTO mapToDTO(TechnologyComparison tech) {
+        return new TechnologyComparisonResponseDTO(
+                tech.getTechnologyName(),
+                tech.getEfficiency(),
+                tech.getInstallationCost(),
+                tech.getMaintenanceCost(),
+                tech.getEnvironmentalImpact(),
+                tech.getCo2Reduction(),
+                tech.getEnergyProduction()
+        );
+    }
+
+    private double getIrradiance(SimulationRequestDTO dto) {
+        return switch (dto.getEnergyType().toLowerCase()) {
+            case "solar" -> dto.getClimate().getIrradiance();
+            case "wind" -> dto.getClimate().getWind();
+            case "hydro" -> dto.getClimate().getHydrology();
+            default -> throw new IllegalArgumentException("Tipo de energía no reconocido.");
+        };
+    }
+
+    private double getEfficiency(String energyType) {
+        return switch (energyType.toLowerCase()) {
+            case "solar" -> 0.18;
+            case "wind" -> 0.40;
+            case "hydro" -> 0.50;
+            default -> throw new IllegalArgumentException("Tipo de energía no reconocido.");
+        };
+    }
+
+    private double calculateScore(TechnologyComparisonResponseDTO tech) {
+        double co2 = tech.getCo2Reduction();
+        double energyProduction = tech.getEnergyProduction();
+        double installationCost = tech.getInstallationCost();
+
+        double normalizedCo2 = co2 / 100;
+        double normalizedEnergy = energyProduction / 10000;
+        double normalizedCost = installationCost / 10000;
+
+        return (normalizedCo2 * 0.3) +
+                (normalizedEnergy * 0.4) -
+                (normalizedCost * 0.3);
+    }
 }
