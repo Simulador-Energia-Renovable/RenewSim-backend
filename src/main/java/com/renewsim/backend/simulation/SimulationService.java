@@ -15,4 +15,7 @@ public interface SimulationService {
     List<SimulationHistoryDTO> getUserSimulationHistoryDTOs(String username);
 
     void deleteSimulationsByUser(String username);
+
+    NormalizationStatsDTO getCurrentNormalizationStats();
+
 }

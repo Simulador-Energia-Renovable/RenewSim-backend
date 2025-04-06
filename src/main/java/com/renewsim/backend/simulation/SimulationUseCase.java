@@ -55,5 +55,10 @@ public class SimulationUseCase {
     public void deleteUserSimulations(String username) {
         simulationService.deleteSimulationsByUser(username);
     }
+
+    public NormalizationStatsDTO getCurrentNormalizationStats() {
+        return simulationService.getCurrentNormalizationStats();
+    }
+    
 }
 

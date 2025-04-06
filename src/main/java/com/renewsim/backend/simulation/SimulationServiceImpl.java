@@ -20,6 +20,8 @@ import com.renewsim.backend.technologyComparison.TechnologyComparisonResponseDTO
 import com.renewsim.backend.user.User;
 import com.renewsim.backend.user.UserRepository;
 
+import static com.renewsim.backend.simulation.TechnologyScoringUtil.*;
+
 @Service
 @RequiredArgsConstructor
 public class SimulationServiceImpl implements SimulationService {
@@ -56,15 +58,15 @@ public class SimulationServiceImpl implements SimulationService {
                 .map(this::mapToDTO)
                 .collect(Collectors.toList());
 
+        var stats = calculateNormalizationStats(technologyDTOs);
+
+        String recommendedTechnology = technologyDTOs.stream()
+                .max(Comparator.comparingDouble(tech -> calculateScoreDynamic(tech, stats)))
+                .map(TechnologyComparisonResponseDTO::getTechnologyName)
+                .orElse("No recommendation available");
+
         double irradiance = getIrradiance(dto);
         double efficiency = getEfficiency(dto.getEnergyType());
-
-        String recommendedTechnology = selectedTechnologies.stream()
-                .max(Comparator.comparingDouble(tech -> (tech.getCo2Reduction() * 0.3)
-                        + (tech.getEnergyProduction() * 0.4)
-                        - (tech.getInstallationCost() * 0.3)))
-                .map(TechnologyComparison::getTechnologyName)
-                .orElse("No recommendation available");
 
         double energyGenerated = irradiance * efficiency * dto.getProjectSize() * 365;
         double estimatedSavings = energyGenerated * 0.2;
@@ -91,11 +93,10 @@ public class SimulationServiceImpl implements SimulationService {
                 savedSimulation.getReturnOnInvestment(),
                 savedSimulation.getTimestamp(),
                 technologyDTOs,
-                recommendedTechnology
-        );
+                recommendedTechnology);
     }
 
-    // ✅ Calculate simulation without saving
+    // Calculate simulation without saving
     @Override
     @Cacheable(value = "simulations", key = "#dto.hashCode()")
     public SimulationResponseDTO calculateSimulation(SimulationRequestDTO dto) {
@@ -106,17 +107,18 @@ public class SimulationServiceImpl implements SimulationService {
                 .map(this::mapToDTO)
                 .collect(Collectors.toList());
 
-        double energyGenerated = irradiance * efficiency * dto.getProjectSize() * 365;
-        double estimatedSavings = energyGenerated * 0.2;
-        double returnOnInvestment = estimatedSavings > 0 ? dto.getBudget() / estimatedSavings : 0;
+        var stats = calculateNormalizationStats(technologyDTOs);
 
         String recommendedTechnology = technologyDTOs.isEmpty()
                 ? "No hay tecnologías disponibles para recomendar."
                 : technologyDTOs.stream()
-                        .sorted((t1, t2) -> Double.compare(calculateScore(t2), calculateScore(t1)))
+                        .max(Comparator.comparingDouble(tech -> calculateScoreDynamic(tech, stats)))
                         .map(TechnologyComparisonResponseDTO::getTechnologyName)
-                        .findFirst()
                         .orElse("No se pudo determinar una recomendación.");
+
+        double energyGenerated = irradiance * efficiency * dto.getProjectSize() * 365;
+        double estimatedSavings = energyGenerated * 0.2;
+        double returnOnInvestment = estimatedSavings > 0 ? dto.getBudget() / estimatedSavings : 0;
 
         return SimulationResponseDTO.builder()
                 .simulationId(null)
@@ -129,7 +131,7 @@ public class SimulationServiceImpl implements SimulationService {
                 .build();
     }
 
-    // ✅ Get user simulations
+    // Get user simulations
     @Override
     public List<Simulation> getUserSimulations(String username) {
         User user = userRepository.findByUsername(username)
@@ -137,14 +139,14 @@ public class SimulationServiceImpl implements SimulationService {
         return simulationRepository.findAllByUser(user);
     }
 
-    // ✅ Get single simulation by ID
+    // Get single simulation by ID
     @Override
     public Simulation getSimulationById(Long simulationId) {
         return simulationRepository.findById(simulationId)
                 .orElseThrow(() -> new IllegalArgumentException("Simulación no encontrada"));
     }
 
-    // ✅ Get simulation history DTOs
+    // Get simulation history DTOs
     @Override
     public List<SimulationHistoryDTO> getUserSimulationHistoryDTOs(String username) {
         User user = userRepository.findByUsername(username)
@@ -155,7 +157,7 @@ public class SimulationServiceImpl implements SimulationService {
                 .collect(Collectors.toList());
     }
 
-    // ✅ Delete all simulations of a user
+    // Delete all simulations of a user
     @Override
     @Transactional
     public void deleteSimulationsByUser(String username) {
@@ -163,6 +165,15 @@ public class SimulationServiceImpl implements SimulationService {
                 .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado"));
 
         simulationRepository.deleteByUser(user);
+    }
+
+    @Override
+    public NormalizationStatsDTO getCurrentNormalizationStats() {
+        List<TechnologyComparisonResponseDTO> techList = technologyComparisonRepository.findAll().stream()
+                .map(this::mapToDTO)
+                .collect(Collectors.toList());
+
+        return calculateNormalizationStats(techList);
     }
 
     // Helpers 🧩
@@ -175,8 +186,7 @@ public class SimulationServiceImpl implements SimulationService {
                 tech.getMaintenanceCost(),
                 tech.getEnvironmentalImpact(),
                 tech.getCo2Reduction(),
-                tech.getEnergyProduction()
-        );
+                tech.getEnergyProduction());
     }
 
     private double getIrradiance(SimulationRequestDTO dto) {
@@ -195,19 +205,5 @@ public class SimulationServiceImpl implements SimulationService {
             case "hydro" -> 0.50;
             default -> throw new IllegalArgumentException("Tipo de energía no reconocido.");
         };
-    }
-
-    private double calculateScore(TechnologyComparisonResponseDTO tech) {
-        double co2 = tech.getCo2Reduction();
-        double energyProduction = tech.getEnergyProduction();
-        double installationCost = tech.getInstallationCost();
-
-        double normalizedCo2 = co2 / 100;
-        double normalizedEnergy = energyProduction / 10000;
-        double normalizedCost = installationCost / 10000;
-
-        return (normalizedCo2 * 0.3) +
-                (normalizedEnergy * 0.4) -
-                (normalizedCost * 0.3);
     }
 }

@@ -21,7 +21,7 @@ public class SimulationController {
         this.simulationUseCase = simulationUseCase;
     }
 
-    //Simulate new project
+    // Simulate new project
     @PostMapping
     @PreAuthorize("hasAuthority('SCOPE_write:simulations')")
     public ResponseEntity<SimulationResponseDTO> simulate(@RequestBody SimulationRequestDTO dto) {
@@ -30,7 +30,7 @@ public class SimulationController {
         return ResponseEntity.ok(result);
     }
 
-    //Get user simulations history
+    // Get user simulations history
     @GetMapping("/user")
     @PreAuthorize("hasAuthority('SCOPE_read:simulations')")
     public ResponseEntity<List<SimulationHistoryDTO>> getUserSimulations() {
@@ -39,7 +39,7 @@ public class SimulationController {
         return ResponseEntity.ok(simulationHistoryList);
     }
 
-    //Get global simulation history (if needed, same as user-specific for now)
+    // Get global simulation history (if needed, same as user-specific for now)
     @GetMapping("/history")
     @PreAuthorize("hasAuthority('SCOPE_read:simulations')")
     public ResponseEntity<List<SimulationHistoryDTO>> getSimulationHistory() {
@@ -52,12 +52,12 @@ public class SimulationController {
     @PreAuthorize("hasAuthority('SCOPE_read:simulations')")
     public ResponseEntity<List<TechnologyComparisonResponseDTO>> getTechnologiesForSimulation(
             @PathVariable Long simulationId) {
-        List<TechnologyComparisonResponseDTO> technologies =
-                simulationUseCase.getTechnologiesForSimulation(simulationId);
+        List<TechnologyComparisonResponseDTO> technologies = simulationUseCase
+                .getTechnologiesForSimulation(simulationId);
         return ResponseEntity.ok(technologies);
     }
 
-    //Delete all simulations for current user
+    // Delete all simulations for current user
     @DeleteMapping("/user")
     @PreAuthorize("hasAuthority('SCOPE_write:simulations')")
     public ResponseEntity<Map<String, String>> deleteUserSimulations() {
@@ -65,5 +65,24 @@ public class SimulationController {
         simulationUseCase.deleteUserSimulations(username);
         return ResponseEntity.ok(Map.of("message", "User simulations deleted successfully"));
     }
-}
 
+    @GetMapping("/normalization-stats")
+    @PreAuthorize("hasAuthority('SCOPE_read:simulations')")
+    public ResponseEntity<NormalizationStatsResponseDTO> getNormalizationStats() {
+        NormalizationStatsDTO stats = simulationUseCase.getCurrentNormalizationStats();
+
+        NormalizationStatsResponseDTO response = NormalizationStatsResponseDTO.builder()
+                .minCo2(stats.getMinCo2())
+                .maxCo2(stats.getMaxCo2())
+                .minEnergyProduction(stats.getMinEnergy())
+                .maxEnergyProduction(stats.getMaxEnergy())
+                .minInstallationCost(stats.getMinCost())
+                .maxInstallationCost(stats.getMaxCost())
+                .minEfficiency(stats.getMinEfficiency())
+                .maxEfficiency(stats.getMaxEfficiency())
+                .build();
+
+        return ResponseEntity.ok(response);
+    }
+
+}
