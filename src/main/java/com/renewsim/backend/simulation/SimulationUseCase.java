@@ -24,14 +24,13 @@ public class SimulationUseCase {
     public SimulationUseCase(
             SimulationService simulationService,
             SimulationMapper simulationMapper,
-            TechnologyComparisonMapper technologyComparisonMapper
-    ) {
+            TechnologyComparisonMapper technologyComparisonMapper) {
         this.simulationService = simulationService;
         this.simulationMapper = simulationMapper;
         this.technologyComparisonMapper = technologyComparisonMapper;
     }
 
-    //Simulate and save new simulation
+    // Simulate and save new simulation
     public SimulationResponseDTO simulateAndSave(SimulationRequestDTO dto, String username) {
         return simulationService.simulateAndSave(dto);
     }
@@ -41,14 +40,14 @@ public class SimulationUseCase {
         return simulationService.getUserSimulations(username);
     }
 
-    //Get user simulation history (DTO) — Using mapper
+    // Get user simulation history (DTO) — Using mapper
     public List<SimulationHistoryDTO> getUserSimulationHistoryDTOs(String username) {
         return simulationService.getUserSimulations(username).stream()
                 .map(simulationMapper::toHistoryDTO)
                 .collect(Collectors.toList());
     }
 
-    //Get technologies associated with a specific simulation — Using mapper
+    // Get technologies associated with a specific simulation — Using mapper
     public List<TechnologyComparisonResponseDTO> getTechnologiesForSimulation(Long simulationId) {
         Simulation simulation = simulationService.getSimulationById(simulationId);
 
@@ -67,27 +66,34 @@ public class SimulationUseCase {
     }
 
     public List<NormalizedTechnologyDTO> getNormalizedTechnologies() {
-    List<TechnologyComparisonResponseDTO> techList = simulationService.getAllTechnologies();
+        List<TechnologyComparisonResponseDTO> techList = simulationService.getAllTechnologies();
 
-    NormalizationStatsDTO stats = TechnologyScoringUtil.calculateNormalizationStats(techList);
+        NormalizationStatsDTO stats = TechnologyScoringUtil.calculateNormalizationStats(techList);
 
-    return techList.stream().map(tech -> {
-        double normalizedCo2 = TechnologyScoringUtil.normalize(tech.getCo2Reduction(), stats.getMinCo2(), stats.getMaxCo2());
-        double normalizedEnergy = TechnologyScoringUtil.normalize(tech.getEnergyProduction(), stats.getMinEnergy(), stats.getMaxEnergy());
-        double normalizedCost = TechnologyScoringUtil.normalize(tech.getInstallationCost(), stats.getMinCost(), stats.getMaxCost());
-        double normalizedEff = TechnologyScoringUtil.normalize(tech.getEfficiency(), stats.getMinEfficiency(), stats.getMaxEfficiency());
-        double score = TechnologyScoringUtil.calculateScoreDynamic(tech, stats);
+        return techList.stream().map(tech -> {
+            double normalizedCo2 = TechnologyScoringUtil.normalize(tech.getCo2Reduction(), stats.getMinCo2(),
+                    stats.getMaxCo2());
+            double normalizedEnergy = TechnologyScoringUtil.normalize(tech.getEnergyProduction(), stats.getMinEnergy(),
+                    stats.getMaxEnergy());
+            double normalizedCost = TechnologyScoringUtil.normalize(tech.getInstallationCost(), stats.getMinCost(),
+                    stats.getMaxCost());
+            double normalizedEff = TechnologyScoringUtil.normalize(tech.getEfficiency(), stats.getMinEfficiency(),
+                    stats.getMaxEfficiency());
+            double score = TechnologyScoringUtil.calculateScoreDynamic(tech, stats);
 
-        return NormalizedTechnologyDTO.builder()
-                .technologyName(tech.getTechnologyName())
-                .normalizedCo2Reduction(normalizedCo2)
-                .normalizedEnergyProduction(normalizedEnergy)
-                .normalizedInstallationCost(normalizedCost)
-                .normalizedEfficiency(normalizedEff)
-                .score(score)
-                .build();
-    }).collect(Collectors.toList());
+            return NormalizedTechnologyDTO.builder()
+                    .technologyName(tech.getTechnologyName())
+                    .normalizedCo2Reduction(normalizedCo2)
+                    .normalizedEnergyProduction(normalizedEnergy)
+                    .normalizedInstallationCost(normalizedCost)
+                    .normalizedEfficiency(normalizedEff)
+                    .score(score)
+                    .build();
+        }).collect(Collectors.toList());
+    }
+
+    public List<TechnologyComparisonResponseDTO> getAllTechnologies() {
+        return simulationService.getAllTechnologies();
+    }
+
 }
-    
-}
-

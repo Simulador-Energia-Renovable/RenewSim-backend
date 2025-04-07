@@ -98,4 +98,12 @@ public class SimulationController {
         return ResponseEntity.ok(normalizedTechnologies);
     }
 
+    // Obtener todas las tecnologías disponibles para comparación global
+    @GetMapping("/technologies/global")
+    @PreAuthorize("hasAuthority('SCOPE_read:simulations')")
+    public ResponseEntity<List<TechnologyComparisonResponseDTO>> getAllTechnologies() {
+        List<TechnologyComparisonResponseDTO> tecnologies = simulationUseCase.getAllTechnologies();
+        return ResponseEntity.ok(tecnologies);
+    }
+
 }

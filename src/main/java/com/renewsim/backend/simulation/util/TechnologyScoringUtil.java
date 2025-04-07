@@ -7,8 +7,7 @@ import java.util.List;
 
 public class TechnologyScoringUtil {
 
-    private TechnologyScoringUtil() {
-        // Utility class — prevent instantiation
+    private TechnologyScoringUtil() {      
     }
 
     public static NormalizationStatsDTO calculateNormalizationStats(List<TechnologyComparisonResponseDTO> techList) {
@@ -43,7 +42,7 @@ public class TechnologyScoringUtil {
 
     public static double normalize(double value, double min, double max) {
         if (max - min == 0) {
-            return 0.0; // Avoid division by zero
+            return 0.0;
         }
         return (value - min) / (max - min);
     }

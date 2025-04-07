@@ -87,6 +87,7 @@ public class SimulationServiceImpl implements SimulationService {
         simulation.setReturnOnInvestment(returnOnInvestment);
         simulation.setUser(user);
         simulation.setTechnologies(selectedTechnologies);
+        
 
         Simulation savedSimulation = simulationRepository.save(simulation);
 
