@@ -57,6 +57,14 @@ public class ProfileServiceImpl implements ProfileService {
 
         return ProfileMapper.toDTO(updatedProfile);
     }
+
+    @Override
+    public void deleteProfile(Long userId) {
+        Profile profile = profileRepository.findByUserId(userId);
+        if (profile == null) {
+            throw new RuntimeException("Profile not found for user id: " + userId);
+        }
+        profileRepository.delete(profile);
+    }
+
 }
-
-

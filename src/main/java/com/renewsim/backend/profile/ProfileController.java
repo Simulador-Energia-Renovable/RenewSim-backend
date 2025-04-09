@@ -22,6 +22,7 @@ public class ProfileController {
     private final CreateProfileUseCase createProfileUseCase;
     private final GetProfileUseCase getProfileUseCase;
     private final UpdateProfileUseCase updateProfileUseCase;
+    private final ProfileService profileService;
 
    @GetMapping("/me")
 public ResponseEntity<ProfileDTO> getProfile() {
@@ -43,5 +44,13 @@ public ResponseEntity<ProfileDTO> updateProfile(@RequestBody UpdateProfileReques
     ProfileDTO updatedProfile = updateProfileUseCase.execute(user.getId(), request);
     return ResponseEntity.ok(updatedProfile);
 }
+
+@DeleteMapping
+public ResponseEntity<Void> deleteProfile() {
+    User user = getCurrentUser();
+    profileService.deleteProfile(user.getId());
+    return ResponseEntity.noContent().build();
+}
+
 }
 
