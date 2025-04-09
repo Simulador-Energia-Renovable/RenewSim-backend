@@ -1,6 +1,5 @@
 package com.renewsim.backend.technologyComparison;
 
-import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -8,6 +7,8 @@ import org.springframework.web.bind.annotation.*;
 
 import com.renewsim.backend.simulation.Simulation;
 import com.renewsim.backend.simulation.SimulationService;
+
+import jakarta.validation.Valid;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -18,12 +19,14 @@ public class TechnologyComparisonController {
 
     private final TechnologyComparisonService service;
     private final SimulationService simulationService;
-
+    private final TechnologyComparisonMapper mapper;
 
     @Autowired
-    public TechnologyComparisonController(TechnologyComparisonService service, SimulationService simulationService) {
+    public TechnologyComparisonController(TechnologyComparisonService service, SimulationService simulationService,
+            TechnologyComparisonMapper mapper) {
         this.service = service;
         this.simulationService = simulationService;
+        this.mapper = mapper;
     }
 
     // Obtener todas las tecnologías
@@ -31,7 +34,7 @@ public class TechnologyComparisonController {
     public ResponseEntity<List<TechnologyComparisonResponseDTO>> getAllTechnologies() {
         List<TechnologyComparisonResponseDTO> responseList = service.getAllTechnologies()
                 .stream()
-                .map(this::mapToResponseDTO)
+                .map(mapper::toResponseDTO)
                 .collect(Collectors.toList());
         return ResponseEntity.ok(responseList);
     }
@@ -40,7 +43,7 @@ public class TechnologyComparisonController {
     @GetMapping("/{id}")
     public ResponseEntity<TechnologyComparisonResponseDTO> getTechnologyById(@PathVariable Long id) {
         return service.getTechnologyById(id)
-                .map(this::mapToResponseDTO)
+                .map(mapper::toResponseDTO)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
@@ -50,9 +53,9 @@ public class TechnologyComparisonController {
     public ResponseEntity<TechnologyComparisonResponseDTO> addTechnology(
             @Valid @RequestBody TechnologyComparisonRequestDTO requestDTO) {
         try {
-            TechnologyComparison technology = mapToEntity(requestDTO);
+            TechnologyComparison technology = mapper.toEntity(requestDTO);
             TechnologyComparison savedTechnology = service.addTechnology(technology);
-            return ResponseEntity.ok(mapToResponseDTO(savedTechnology));
+            return ResponseEntity.ok(mapper.toResponseDTO(savedTechnology));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();
         }
@@ -69,49 +72,16 @@ public class TechnologyComparisonController {
         }
     }
 
-    // Mapper de Entity a ResponseDTO
-    private TechnologyComparisonResponseDTO mapToResponseDTO(TechnologyComparison entity) {
-        return new TechnologyComparisonResponseDTO(
-                entity.getTechnologyName(),
-                entity.getEfficiency(),
-                entity.getInstallationCost(),
-                entity.getMaintenanceCost(),
-                entity.getEnvironmentalImpact(),
-                entity.getCo2Reduction(),
-                entity.getEnergyProduction());
-    }
-
-    // Mapper de RequestDTO a Entity
-    private TechnologyComparison mapToEntity(TechnologyComparisonRequestDTO dto) {
-        return new TechnologyComparison(
-                dto.getTechnologyName(),
-                dto.getEfficiency(),
-                dto.getInstallationCost(),
-                dto.getMaintenanceCost(),
-                dto.getEnvironmentalImpact(),
-                dto.getCo2Reduction(),
-                dto.getEnergyProduction(),
-                dto.getEnergyType());
-               
-    }
-
+    // Obtener tecnologías asociadas a una simulación
     @GetMapping("/simulation/{simulationId}")
     @PreAuthorize("hasAuthority('SCOPE_read:simulations')")
     public ResponseEntity<List<TechnologyComparisonResponseDTO>> getTechnologiesBySimulation(
             @PathVariable Long simulationId) {
         Simulation simulation = simulationService.getSimulationById(simulationId);
         List<TechnologyComparisonResponseDTO> dtos = simulation.getTechnologies().stream()
-                .map(tech -> new TechnologyComparisonResponseDTO(
-                        tech.getTechnologyName(),
-                        tech.getEfficiency(),
-                        tech.getInstallationCost(),
-                        tech.getMaintenanceCost(),
-                        tech.getEnvironmentalImpact(),
-                        tech.getCo2Reduction(),
-                        tech.getEnergyProduction()))
-                .toList();
+                .map(mapper::toResponseDTO)
+                .collect(Collectors.toList());
 
         return ResponseEntity.ok(dtos);
     }
-
 }
