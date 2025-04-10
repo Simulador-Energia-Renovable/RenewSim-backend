@@ -1,7 +1,8 @@
-package com.renewsim.backend.security;
+package com.renewsim.backend.auth;
 
 import com.renewsim.backend.config.SpringContext;
 import com.renewsim.backend.exception.UnauthorizedException;
+import com.renewsim.backend.security.UserDetailsImpl;
 import com.renewsim.backend.user.User;
 import com.renewsim.backend.user.UserRepository;
 import org.slf4j.Logger;
