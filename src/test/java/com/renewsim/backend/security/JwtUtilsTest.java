@@ -5,6 +5,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.Set;
 
@@ -14,7 +15,7 @@ import static org.mockito.Mockito.*;
 @DisplayName("JwtUtils Tests")
 class JwtUtilsTest {
 
-    private static final String SECRET_KEY = "VGhpcyBpcyBhIHZlcnkgc2VjdXJlIHNlY3JldCBmb3IgdGVzdGluZw==";
+    private static final String SECRET_KEY = "VGhpcyBpcyBhIHZlcnkgc2VjdXJlIHNlY3JldCB0ZXN0aW5nIHRva2VuIQ==";
     private static final long EXPIRATION_TIME = 3600000;
     private static final String TEST_USERNAME = "testuser";
     private static final Set<String> TEST_ROLES = Set.of("USER", "ADMIN");
@@ -24,7 +25,10 @@ class JwtUtilsTest {
 
     @BeforeEach
     void setUp() {
-        jwtUtils = new JwtUtils(SECRET_KEY, EXPIRATION_TIME);
+         jwtUtils = new JwtUtils(); 
+        ReflectionTestUtils.setField(jwtUtils, "secret", SECRET_KEY);
+        ReflectionTestUtils.setField(jwtUtils, "expiration", EXPIRATION_TIME);
+        ReflectionTestUtils.invokeMethod(jwtUtils, "init");
     }
 
     @Test
