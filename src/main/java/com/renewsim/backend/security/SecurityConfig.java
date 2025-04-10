@@ -23,7 +23,7 @@ import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
 @RequiredArgsConstructor
-public final class SecurityConfig {
+public  class SecurityConfig {
 
     private final JwtUtils jwtUtils;
 
