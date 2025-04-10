@@ -32,6 +32,7 @@ public class AuthService {
         this.passwordEncoder = passwordEncoder;
         this.jwtUtils = jwtUtils;
         this.roleService = roleService;
+       
     }
 
     public Optional<User> findByUsername(String username) {
@@ -46,7 +47,7 @@ public class AuthService {
         Role defaultRole = roleService.getRoleByName(RoleName.USER);
         Set<Role> roles = Set.of(defaultRole);
         User user = new User(username, passwordEncoder.encode(password), roles);
-        userRepository.save(user);
+        userRepository.save(user);       
 
         Set<String> roleNames = Set.of(defaultRole.getName().name());
         Set<String> scopes = getScopesFromRole(defaultRole.getName());
@@ -75,11 +76,11 @@ public class AuthService {
     private Set<String> getScopesFromRole(RoleName roleName) {
         return switch (roleName) {
             case USER -> Set.of("read:simulations", "write:simulations", "compare:simulations");
-            case ADVANCED_USER -> Set.of("read:simulations", "write:simulations", "compare:simulations", "export:simulations");
+            case ADVANCED_USER ->
+                Set.of("read:simulations", "write:simulations", "compare:simulations", "export:simulations");
             case ADMIN -> Set.of("read:simulations", "write:simulations", "compare:simulations",
-                                 "export:simulations", "delete:simulations", "read:users", "manage:users");
+                    "export:simulations", "delete:simulations", "read:users", "manage:users");
         };
     }
-    
 
 }
