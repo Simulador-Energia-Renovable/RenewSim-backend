@@ -3,6 +3,8 @@ package com.renewsim.backend.user;
 import java.util.List;
 
 import com.renewsim.backend.role.RoleDTO;
+import com.renewsim.backend.user.dto.UserRequestDTO;
+import com.renewsim.backend.user.dto.UserResponseDTO;
 
 
 public interface UserService {
