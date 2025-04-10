@@ -77,6 +77,32 @@ class AuthUtilsTest {
 
                 assertNotNull(result);
                 assertEquals(TEST_USERNAME, result.getUsername());
+                verify(mockRepo).findByUsername(TEST_USERNAME);
+
+            }
+        }
+
+        @Test
+        @DisplayName("should throw UnauthorizedException when JWT user is not found")
+        void shouldThrowWhenJwtUserNotFound() {
+            Jwt jwt = mock(Jwt.class);
+            when(jwt.getClaimAsString("sub")).thenReturn(TEST_USERNAME);
+    
+            Authentication auth = new UsernamePasswordAuthenticationToken(jwt, null, Set.of());
+            SecurityContextHolder.getContext().setAuthentication(auth);
+    
+            try (MockedStatic<SpringContext> springContextMock = mockStatic(SpringContext.class)) {
+                UserRepository mockRepo = mock(UserRepository.class);
+                springContextMock.when(() -> SpringContext.getBean(UserRepository.class)).thenReturn(mockRepo);
+                when(mockRepo.findByUsername(TEST_USERNAME)).thenReturn(Optional.empty());
+    
+                UnauthorizedException exception = assertThrows(
+                        UnauthorizedException.class,
+                        AuthUtils::getCurrentUser
+                );
+    
+                assertEquals("User not found", exception.getMessage());
+                verify(mockRepo).findByUsername(TEST_USERNAME);
             }
         }
 
