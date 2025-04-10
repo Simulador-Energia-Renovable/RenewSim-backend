@@ -7,11 +7,13 @@ import com.renewsim.backend.role.RoleName;
 import com.renewsim.backend.security.UserDetailsImpl;
 import com.renewsim.backend.user.User;
 import com.renewsim.backend.user.UserRepository;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 
 import java.lang.reflect.InvocationTargetException;
@@ -27,123 +29,101 @@ class AuthUtilsTest {
     private static final String TEST_USERNAME = "testuser";
 
     @AfterEach
-    void tearDown() {
+    void clearSecurityContext() {
         SecurityContextHolder.clearContext();
     }
 
-    @Nested
-    @DisplayName("getCurrentUser()")
-    class GetCurrentUserTests {
+    @Test
+    @DisplayName("should return User from UserDetailsImpl when authenticated")
+    void shouldReturnUserFromUserDetails() {
 
-        @Test
-        @DisplayName("should return User from UserDetailsImpl when authenticated")
-        void shouldReturnUserFromUserDetails() {
-            Role mockRole = new Role();
-            mockRole.setName(RoleName.USER);
+        User user = createTestUserWithRole(RoleName.USER);
+        UserDetailsImpl userDetails = new UserDetailsImpl(user);
+        authenticate(userDetails);
 
-            User mockUser = new User();
-            mockUser.setUsername(TEST_USERNAME);
-            mockUser.setRoles(Set.of(mockRole));
+        User result = AuthUtils.getCurrentUser();
 
-            UserDetailsImpl userDetails = new UserDetailsImpl(mockUser);
-            var auth = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+        assertNotNull(result);
+        assertEquals(TEST_USERNAME, result.getUsername());
+    }
 
-            SecurityContextHolder.getContext().setAuthentication(auth);
+    @Test
+    @DisplayName("should return User from JWT principal when authenticated")
+    void shouldReturnUserFromJwt() {
+
+        Jwt jwt = mock(Jwt.class);
+        when(jwt.getClaimAsString("sub")).thenReturn(TEST_USERNAME);
+        authenticate(jwt);
+
+        try (MockedStatic<SpringContext> springContextMock = mockStatic(SpringContext.class)) {
+            UserRepository mockRepo = mock(UserRepository.class);
+            User user = createTestUser();
+            when(mockRepo.findByUsername(TEST_USERNAME)).thenReturn(Optional.of(user));
+
+            springContextMock.when(() -> SpringContext.getBean(UserRepository.class)).thenReturn(mockRepo);
 
             User result = AuthUtils.getCurrentUser();
 
             assertNotNull(result);
             assertEquals(TEST_USERNAME, result.getUsername());
+            verify(mockRepo).findByUsername(TEST_USERNAME);
         }
+    }
 
-        @Test
-        @DisplayName("should return User from JWT principal when authenticated")
-        void shouldReturnUserFromJwt() {
-            Jwt jwt = mock(Jwt.class);
-            when(jwt.getClaimAsString("sub")).thenReturn(TEST_USERNAME);
+    @Test
+    @DisplayName("should throw UnauthorizedException when JWT user is not found")
+    void shouldThrowWhenJwtUserNotFound() {
+        Jwt jwt = mock(Jwt.class);
+        when(jwt.getClaimAsString("sub")).thenReturn(TEST_USERNAME);
+        authenticate(jwt);
 
-            User mockUser = new User();
-            mockUser.setUsername(TEST_USERNAME);
-
-            Authentication auth = new UsernamePasswordAuthenticationToken(jwt, null, Set.of());
-            SecurityContextHolder.getContext().setAuthentication(auth);
-
-            try (MockedStatic<SpringContext> springContextMock = mockStatic(SpringContext.class)) {
-                UserRepository mockRepo = mock(UserRepository.class);
-                springContextMock.when(() -> SpringContext.getBean(UserRepository.class)).thenReturn(mockRepo);
-                when(mockRepo.findByUsername(TEST_USERNAME)).thenReturn(Optional.of(mockUser));
-
-                User result = AuthUtils.getCurrentUser();
-
-                assertNotNull(result);
-                assertEquals(TEST_USERNAME, result.getUsername());
-                verify(mockRepo).findByUsername(TEST_USERNAME);
-
-            }
-        }
-
-        @Test
-        @DisplayName("should throw UnauthorizedException when JWT user is not found")
-        void shouldThrowWhenJwtUserNotFound() {
-            Jwt jwt = mock(Jwt.class);
-            when(jwt.getClaimAsString("sub")).thenReturn(TEST_USERNAME);
-    
-            Authentication auth = new UsernamePasswordAuthenticationToken(jwt, null, Set.of());
-            SecurityContextHolder.getContext().setAuthentication(auth);
-    
-            try (MockedStatic<SpringContext> springContextMock = mockStatic(SpringContext.class)) {
-                UserRepository mockRepo = mock(UserRepository.class);
-                springContextMock.when(() -> SpringContext.getBean(UserRepository.class)).thenReturn(mockRepo);
-                when(mockRepo.findByUsername(TEST_USERNAME)).thenReturn(Optional.empty());
-    
-                UnauthorizedException exception = assertThrows(
-                        UnauthorizedException.class,
-                        AuthUtils::getCurrentUser
-                );
-    
-                assertEquals("User not found", exception.getMessage());
-                verify(mockRepo).findByUsername(TEST_USERNAME);
-            }
-        }
-
-        @Test
-        @DisplayName("should throw UnauthorizedException when authentication is null")
-        void shouldThrowWhenAuthenticationIsNull() {
-            SecurityContextHolder.clearContext();
+        try (MockedStatic<SpringContext> springContextMock = mockStatic(SpringContext.class)) {
+            UserRepository mockRepo = mock(UserRepository.class);
+            when(mockRepo.findByUsername(TEST_USERNAME)).thenReturn(Optional.empty());
+            springContextMock.when(() -> SpringContext.getBean(UserRepository.class)).thenReturn(mockRepo);
 
             UnauthorizedException exception = assertThrows(
                     UnauthorizedException.class,
                     AuthUtils::getCurrentUser);
 
-            assertEquals("User is not authenticated", exception.getMessage());
+            assertEquals("User not found", exception.getMessage());
+            verify(mockRepo).findByUsername(TEST_USERNAME);
         }
+    }
 
-        @Test
-        @DisplayName("should throw UnauthorizedException when principal is unknown type")
-        void shouldThrowWhenPrincipalIsInvalidType() {
+    @Test
+    @DisplayName("should throw UnauthorizedException when authentication is null")
+    void shouldThrowWhenAuthenticationIsNull() {
+        UnauthorizedException exception = assertThrows(
+                UnauthorizedException.class,
+                AuthUtils::getCurrentUser);
 
-            Authentication auth = new UsernamePasswordAuthenticationToken("someString", null, Set.of());
-            SecurityContextHolder.getContext().setAuthentication(auth);
+        assertEquals("User is not authenticated", exception.getMessage());
+    }
 
-            UnauthorizedException exception = assertThrows(
-                    UnauthorizedException.class,
-                    AuthUtils::getCurrentUser);
+    @Test
+    @DisplayName("should throw UnauthorizedException when principal is invalid type")
+    void shouldThrowWhenPrincipalIsInvalidType() {
+        authenticate("invalidPrincipal");
 
-            assertEquals("Invalid authentication principal", exception.getMessage());
-        }
+        UnauthorizedException exception = assertThrows(
+                UnauthorizedException.class,
+                AuthUtils::getCurrentUser);
 
-        @Test
-        @DisplayName("should throw UnauthorizedException when authentication is not authenticated")
-        void shouldThrowWhenAuthenticationIsNotAuthenticated() {
-            Authentication unauthenticatedAuth = new UsernamePasswordAuthenticationToken("someString", null);
-            SecurityContextHolder.getContext().setAuthentication(unauthenticatedAuth);
+        assertEquals("Invalid authentication principal", exception.getMessage());
+    }
 
-            UnauthorizedException exception = assertThrows(
-                    UnauthorizedException.class,
-                    AuthUtils::getCurrentUser);
+    @Test
+    @DisplayName("should throw UnauthorizedException when authentication is not authenticated")
+    void shouldThrowWhenAuthenticationIsNotAuthenticated() {
+        Authentication unauthenticatedAuth = new UsernamePasswordAuthenticationToken("somePrincipal", null);
+        SecurityContextHolder.getContext().setAuthentication(unauthenticatedAuth);
 
-            assertEquals("User is not authenticated", exception.getMessage());
-        }
+        UnauthorizedException exception = assertThrows(
+                UnauthorizedException.class,
+                AuthUtils::getCurrentUser);
+
+        assertEquals("User is not authenticated", exception.getMessage());
     }
 
     @Test
@@ -162,4 +142,26 @@ class AuthUtilsTest {
         assertEquals("Utility class should not be instantiated", cause.getMessage());
     }
 
+
+    private void authenticate(Object principal) {
+        Authentication auth = new UsernamePasswordAuthenticationToken(principal, null, Set.of());
+        SecurityContextHolder.getContext().setAuthentication(auth);
+    }
+
+    private User createTestUserWithRole(RoleName roleName) {
+        Role role = new Role();
+        role.setName(roleName);
+
+        User user = new User();
+        user.setUsername(TEST_USERNAME);
+        user.setRoles(Set.of(role));
+
+        return user;
+    }
+
+    private User createTestUser() {
+        User user = new User();
+        user.setUsername(TEST_USERNAME);
+        return user;
+    }
 }
