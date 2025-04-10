@@ -5,6 +5,8 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -18,6 +20,7 @@ import java.io.IOException;
 @RequiredArgsConstructor
 public final class JwtAuthenticationFilter extends OncePerRequestFilter {
 
+    private static final Logger logger = LoggerFactory.getLogger(JwtAuthenticationFilter.class);
     private static final String AUTH_HEADER = "Authorization";
     private static final String BEARER_PREFIX = "Bearer ";
 
@@ -29,15 +32,21 @@ public final class JwtAuthenticationFilter extends OncePerRequestFilter {
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
 
-        final String token = extractTokenFromRequest(request);
+        logger.debug("JwtAuthenticationFilter invoked for URI: {}", request.getRequestURI());
 
-        if (token != null && jwtUtils.validateToken(token)) {
-            String username = jwtUtils.extractUsername(token);
+        try {
+            final String token = extractTokenFromRequest(request);
 
-            if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-                UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-                setAuthentication(userDetails, request);
+            if (token != null && jwtUtils.validateToken(token)) {
+                String username = jwtUtils.extractUsername(token);
+                if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                    UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+                    setAuthentication(userDetails, request);
+                    logger.debug("JWT validated. User '{}' authenticated with roles: {}", username, userDetails.getAuthorities());
+                }
             }
+        } catch (Exception e) {
+            logger.error("Cannot set user authentication: {}", e.getMessage());
         }
 
         filterChain.doFilter(request, response);
@@ -67,4 +76,5 @@ public final class JwtAuthenticationFilter extends OncePerRequestFilter {
         SecurityContextHolder.getContext().setAuthentication(authToken);
     }
 }
+
 

@@ -1,4 +1,4 @@
-package com.renewsim.backend.user;
+package com.renewsim.backend.user.dto;
 
 import java.util.Set;
 

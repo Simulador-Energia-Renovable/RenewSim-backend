@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 import com.renewsim.backend.role.RoleDTO;
 import com.renewsim.backend.role.UpdateRolesRequestDTO;
 import com.renewsim.backend.security.UserDetailsImpl;
+import com.renewsim.backend.user.dto.UserResponseDTO;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
