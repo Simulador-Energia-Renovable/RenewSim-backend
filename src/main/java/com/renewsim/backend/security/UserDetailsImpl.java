@@ -8,7 +8,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.util.Collection;
 import java.util.stream.Collectors;
 
-public class UserDetailsImpl implements UserDetails {
+public final class UserDetailsImpl implements UserDetails {
 
     private final User user;
 
@@ -22,7 +22,6 @@ public class UserDetailsImpl implements UserDetails {
             .map(role -> new SimpleGrantedAuthority("ROLE_" + role.getName().name()))
             .collect(Collectors.toList());
     }
-    
 
     @Override
     public String getPassword() {
@@ -58,4 +57,3 @@ public class UserDetailsImpl implements UserDetails {
         return user;
     }
 }
-
