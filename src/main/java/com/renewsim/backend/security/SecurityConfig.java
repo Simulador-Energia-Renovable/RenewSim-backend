@@ -47,10 +47,10 @@ public final class SecurityConfig {
         return http.build();
     }
 
-    
+
     @Bean
     public JwtDecoder jwtDecoder() {
-        // TODO: Move this secret to application.yml and inject it via @Value
+       
         String secret = "J6s8wQ0eK2rLdP9yXbTmGhV7zM9aFgRk";
         byte[] keyBytes = secret.getBytes(StandardCharsets.UTF_8);
         SecretKeySpec secretKey = new SecretKeySpec(keyBytes, "HmacSHA256");
