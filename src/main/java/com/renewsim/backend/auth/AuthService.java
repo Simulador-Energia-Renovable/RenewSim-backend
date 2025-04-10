@@ -5,8 +5,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import com.renewsim.backend.profile.ProfileService;
-import com.renewsim.backend.profile.dto.CreateProfileRequestDTO;
 import com.renewsim.backend.role.Role;
 import com.renewsim.backend.role.RoleName;
 import com.renewsim.backend.role.RoleService;
@@ -24,18 +22,17 @@ public class AuthService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final RoleService roleService;
-    private final ProfileService profileService;
     private final JwtUtils jwtUtils;
 
     public AuthService(UserRepository userRepository,
             PasswordEncoder passwordEncoder,
             JwtUtils jwtUtils,
-            RoleService roleService, ProfileService profileService) {
+            RoleService roleService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtUtils = jwtUtils;
         this.roleService = roleService;
-        this.profileService = profileService;
+       
     }
 
     public Optional<User> findByUsername(String username) {
@@ -50,10 +47,7 @@ public class AuthService {
         Role defaultRole = roleService.getRoleByName(RoleName.USER);
         Set<Role> roles = Set.of(defaultRole);
         User user = new User(username, passwordEncoder.encode(password), roles);
-        userRepository.save(user);
-
-        // ✅ Crear perfil vacío al registrar usuario
-        profileService.createProfile(user.getId(), new CreateProfileRequestDTO("", "", "", "", ""));
+        userRepository.save(user);       
 
         Set<String> roleNames = Set.of(defaultRole.getName().name());
         Set<String> scopes = getScopesFromRole(defaultRole.getName());
