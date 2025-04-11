@@ -17,31 +17,29 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/v1/users")
 public class UserController {
 
+    private final UserUseCase userUseCase;
     private final UserService userService;
 
-    public UserController(UserService userService) {
+    public UserController(UserUseCase userUseCase, UserService userService) {
+        this.userUseCase = userUseCase;
         this.userService = userService;
     }
 
-    // Obtener todos los usuarios
     @GetMapping
     public List<UserResponseDTO> getAllUsers() {
         return userService.getAll();
     }
 
-    // Obtener usuario por ID
     @GetMapping("/{id}")
     public UserResponseDTO getUserById(@PathVariable Long id) {
         return userService.getById(id);
     }
 
-    // Obtener roles por ID de usuario
     @GetMapping("/{id}/roles")
     public List<RoleDTO> getUserRoles(@PathVariable Long id) {
         return userService.getRolesByUserId(id);
     }
 
-    // Obtener roles del usuario autenticado
     @GetMapping("/me/roles")
     public List<RoleDTO> getCurrentUserRoles(@AuthenticationPrincipal UserDetailsImpl userDetails) {
         return userDetails.getUser().getRoles().stream()
@@ -49,34 +47,31 @@ public class UserController {
                 .collect(Collectors.toList());
     }
 
-    // Actualizar roles de un usuario
+    // ⬇️ Actualizamos para que use el UseCase
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}/roles")
     public ResponseEntity<String> updateUserRoles(
             @PathVariable Long id,
             @RequestBody UpdateRolesRequestDTO request) {
-        userService.updateUserRoles(id, request.getRoles());
+        userUseCase.updateUserRoles(id, request.getRoles());
         return ResponseEntity.ok("Roles actualizados correctamente");
     }
 
-    // Eliminar usuario (no se permite si es ADMIN)
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteUser(@PathVariable Long id) {
-        userService.deleteUser(id);
+        userUseCase.deleteUser(id);
         return ResponseEntity.ok("Usuario eliminado correctamente");
     }
 
-    // Obtener usuarios sin roles@PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/without-roles")
     public List<UserResponseDTO> getUsersWithoutRoles() {
-        return userService.getUsersWithoutRoles();
+        return userUseCase.getUsersWithoutRoles();
     }
 
-    // Obtener datos del usuario autenticado
     @GetMapping("/me")
     public UserResponseDTO getCurrentUser(@AuthenticationPrincipal UserDetailsImpl userDetails) {
         return userService.getCurrentUser(userDetails.getUser());
     }
-
 }

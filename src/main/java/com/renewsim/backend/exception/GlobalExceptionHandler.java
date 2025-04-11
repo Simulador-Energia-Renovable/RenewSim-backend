@@ -13,61 +13,61 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
-    // Manejo de excepciones genéricas
+    private String generateTraceId() {
+        return UUID.randomUUID().toString();
+    }
+
+    private ErrorResponse buildErrorResponse(HttpStatus status, String message, String traceId,
+            Map<String, ?> details) {
+        return new ErrorResponse(
+                LocalDateTime.now(),
+                status.value(),
+                status.getReasonPhrase(),
+                message,
+                details != null ? (Map<String, String>) details : Map.of("traceId", traceId));
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleGlobalException(Exception ex) {
-        logger.error("Internal Server Error: {}", ex.getMessage(), ex);
+        String traceId = generateTraceId();
+        logger.error("TraceId: {} - Internal Server Error: {}", traceId, ex.getMessage(), ex);
 
-        ErrorResponse errorResponse = new ErrorResponse(
-                LocalDateTime.now(),
-                HttpStatus.INTERNAL_SERVER_ERROR.value(),
-                "Internal Server Error",
-                "An unexpected error occurred.",
-                null);
-
-        return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+        return new ResponseEntity<>(
+                buildErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, "An unexpected error occurred.", traceId, null),
+                HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-    // Manejo de recursos no encontrados
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleResourceNotFoundException(ResourceNotFoundException ex) {
-        logger.warn("Resource not found: {}", ex.getMessage());
+        String traceId = generateTraceId();
+        logger.warn("TraceId: {} - Resource not found: {}", traceId, ex.getMessage());
 
-        ErrorResponse errorResponse = new ErrorResponse(
-                LocalDateTime.now(),
-                HttpStatus.NOT_FOUND.value(),
-                "Not Found",
-                ex.getMessage(),
-                null);
-
-        return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(
+                buildErrorResponse(HttpStatus.NOT_FOUND, ex.getMessage(), traceId, null),
+                HttpStatus.NOT_FOUND);
     }
 
-    // Manejo de solicitudes incorrectas
     @ExceptionHandler(BadRequestException.class)
     public ResponseEntity<ErrorResponse> handleBadRequestException(BadRequestException ex) {
-        logger.warn("Bad Request: {}", ex.getMessage());
+        String traceId = generateTraceId();
+        logger.warn("TraceId: {} - Bad Request: {}", traceId, ex.getMessage());
 
-        ErrorResponse errorResponse = new ErrorResponse(
-                LocalDateTime.now(),
-                HttpStatus.BAD_REQUEST.value(),
-                "Bad Request",
-                ex.getMessage(),
-                null);
-
-        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(
+                buildErrorResponse(HttpStatus.BAD_REQUEST, ex.getMessage(), traceId, null),
+                HttpStatus.BAD_REQUEST);
     }
 
-    // Manejo de validaciones fallidas
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleValidationExceptions(MethodArgumentNotValidException ex) {
-        logger.warn("Validation error: {}", ex.getMessage());
+        String traceId = generateTraceId();
+        logger.warn("TraceId: {} - Validation error: {}", traceId, ex.getMessage());
 
         Map<String, String> errors = new HashMap<>();
         ex.getBindingResult().getAllErrors().forEach(error -> {
@@ -76,44 +76,28 @@ public class GlobalExceptionHandler {
             errors.put(fieldName, errorMessage);
         });
 
-        ErrorResponse errorResponse = new ErrorResponse(
-                LocalDateTime.now(),
-                HttpStatus.BAD_REQUEST.value(),
-                "Validation Failed",
-                "One or more fields are invalid.",
-                errors);
-
-        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(
+                buildErrorResponse(HttpStatus.BAD_REQUEST, "One or more fields are invalid.", traceId, errors),
+                HttpStatus.BAD_REQUEST);
     }
 
-    // Manejo de argumentos inválidos (validaciones personalizadas)
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ErrorResponse> handleIllegalArgumentException(IllegalArgumentException ex) {
-        logger.warn("Validation failed: {}", ex.getMessage());
+        String traceId = generateTraceId();
+        logger.warn("TraceId: {} - Validation failed: {}", traceId, ex.getMessage());
 
-        ErrorResponse errorResponse = new ErrorResponse(
-                LocalDateTime.now(),
-                HttpStatus.BAD_REQUEST.value(),
-                "Invalid Argument",
-                ex.getMessage(),
-                null);
-
-        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(
+                buildErrorResponse(HttpStatus.BAD_REQUEST, ex.getMessage(), traceId, null),
+                HttpStatus.BAD_REQUEST);
     }
-    
+
     @ExceptionHandler(UnauthorizedException.class)
-public ResponseEntity<ErrorResponse> handleUnauthorizedException(UnauthorizedException ex) {
-    logger.warn("Unauthorized access attempt: {}", ex.getMessage());
+    public ResponseEntity<ErrorResponse> handleUnauthorizedException(UnauthorizedException ex) {
+        String traceId = generateTraceId();
+        logger.warn("TraceId: {} - Unauthorized access attempt: {}", traceId, ex.getMessage());
 
-    ErrorResponse errorResponse = new ErrorResponse(
-            LocalDateTime.now(),
-            HttpStatus.UNAUTHORIZED.value(),
-            "Unauthorized",
-            ex.getMessage(),
-            null
-    );
-
-    return new ResponseEntity<>(errorResponse, HttpStatus.UNAUTHORIZED);
-}
-
+        return new ResponseEntity<>(
+                buildErrorResponse(HttpStatus.UNAUTHORIZED, ex.getMessage(), traceId, null),
+                HttpStatus.UNAUTHORIZED);
+    }
 }
