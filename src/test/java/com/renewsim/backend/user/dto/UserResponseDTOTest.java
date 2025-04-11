@@ -1,59 +1,57 @@
-package com.renewsim.backend.user;
+package com.renewsim.backend.user.dto;
 
 import org.junit.jupiter.api.Test;
-
-import com.renewsim.backend.user.dto.UserRequestDTO;
 
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class UserRequestDTOTest {
+class UserResponseDTOTest {
 
     @Test
-    void shouldCreateUserRequestDTOUsingConstructor() {
+    void shouldCreateUserResponseDTOUsingConstructor() {
 
+        Long id = 1L;
         String username = "testuser";
-        String password = "securepassword";
         Set<String> roles = Set.of("ADMIN", "USER");
 
-        UserRequestDTO dto = new UserRequestDTO(username, password, roles);
+        UserResponseDTO dto = new UserResponseDTO(id, username, roles);
 
+        assertThat(dto.getId()).isEqualTo(id);
         assertThat(dto.getUsername()).isEqualTo(username);
-        assertThat(dto.getPassword()).isEqualTo(password);
         assertThat(dto.getRoles()).containsExactlyInAnyOrder("ADMIN", "USER");
     }
 
     @Test
-    void shouldCreateUserRequestDTOUsingBuilder() {
+    void shouldCreateUserResponseDTOUsingBuilder() {
 
+        Long id = 2L;
         String username = "builderUser";
-        String password = "builderPassword";
         Set<String> roles = Set.of("USER");
 
-        UserRequestDTO dto = UserRequestDTO.builder()
+        UserResponseDTO dto = UserResponseDTO.builder()
+                .id(id)
                 .username(username)
-                .password(password)
                 .roles(roles)
                 .build();
 
+        assertThat(dto.getId()).isEqualTo(id);
         assertThat(dto.getUsername()).isEqualTo(username);
-        assertThat(dto.getPassword()).isEqualTo(password);
         assertThat(dto.getRoles()).containsExactly("USER");
     }
 
     @Test
     void shouldVerifyEqualsAndHashCode() {
 
-        UserRequestDTO dto1 = UserRequestDTO.builder()
+        UserResponseDTO dto1 = UserResponseDTO.builder()
+                .id(3L)
                 .username("user")
-                .password("pass")
                 .roles(Set.of("ADMIN"))
                 .build();
 
-        UserRequestDTO dto2 = UserRequestDTO.builder()
+        UserResponseDTO dto2 = UserResponseDTO.builder()
+                .id(3L)
                 .username("user")
-                .password("pass")
                 .roles(Set.of("ADMIN"))
                 .build();
 
@@ -64,15 +62,16 @@ class UserRequestDTOTest {
     @Test
     void shouldReturnToStringContainingFieldValues() {
 
-        UserRequestDTO dto = UserRequestDTO.builder()
+        UserResponseDTO dto = UserResponseDTO.builder()
+                .id(4L)
                 .username("user")
-                .password("pass")
                 .roles(Set.of("USER"))
                 .build();
 
         String result = dto.toString();
+        assertThat(result).contains("4");
         assertThat(result).contains("user");
-        assertThat(result).contains("pass");
         assertThat(result).contains("USER");
     }
 }
+
