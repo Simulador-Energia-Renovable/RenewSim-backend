@@ -2,6 +2,7 @@ package com.renewsim.backend.user;
 
 import org.springframework.stereotype.Service;
 
+import com.renewsim.backend.exception.UserNotFoundException;
 import com.renewsim.backend.role.RoleDTO;
 
 import com.renewsim.backend.user.dto.UserRequestDTO;
@@ -38,7 +39,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public User getByIdEntity(Long id) {
         return userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new UserNotFoundException(id));
     }
 
     @Override
