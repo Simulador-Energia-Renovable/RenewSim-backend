@@ -1,34 +1,40 @@
 package com.renewsim.backend.user.dto;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@DisplayName("UserResponseDTO Test")
 class UserResponseDTOTest {
 
+    private Long id;
+    private String username;
+    private Set<String> roles;
+
+    @BeforeEach
+    void setUp() {
+        id = 1L;
+        username = "testuser";
+        roles = Set.of("ADMIN", "USER");
+    }
+
     @Test
+    @DisplayName("Should create UserResponseDTO using constructor")
     void shouldCreateUserResponseDTOUsingConstructor() {
-
-        Long id = 1L;
-        String username = "testuser";
-        Set<String> roles = Set.of("ADMIN", "USER");
-
         UserResponseDTO dto = new UserResponseDTO(id, username, roles);
 
         assertThat(dto.getId()).isEqualTo(id);
         assertThat(dto.getUsername()).isEqualTo(username);
-        assertThat(dto.getRoles()).containsExactlyInAnyOrder("ADMIN", "USER");
+        assertThat(dto.getRoles()).containsExactlyInAnyOrderElementsOf(roles);
     }
 
     @Test
+    @DisplayName("Should create UserResponseDTO using builder")
     void shouldCreateUserResponseDTOUsingBuilder() {
-
-        Long id = 2L;
-        String username = "builderUser";
-        Set<String> roles = Set.of("USER");
-
         UserResponseDTO dto = UserResponseDTO.builder()
                 .id(id)
                 .username(username)
@@ -37,22 +43,22 @@ class UserResponseDTOTest {
 
         assertThat(dto.getId()).isEqualTo(id);
         assertThat(dto.getUsername()).isEqualTo(username);
-        assertThat(dto.getRoles()).containsExactly("USER");
+        assertThat(dto.getRoles()).containsExactlyInAnyOrderElementsOf(roles);
     }
 
     @Test
+    @DisplayName("Should verify equals and hashCode")
     void shouldVerifyEqualsAndHashCode() {
-
         UserResponseDTO dto1 = UserResponseDTO.builder()
-                .id(3L)
-                .username("user")
-                .roles(Set.of("ADMIN"))
+                .id(id)
+                .username(username)
+                .roles(roles)
                 .build();
 
         UserResponseDTO dto2 = UserResponseDTO.builder()
-                .id(3L)
-                .username("user")
-                .roles(Set.of("ADMIN"))
+                .id(id)
+                .username(username)
+                .roles(roles)
                 .build();
 
         assertThat(dto1).isEqualTo(dto2);
@@ -60,18 +66,16 @@ class UserResponseDTOTest {
     }
 
     @Test
+    @DisplayName("Should return toString containing field values")
     void shouldReturnToStringContainingFieldValues() {
-
         UserResponseDTO dto = UserResponseDTO.builder()
-                .id(4L)
-                .username("user")
-                .roles(Set.of("USER"))
+                .id(id)
+                .username(username)
+                .roles(roles)
                 .build();
 
         String result = dto.toString();
-        assertThat(result).contains("4");
-        assertThat(result).contains("user");
-        assertThat(result).contains("USER");
+        assertThat(result).contains(String.valueOf(id), username);
+        roles.forEach(role -> assertThat(result).contains(role));
     }
 }
-
