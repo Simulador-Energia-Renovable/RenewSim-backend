@@ -13,16 +13,19 @@ public interface UserService {
 
     UserResponseDTO getById(Long id);
 
+    User getByIdEntity(Long id); 
+
     UserResponseDTO save(UserRequestDTO dto);
+
+    void saveUser(User user); 
 
     void deleteUser(Long id);
 
     List<RoleDTO> getRolesByUserId(Long id);
-
-    void updateUserRoles(Long userId, List<String> roleNames);
 
     UserResponseDTO getCurrentUser(User user);
 
     List<UserResponseDTO> getUsersWithoutRoles();
 
 }
+
