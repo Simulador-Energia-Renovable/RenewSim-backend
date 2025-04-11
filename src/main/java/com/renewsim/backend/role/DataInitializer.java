@@ -16,7 +16,7 @@ public class DataInitializer implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        List<RoleName> roles = List.of(RoleName.USER, RoleName.ADVANCED_USER, RoleName.ADMIN);
+        List<RoleName> roles = List.of(RoleName.USER, RoleName.ADMIN);
 
         roles.forEach(roleName -> {
             roleRepository.findByName(roleName).orElseGet(() -> roleRepository.save(new Role(roleName)));
