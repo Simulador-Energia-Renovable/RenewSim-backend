@@ -75,9 +75,7 @@ public class AuthService {
 
     private Set<String> getScopesFromRole(RoleName roleName) {
         return switch (roleName) {
-            case USER -> Set.of("read:simulations", "write:simulations", "compare:simulations");
-            case ADVANCED_USER ->
-                Set.of("read:simulations", "write:simulations", "compare:simulations", "export:simulations");
+            case USER -> Set.of("read:simulations", "write:simulations", "compare:simulations");           
             case ADMIN -> Set.of("read:simulations", "write:simulations", "compare:simulations",
                     "export:simulations", "delete:simulations", "read:users", "manage:users");
         };
