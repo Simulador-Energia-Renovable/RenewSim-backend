@@ -1,6 +1,18 @@
 package com.renewsim.backend.user.dto;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import java.util.Set;
 
-public record UserRequestDTO(String username, String password, Set<String> roles) {
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class UserRequestDTO {
+    private String username;
+    private String password;
+    private Set<String> roles;
 }
