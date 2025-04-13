@@ -3,8 +3,7 @@ package com.renewsim.backend.user;
 import org.springframework.stereotype.Service;
 
 import com.renewsim.backend.exception.UserNotFoundException;
-import com.renewsim.backend.role.RoleDTO;
-
+import com.renewsim.backend.role.dto.RoleDTO;
 import com.renewsim.backend.user.dto.UserRequestDTO;
 import com.renewsim.backend.user.dto.UserResponseDTO;
 

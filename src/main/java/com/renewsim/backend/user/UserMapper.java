@@ -16,12 +16,11 @@ import java.util.stream.Collectors;
 public interface UserMapper {
 
     @Mapping(target = "roles", source = "roles", qualifiedByName = "mapRoleNames")
-   
     UserResponseDTO toResponseDto(User user);
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "roles", source = "roles", qualifiedByName = "mapRolesFromStrings")
-    @Mapping(target = "simulations", ignore = true) 
+    @Mapping(target = "simulations", ignore = true)
     User toEntity(UserRequestDTO dto);
 
     @Named("mapRoleNames")
@@ -34,11 +33,7 @@ public interface UserMapper {
     @Named("mapRolesFromStrings")
     default Set<Role> mapRolesFromStrings(Set<String> roles) {
         return roles.stream()
-                .map(roleName -> {
-                    Role role = new Role();
-                    role.setName(RoleName.valueOf(roleName));
-                    return role;
-                })
+                .map(roleName -> new Role(RoleName.valueOf(roleName)))
                 .collect(Collectors.toSet());
     }
 }
