@@ -1,17 +1,17 @@
 package com.renewsim.backend.user;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
 import com.renewsim.backend.role.RoleDTO;
 import com.renewsim.backend.role.UpdateRolesRequestDTO;
 import com.renewsim.backend.security.UserDetailsImpl;
 import com.renewsim.backend.user.dto.UserResponseDTO;
-
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/v1/users")
@@ -26,33 +26,33 @@ public class UserController {
     }
 
     @GetMapping
-    public List<UserResponseDTO> getAllUsers() {
-        return userService.getAll();
+    public ResponseEntity<List<UserResponseDTO>> getAllUsers() {
+        return ResponseEntity.ok(userService.getAll());
     }
 
     @GetMapping("/{id}")
-    public UserResponseDTO getUserById(@PathVariable Long id) {
-        return userService.getById(id);
+    public ResponseEntity<UserResponseDTO> getUserById(@PathVariable Long id) {
+        return ResponseEntity.ok(userService.getById(id));
     }
 
     @GetMapping("/{id}/roles")
-    public List<RoleDTO> getUserRoles(@PathVariable Long id) {
-        return userService.getRolesByUserId(id);
+    public ResponseEntity<List<RoleDTO>> getUserRoles(@PathVariable Long id) {
+        return ResponseEntity.ok(userService.getRolesByUserId(id));
     }
 
     @GetMapping("/me/roles")
-    public List<RoleDTO> getCurrentUserRoles(@AuthenticationPrincipal UserDetailsImpl userDetails) {
-        return userDetails.getUser().getRoles().stream()
+    public ResponseEntity<List<RoleDTO>> getCurrentUserRoles(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+        List<RoleDTO> roles = userDetails.getUser().getRoles().stream()
                 .map(role -> new RoleDTO(role.getId(), role.getName().name()))
                 .collect(Collectors.toList());
+        return ResponseEntity.ok(roles);
     }
 
-    // ⬇️ Actualizamos para que use el UseCase
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}/roles")
     public ResponseEntity<String> updateUserRoles(
             @PathVariable Long id,
-            @RequestBody UpdateRolesRequestDTO request) {
+            @Validated @RequestBody UpdateRolesRequestDTO request) {
         userUseCase.updateUserRoles(id, request.getRoles());
         return ResponseEntity.ok("Roles actualizados correctamente");
     }
@@ -65,13 +65,14 @@ public class UserController {
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    @GetMapping("/without-roles")
-    public List<UserResponseDTO> getUsersWithoutRoles() {
-        return userUseCase.getUsersWithoutRoles();
+    @GetMapping("/filter/without-roles")
+    public ResponseEntity<List<UserResponseDTO>> getUsersWithoutRoles() {
+        return ResponseEntity.ok(userUseCase.getUsersWithoutRoles());
     }
 
     @GetMapping("/me")
-    public UserResponseDTO getCurrentUser(@AuthenticationPrincipal UserDetailsImpl userDetails) {
-        return userService.getCurrentUser(userDetails.getUser());
+    public ResponseEntity<UserResponseDTO> getCurrentUser(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+        return ResponseEntity.ok(userService.getCurrentUser(userDetails.getUser()));
     }
 }
+
