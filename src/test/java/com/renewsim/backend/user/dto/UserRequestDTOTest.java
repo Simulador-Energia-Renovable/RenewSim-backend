@@ -1,5 +1,4 @@
 package com.renewsim.backend.user.dto;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -79,3 +78,4 @@ class UserRequestDTOTest {
         roles.forEach(role -> assertThat(result).contains(role));
     }
 }
+

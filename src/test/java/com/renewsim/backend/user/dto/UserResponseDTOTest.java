@@ -79,3 +79,4 @@ class UserResponseDTOTest {
         roles.forEach(role -> assertThat(result).contains(role));
     }
 }
+
