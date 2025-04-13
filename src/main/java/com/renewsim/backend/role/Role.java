@@ -15,14 +15,12 @@ public class Role {
     @Column(unique = true, nullable = false)
     private RoleName name;
 
-    // Constructors
     public Role() {}
 
     public Role(RoleName name) {
         this.name = name;
     }
 
-    // Getters and setters
     public Long getId() {
         return id;
     }
@@ -39,7 +37,6 @@ public class Role {
         this.name = name;
     }
 
-    // Equals and hashCode (importante para seguridad/autenticación)
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
