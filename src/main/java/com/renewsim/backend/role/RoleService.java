@@ -18,13 +18,11 @@ public class RoleService {
         this.roleRepository = roleRepository;
     }
 
-    // Método para obtener un solo rol por nombre (enum)
     public Role getRoleByName(RoleName roleName) {
         return roleRepository.findByName(roleName)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "El rol " + roleName + " no existe"));
     }
 
-    // Método para obtener múltiples roles a partir de strings
     public Set<Role> getRolesFromStrings(Set<String> roleNames) {
         Set<Role> roles = new HashSet<>();
         for (String roleName : roleNames) {

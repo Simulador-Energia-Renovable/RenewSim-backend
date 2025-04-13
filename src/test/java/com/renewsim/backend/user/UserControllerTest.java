@@ -1,7 +1,7 @@
 package com.renewsim.backend.user;
 
 import com.renewsim.backend.role.Role;
-import com.renewsim.backend.role.RoleDTO;
+import com.renewsim.backend.role.dto.RoleDTO;
 import com.renewsim.backend.security.UserDetailsImpl;
 import com.renewsim.backend.user.dto.UserResponseDTO;
 import org.junit.jupiter.api.BeforeEach;
