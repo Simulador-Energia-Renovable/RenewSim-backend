@@ -5,6 +5,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.renewsim.backend.auth.dto.AuthResponseDTO;
 import com.renewsim.backend.role.Role;
 import com.renewsim.backend.role.RoleName;
 import com.renewsim.backend.role.RoleService;
@@ -25,14 +26,13 @@ public class AuthService {
     private final JwtUtils jwtUtils;
 
     public AuthService(UserRepository userRepository,
-            PasswordEncoder passwordEncoder,
-            JwtUtils jwtUtils,
-            RoleService roleService) {
+                       PasswordEncoder passwordEncoder,
+                       JwtUtils jwtUtils,
+                       RoleService roleService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtUtils = jwtUtils;
         this.roleService = roleService;
-       
     }
 
     public Optional<User> findByUsername(String username) {
@@ -47,9 +47,9 @@ public class AuthService {
         Role defaultRole = roleService.getRoleByName(RoleName.USER);
         Set<Role> roles = Set.of(defaultRole);
         User user = new User(username, passwordEncoder.encode(password), roles);
-        userRepository.save(user);       
+        userRepository.save(user);
 
-        Set<String> roleNames = Set.of(defaultRole.getName().name());
+        Set<String> roleNames = extractRoleNames(roles);
         Set<String> scopes = getScopesFromRole(defaultRole.getName());
 
         String token = jwtUtils.generateToken(username, roleNames, scopes);
@@ -57,28 +57,35 @@ public class AuthService {
     }
 
     public String authenticate(String username, String password) {
-        Optional<User> userOpt = userRepository.findByUsername(username);
-        if (userOpt.isPresent() && passwordEncoder.matches(password, userOpt.get().getPassword())) {
-            User user = userOpt.get();
-            Set<String> roleNames = user.getRoles().stream()
-                    .map(r -> r.getName().name())
-                    .collect(Collectors.toSet());
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Credenciales inválidas"));
 
-            Set<String> scopes = user.getRoles().stream()
-                    .flatMap(r -> getScopesFromRole(r.getName()).stream())
-                    .collect(Collectors.toSet());
-
-            return jwtUtils.generateToken(username, roleNames, scopes);
+        if (!passwordEncoder.matches(password, user.getPassword())) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Credenciales inválidas");
         }
-        throw new RuntimeException("Credenciales inválidas");
+
+        Set<String> roleNames = extractRoleNames(user.getRoles());
+        Set<String> scopes = user.getRoles().stream()
+                .flatMap(role -> getScopesFromRole(role.getName()).stream())
+                .collect(Collectors.toSet());
+
+        return jwtUtils.generateToken(username, roleNames, scopes);
+    }
+
+    private Set<String> extractRoleNames(Set<Role> roles) {
+        return roles.stream()
+                .map(role -> role.getName().name())
+                .collect(Collectors.toSet());
     }
 
     private Set<String> getScopesFromRole(RoleName roleName) {
         return switch (roleName) {
-            case USER -> Set.of("read:simulations", "write:simulations", "compare:simulations");           
-            case ADMIN -> Set.of("read:simulations", "write:simulations", "compare:simulations",
-                    "export:simulations", "delete:simulations", "read:users", "manage:users");
+            case USER -> Set.of("read:simulations", "write:simulations", "compare:simulations");
+            case ADMIN -> Set.of(
+                    "read:simulations", "write:simulations", "compare:simulations",
+                    "export:simulations", "delete:simulations", "read:users", "manage:users"
+            );
         };
     }
-
 }
+
