@@ -5,6 +5,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.renewsim.backend.auth.dto.AuthResponseDTO;
 import com.renewsim.backend.role.Role;
 import com.renewsim.backend.role.RoleName;
 import com.renewsim.backend.role.RoleService;

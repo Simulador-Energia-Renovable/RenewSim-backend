@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.renewsim.backend.auth.dto.AuthRequestDTO;
+import com.renewsim.backend.auth.dto.AuthResponseDTO;
 import com.renewsim.backend.security.JwtUtils;
 import com.renewsim.backend.user.User;
 import com.renewsim.backend.user.UserMapper;
