@@ -6,7 +6,7 @@ import com.renewsim.backend.simulation.dto.NormalizationStatsDTO;
 import com.renewsim.backend.simulation.dto.SimulationHistoryDTO;
 import com.renewsim.backend.simulation.dto.SimulationRequestDTO;
 import com.renewsim.backend.simulation.dto.SimulationResponseDTO;
-import com.renewsim.backend.technologyComparison.TechnologyComparisonResponseDTO;
+import com.renewsim.backend.technologyComparison.dto.TechnologyComparisonResponseDTO;
 
 public interface SimulationService {
 

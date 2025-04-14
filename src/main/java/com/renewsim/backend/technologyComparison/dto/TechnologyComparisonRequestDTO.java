@@ -1,4 +1,4 @@
-package com.renewsim.backend.technologyComparison;
+package com.renewsim.backend.technologyComparison.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;

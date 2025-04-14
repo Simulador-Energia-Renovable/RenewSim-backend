@@ -7,6 +7,8 @@ import org.springframework.web.bind.annotation.*;
 
 import com.renewsim.backend.simulation.Simulation;
 import com.renewsim.backend.simulation.SimulationService;
+import com.renewsim.backend.technologyComparison.dto.TechnologyComparisonRequestDTO;
+import com.renewsim.backend.technologyComparison.dto.TechnologyComparisonResponseDTO;
 
 import jakarta.validation.Valid;
 

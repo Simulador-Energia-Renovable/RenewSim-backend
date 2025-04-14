@@ -2,7 +2,7 @@ package com.renewsim.backend.simulation.dto;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import com.renewsim.backend.technologyComparison.TechnologyComparisonResponseDTO;
+import com.renewsim.backend.technologyComparison.dto.TechnologyComparisonResponseDTO;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

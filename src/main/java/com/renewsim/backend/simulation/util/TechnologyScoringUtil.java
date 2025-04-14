@@ -1,7 +1,7 @@
 package com.renewsim.backend.simulation.util;
 
 import com.renewsim.backend.simulation.dto.NormalizationStatsDTO;
-import com.renewsim.backend.technologyComparison.TechnologyComparisonResponseDTO;
+import com.renewsim.backend.technologyComparison.dto.TechnologyComparisonResponseDTO;
 
 import java.util.List;
 

@@ -12,7 +12,7 @@ import com.renewsim.backend.simulation.dto.SimulationRequestDTO;
 import com.renewsim.backend.simulation.dto.SimulationResponseDTO;
 import com.renewsim.backend.simulation.util.TechnologyScoringUtil;
 import com.renewsim.backend.technologyComparison.TechnologyComparisonMapper;
-import com.renewsim.backend.technologyComparison.TechnologyComparisonResponseDTO;
+import com.renewsim.backend.technologyComparison.dto.TechnologyComparisonResponseDTO;
 
 @Component
 public class SimulationUseCase {

@@ -1,4 +1,4 @@
-package com.renewsim.backend.technologyComparison;
+package com.renewsim.backend.technologyComparison.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

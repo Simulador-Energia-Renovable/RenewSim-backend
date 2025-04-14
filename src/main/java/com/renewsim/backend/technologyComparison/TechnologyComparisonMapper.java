@@ -2,6 +2,9 @@ package com.renewsim.backend.technologyComparison;
 
 import org.springframework.stereotype.Component;
 
+import com.renewsim.backend.technologyComparison.dto.TechnologyComparisonRequestDTO;
+import com.renewsim.backend.technologyComparison.dto.TechnologyComparisonResponseDTO;
+
 @Component
 public class TechnologyComparisonMapper {
 

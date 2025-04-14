@@ -14,7 +14,7 @@ import com.renewsim.backend.simulation.dto.NormalizedTechnologyDTO;
 import com.renewsim.backend.simulation.dto.SimulationHistoryDTO;
 import com.renewsim.backend.simulation.dto.SimulationRequestDTO;
 import com.renewsim.backend.simulation.dto.SimulationResponseDTO;
-import com.renewsim.backend.technologyComparison.TechnologyComparisonResponseDTO;
+import com.renewsim.backend.technologyComparison.dto.TechnologyComparisonResponseDTO;
 
 @RestController
 @RequestMapping("/api/v1/simulation")

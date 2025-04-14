@@ -22,7 +22,7 @@ import com.renewsim.backend.simulation.dto.SimulationRequestDTO;
 import com.renewsim.backend.simulation.dto.SimulationResponseDTO;
 import com.renewsim.backend.technologyComparison.TechnologyComparison;
 import com.renewsim.backend.technologyComparison.TechnologyComparisonRepository;
-import com.renewsim.backend.technologyComparison.TechnologyComparisonResponseDTO;
+import com.renewsim.backend.technologyComparison.dto.TechnologyComparisonResponseDTO;
 import com.renewsim.backend.user.User;
 import com.renewsim.backend.user.UserRepository;
 
