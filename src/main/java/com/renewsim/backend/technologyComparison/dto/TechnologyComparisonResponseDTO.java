@@ -18,4 +18,6 @@ public class TechnologyComparisonResponseDTO {
     private String environmentalImpact;
     private Double co2Reduction;
     private Double energyProduction;
+    private String energyType; 
 }
+

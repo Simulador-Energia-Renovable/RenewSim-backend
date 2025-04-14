@@ -17,6 +17,7 @@ public class TechnologyComparisonMapper {
                 .environmentalImpact(entity.getEnvironmentalImpact())
                 .co2Reduction(entity.getCo2Reduction())
                 .energyProduction(entity.getEnergyProduction())
+                .energyType(entity.getEnergyType())
                 .build();
     }
 

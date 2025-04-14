@@ -198,7 +198,8 @@ public class SimulationServiceImpl implements SimulationService {
                 tech.getMaintenanceCost(),
                 tech.getEnvironmentalImpact(),
                 tech.getCo2Reduction(),
-                tech.getEnergyProduction());
+                tech.getEnergyProduction(),
+                tech.getEnergyType());
     }
 
     private double getIrradiance(SimulationRequestDTO dto) {
