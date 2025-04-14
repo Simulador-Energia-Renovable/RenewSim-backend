@@ -3,73 +3,65 @@ package com.renewsim.backend.auth;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
+import com.renewsim.backend.security.JwtUtils;
 import com.renewsim.backend.user.User;
 import com.renewsim.backend.user.UserMapper;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/v1/auth")
 public class AuthController {
     private final AuthService authService;
-    private UserMapper userMapper;
+    private final JwtUtils jwtUtils;
+  
 
     public AuthController(AuthService authService, UserMapper userMapper) {
         this.authService = authService;
-        this.userMapper = userMapper;
+        this.jwtUtils = new JwtUtils();
+    
     }
 
     @PostMapping("/register")
-    public ResponseEntity<AuthResponseDTO> register(@RequestBody AuthRequestDTO request, HttpServletResponse response) {
+    public ResponseEntity<AuthResponseDTO> register(@Valid @RequestBody AuthRequestDTO request, HttpServletResponse response) {
         AuthResponseDTO authResponse = authService.registerUserAndReturnAuth(
                 request.getUsername(),
                 request.getPassword());
 
-        addJwtCookie(response, authResponse.getToken());
+        jwtUtils.addJwtCookie(response, authResponse.getToken());
         return ResponseEntity.ok(authResponse);
     }
 
     @PostMapping("/login")
-    public ResponseEntity<AuthResponseDTO> login(@RequestBody AuthRequestDTO request, HttpServletResponse response) {
+    public ResponseEntity<AuthResponseDTO> login(@Valid @RequestBody AuthRequestDTO request, HttpServletResponse response) {
         String token = authService.authenticate(request.getUsername(), request.getPassword());
 
         User user = authService.findByUsername(request.getUsername())
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
         Set<String> roles = user.getRoles()
                 .stream()
                 .map(role -> role.getName().name())
                 .collect(Collectors.toSet());
 
-        addJwtCookie(response, token);
+                jwtUtils.addJwtCookie(response, token);
         return ResponseEntity.ok(new AuthResponseDTO(token, user.getUsername(), roles));
     }
 
     @PostMapping("/logout")
     public ResponseEntity<Void> logout(HttpServletResponse response) {
-        Cookie cookie = new Cookie("jwt", null);
-        cookie.setHttpOnly(true);
-        cookie.setSecure(true); // Asegúrate de usar HTTPS en producción
-        cookie.setPath("/");
-        cookie.setMaxAge(0); // Expira inmediatamente
-        response.addCookie(cookie);
+        jwtUtils.clearJwtCookie(response);
         return ResponseEntity.noContent().build();
-    }
+    }  
 
-    private void addJwtCookie(HttpServletResponse response, String token) {
-        Cookie cookie = new Cookie("jwt", token);
-        cookie.setHttpOnly(true);
-        cookie.setSecure(true); // Asegúrate de usar HTTPS en producción
-        cookie.setPath("/");
-        cookie.setMaxAge(7 * 24 * 60 * 60); // 7 días
-        response.addCookie(cookie);
-    }
 
 }
