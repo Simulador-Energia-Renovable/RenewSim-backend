@@ -85,7 +85,7 @@ class AuthControllerUnitTest {
 
     @Test
     @DisplayName("Should throw ResponseStatusException when user not found during login")
-    void shouldThrowExceptionWhenUserNotFoundOnLogin() {
+    void testShouldThrowExceptionWhenUserNotFoundOnLogin() {
 
         HttpServletResponse mockResponse = mock(HttpServletResponse.class);
 
