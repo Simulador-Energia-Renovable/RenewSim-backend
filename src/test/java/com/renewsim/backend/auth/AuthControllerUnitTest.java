@@ -19,7 +19,7 @@ class AuthControllerUnitTest {
 
     private AuthService authService;
     private AuthController authController;
-    private AuthRequestDTO requestDTO;  
+    private AuthRequestDTO requestDTO;
 
     @BeforeEach
     void setUp() {
@@ -31,7 +31,7 @@ class AuthControllerUnitTest {
     @Test
     @DisplayName("Should register user and return AuthResponseDTO")
     void testShouldRegisterUser() {
-      
+
         AuthResponseDTO expectedResponse = new AuthResponseDTO("sample.jwt.token", "testuser", Set.of("USER"));
 
         HttpServletResponse mockResponse = mock(HttpServletResponse.class);
@@ -48,7 +48,7 @@ class AuthControllerUnitTest {
     @Test
     @DisplayName("Should login user and return AuthResponseDTO")
     void testShouldLoginUser() {
-    
+
         String token = "sample.jwt.token";
 
         HttpServletResponse mockResponse = mock(HttpServletResponse.class);
@@ -82,4 +82,26 @@ class AuthControllerUnitTest {
         assertThat(responseEntity.getStatusCode().value()).isEqualTo(204);
 
     }
+
+    @Test
+    @DisplayName("Should throw ResponseStatusException when user not found during login")
+    void shouldThrowExceptionWhenUserNotFoundOnLogin() {
+
+        HttpServletResponse mockResponse = mock(HttpServletResponse.class);
+
+        when(authService.authenticate("nonexistentuser", "password123"))
+                .thenReturn("sample.jwt.token");
+        when(authService.findByUsername("nonexistentuser"))
+                .thenReturn(java.util.Optional.empty());
+
+        var exception = org.junit.jupiter.api.Assertions.assertThrows(
+                org.springframework.web.server.ResponseStatusException.class,
+                () -> authController.login(
+                        new com.renewsim.backend.auth.dto.AuthRequestDTO("nonexistentuser", "password123"),
+                        mockResponse));
+
+        assertThat(exception.getStatusCode().value()).isEqualTo(404);
+        assertThat(exception.getReason()).isEqualTo("User not found");
+    }
+
 }
