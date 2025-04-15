@@ -1,16 +1,13 @@
 package com.renewsim.backend.technologyComparison;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
-
 import com.renewsim.backend.simulation.Simulation;
 import com.renewsim.backend.simulation.SimulationService;
 import com.renewsim.backend.technologyComparison.dto.TechnologyComparisonRequestDTO;
 import com.renewsim.backend.technologyComparison.dto.TechnologyComparisonResponseDTO;
-
 import jakarta.validation.Valid;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -19,13 +16,14 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/technologies")
 public class TechnologyComparisonController {
 
+    private final TechnologyComparisonUseCase useCase;
     private final TechnologyComparisonService service;
     private final SimulationService simulationService;
     private final TechnologyComparisonMapper mapper;
 
-    public TechnologyComparisonController(TechnologyComparisonService service,
-            SimulationService simulationService,
-            TechnologyComparisonMapper mapper) {
+    public TechnologyComparisonController(TechnologyComparisonUseCase useCase, TechnologyComparisonService service,
+            SimulationService simulationService, TechnologyComparisonMapper mapper) {
+        this.useCase = useCase;
         this.service = service;
         this.simulationService = simulationService;
         this.mapper = mapper;
@@ -51,19 +49,14 @@ public class TechnologyComparisonController {
     @GetMapping("/type/{energyType}")
     public ResponseEntity<List<TechnologyComparisonResponseDTO>> getTechnologiesByType(
             @PathVariable String energyType) {
-        List<TechnologyComparisonResponseDTO> dtos = service.getTechnologiesByEnergyType(energyType).stream()
-                .map(mapper::toResponseDTO)
-                .collect(Collectors.toList());
-        return ResponseEntity.ok(dtos);
+        return ResponseEntity.ok(useCase.filterByType(energyType));
     }
 
     @PostMapping
     public ResponseEntity<TechnologyComparisonResponseDTO> addTechnology(
             @Valid @RequestBody TechnologyComparisonRequestDTO requestDTO) {
         try {
-            TechnologyComparison technology = mapper.toEntity(requestDTO);
-            TechnologyComparison savedTechnology = service.addTechnology(technology);
-            return ResponseEntity.ok(mapper.toResponseDTO(savedTechnology));
+            return ResponseEntity.ok(useCase.createTechnology(requestDTO));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();
         }
@@ -72,7 +65,7 @@ public class TechnologyComparisonController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteTechnology(@PathVariable Long id) {
         try {
-            service.deleteTechnology(id);
+            useCase.deleteTechnology(id);
             return ResponseEntity.noContent().build();
         } catch (IllegalArgumentException e) {
             return ResponseEntity.notFound().build();
@@ -87,7 +80,6 @@ public class TechnologyComparisonController {
         List<TechnologyComparisonResponseDTO> dtos = simulation.getTechnologies().stream()
                 .map(mapper::toResponseDTO)
                 .collect(Collectors.toList());
-
         return ResponseEntity.ok(dtos);
     }
 }
