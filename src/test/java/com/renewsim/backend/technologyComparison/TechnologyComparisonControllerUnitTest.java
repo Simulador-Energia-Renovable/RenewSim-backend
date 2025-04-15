@@ -9,6 +9,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.ResponseEntity;
 
 import java.util.List;
 import java.util.Optional;
@@ -16,42 +18,30 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.ResponseEntity;
-
 @ExtendWith(MockitoExtension.class)
 @DisplayName("Unit tests for TechnologyComparisonController")
 class TechnologyComparisonControllerUnitTest {
 
     @Mock
     private TechnologyComparisonUseCase useCase;
-
     @Mock
     private TechnologyComparisonService service;
-
     @Mock
     private SimulationService simulationService;
-
     @Mock
     private TechnologyComparisonMapper mapper;
 
     @InjectMocks
     private TechnologyComparisonController controller;
 
-    private TechnologyComparison technology;
+    private TechnologyComparison solarTech;
     private TechnologyComparisonResponseDTO responseDTO;
+    private TechnologyComparisonRequestDTO requestDTO;
 
     @BeforeEach
     void setUp() {
-        technology = new TechnologyComparison(
-                "Solar",
-                85.0,
-                1000.0,
-                70.0,
-                "Low impact",
-                50.0,
-                300.0,
-                "Solar");
+        solarTech = new TechnologyComparison(
+                "Solar", 85.0, 1000.0, 70.0, "Low impact", 50.0, 300.0, "Solar");
 
         responseDTO = TechnologyComparisonResponseDTO.builder()
                 .technologyName("Solar")
@@ -63,13 +53,21 @@ class TechnologyComparisonControllerUnitTest {
                 .energyProduction(300.0)
                 .energyType("Solar")
                 .build();
+
+        requestDTO = TechnologyComparisonRequestDTO.builder()
+                .technologyName("Solar")
+                .efficiency(85.0)
+                .installationCost(1000.0)
+                .maintenanceCost(70.0)
+                .energyType("Solar")
+                .build();
     }
 
     @Test
-    @DisplayName("Should return list of technologies")
+    @DisplayName("Should return all technologies")
     void testShouldReturnAllTechnologies() {
-        when(service.getAllTechnologies()).thenReturn(List.of(technology));
-        when(mapper.toResponseDTO(technology)).thenReturn(responseDTO);
+        when(service.getAllTechnologies()).thenReturn(List.of(solarTech));
+        when(mapper.toResponseDTO(solarTech)).thenReturn(responseDTO);
 
         ResponseEntity<List<TechnologyComparisonResponseDTO>> result = controller.getAllTechnologies();
 
@@ -80,8 +78,8 @@ class TechnologyComparisonControllerUnitTest {
     @Test
     @DisplayName("Should return technology by ID")
     void testShouldReturnTechnologyById() {
-        when(service.getTechnologyById(1L)).thenReturn(Optional.of(technology));
-        when(mapper.toResponseDTO(technology)).thenReturn(responseDTO);
+        when(service.getTechnologyById(1L)).thenReturn(Optional.of(solarTech));
+        when(mapper.toResponseDTO(solarTech)).thenReturn(responseDTO);
 
         ResponseEntity<TechnologyComparisonResponseDTO> result = controller.getTechnologyById(1L);
 
@@ -100,16 +98,8 @@ class TechnologyComparisonControllerUnitTest {
     }
 
     @Test
-    @DisplayName("Should delegate creation to useCase")
+    @DisplayName("Should create a technology successfully")
     void testShouldCreateTechnology() {
-        TechnologyComparisonRequestDTO requestDTO = TechnologyComparisonRequestDTO.builder()
-                .technologyName("Solar")
-                .efficiency(85.0)
-                .installationCost(1000.0)
-                .maintenanceCost(70.0)
-                .energyType("Solar")
-                .build();
-
         when(useCase.createTechnology(requestDTO)).thenReturn(responseDTO);
 
         ResponseEntity<TechnologyComparisonResponseDTO> result = controller.addTechnology(requestDTO);
@@ -120,11 +110,7 @@ class TechnologyComparisonControllerUnitTest {
 
     @Test
     @DisplayName("Should return 400 when creation fails")
-    void testShouldReturnBadRequestOnCreateFailure() {
-        TechnologyComparisonRequestDTO requestDTO = TechnologyComparisonRequestDTO.builder()
-                .technologyName("Solar")
-                .build();
-
+    void testShouldReturnBadRequestOnCreationFailure() {
         when(useCase.createTechnology(requestDTO)).thenThrow(new IllegalArgumentException("Duplicate"));
 
         ResponseEntity<TechnologyComparisonResponseDTO> result = controller.addTechnology(requestDTO);
@@ -133,7 +119,7 @@ class TechnologyComparisonControllerUnitTest {
     }
 
     @Test
-    @DisplayName("Should delete technology by ID")
+    @DisplayName("Should delete a technology")
     void testShouldDeleteTechnology() {
         ResponseEntity<Void> result = controller.deleteTechnology(1L);
 
@@ -154,36 +140,27 @@ class TechnologyComparisonControllerUnitTest {
     @Test
     @DisplayName("Should return technologies by simulation ID")
     void testShouldReturnTechnologiesBySimulationId() {
-        Long simulationId = 1L;
-
-        TechnologyComparison tech = new TechnologyComparison(
-                "Solar", 85.0, 1000.0, 70.0, "Clean", 50.0, 300.0, "Solar");
-
         Simulation simulation = new Simulation();
-        simulation.setTechnologies(List.of(tech));
+        simulation.setTechnologies(List.of(solarTech));
 
-        when(simulationService.getSimulationById(simulationId)).thenReturn(simulation);
-        when(mapper.toResponseDTO(tech)).thenReturn(responseDTO);
+        when(simulationService.getSimulationById(1L)).thenReturn(simulation);
+        when(mapper.toResponseDTO(solarTech)).thenReturn(responseDTO);
 
-        ResponseEntity<List<TechnologyComparisonResponseDTO>> response = controller
-                .getTechnologiesBySimulation(simulationId);
+        ResponseEntity<List<TechnologyComparisonResponseDTO>> result = controller.getTechnologiesBySimulation(1L);
 
-        assertThat(response.getStatusCode().value()).isEqualTo(200);
-        assertThat(response.getBody()).contains(responseDTO);
+        assertThat(result.getStatusCode().value()).isEqualTo(200);
+        assertThat(result.getBody()).contains(responseDTO);
     }
 
     @Test
     @DisplayName("Should return technologies filtered by energy type")
     void testShouldReturnTechnologiesByType() {
-        String energyType = "Solar";
+        when(useCase.filterByType("Solar")).thenReturn(List.of(responseDTO));
 
-        when(useCase.filterByType(energyType)).thenReturn(List.of(responseDTO));
+        ResponseEntity<List<TechnologyComparisonResponseDTO>> result = controller.getTechnologiesByType("Solar");
 
-        ResponseEntity<List<TechnologyComparisonResponseDTO>> response = controller.getTechnologiesByType(energyType);
-
-        assertThat(response.getStatusCode().value()).isEqualTo(200);
-        assertThat(response.getBody()).contains(responseDTO);
-        verify(useCase).filterByType(energyType);
+        assertThat(result.getStatusCode().value()).isEqualTo(200);
+        assertThat(result.getBody()).contains(responseDTO);
+        verify(useCase).filterByType("Solar");
     }
-
 }
