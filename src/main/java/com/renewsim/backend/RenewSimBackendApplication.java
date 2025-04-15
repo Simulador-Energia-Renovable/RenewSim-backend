@@ -11,6 +11,7 @@ import java.sql.DatabaseMetaData;
 import org.springframework.boot.CommandLineRunner;
 
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Profile;
 
 @SpringBootApplication
 @EnableCaching // Habilita la caché en toda la aplicación
@@ -20,6 +21,7 @@ public class RenewSimBackendApplication {
     }
 
     @Bean
+    @Profile("!test") // ⬅️ Importante: se ejecuta solo fuera del perfil de test
     CommandLineRunner checkDatabase(DataSource dataSource) {
         return args -> {
             try (Connection connection = dataSource.getConnection()) {
