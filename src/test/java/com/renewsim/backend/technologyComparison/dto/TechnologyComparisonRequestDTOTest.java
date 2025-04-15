@@ -1,4 +1,4 @@
-package com.renewsim.backend.technologyComparison;
+package com.renewsim.backend.technologyComparison.dto;
 
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
@@ -8,7 +8,6 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import com.renewsim.backend.technologyComparison.dto.TechnologyComparisonRequestDTO;
 
 import java.util.Set;
 
@@ -46,7 +45,7 @@ public class TechnologyComparisonRequestDTOTest {
     @Test
     @DisplayName("Should fail validation when required fields are missing")
     public void testInvalidRequestDTO_MissingRequiredFields() {
-        TechnologyComparisonRequestDTO dto = new TechnologyComparisonRequestDTO(); // campos vacíos
+        TechnologyComparisonRequestDTO dto = new TechnologyComparisonRequestDTO(); 
 
         Set<ConstraintViolation<TechnologyComparisonRequestDTO>> violations = validator.validate(dto);
         assertFalse(violations.isEmpty(), "DTO should have validation errors");
