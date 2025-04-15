@@ -1,5 +1,6 @@
 package com.renewsim.backend.technologyComparison;
 
+import com.renewsim.backend.simulation.Simulation;
 import com.renewsim.backend.simulation.SimulationService;
 import com.renewsim.backend.technologyComparison.dto.TechnologyComparisonRequestDTO;
 import com.renewsim.backend.technologyComparison.dto.TechnologyComparisonResponseDTO;
@@ -50,8 +51,7 @@ class TechnologyComparisonControllerUnitTest {
                 "Low impact",
                 50.0,
                 300.0,
-                "Solar"
-        );
+                "Solar");
 
         responseDTO = TechnologyComparisonResponseDTO.builder()
                 .technologyName("Solar")
@@ -150,4 +150,26 @@ class TechnologyComparisonControllerUnitTest {
 
         assertThat(result.getStatusCode().value()).isEqualTo(404);
     }
+
+    @Test
+    @DisplayName("Should return technologies by simulation ID")
+    void testShouldReturnTechnologiesBySimulationId() {
+        Long simulationId = 1L;
+
+        TechnologyComparison tech = new TechnologyComparison(
+                "Solar", 85.0, 1000.0, 70.0, "Clean", 50.0, 300.0, "Solar");
+
+        Simulation simulation = new Simulation();
+        simulation.setTechnologies(List.of(tech));
+
+        when(simulationService.getSimulationById(simulationId)).thenReturn(simulation);
+        when(mapper.toResponseDTO(tech)).thenReturn(responseDTO);
+
+        ResponseEntity<List<TechnologyComparisonResponseDTO>> response = controller
+                .getTechnologiesBySimulation(simulationId);
+
+        assertThat(response.getStatusCode().value()).isEqualTo(200);
+        assertThat(response.getBody()).contains(responseDTO);
+    }
+
 }
