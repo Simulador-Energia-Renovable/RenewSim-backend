@@ -43,7 +43,7 @@ class TechnologyComparisonServiceImplUnitTest {
 
     @Test
     @DisplayName("Should add technology when name is unique")
-    void shouldAddTechnologyWhenNameIsUnique() {
+    void testShouldAddTechnologyWhenNameIsUnique() {
         when(repository.existsByTechnologyName("Solar")).thenReturn(false);
         when(repository.save(any())).thenReturn(solar);
 
@@ -55,7 +55,7 @@ class TechnologyComparisonServiceImplUnitTest {
 
     @Test
     @DisplayName("Should throw exception when technology name already exists")
-    void shouldThrowWhenTechnologyNameExists() {
+    void testShouldThrowWhenTechnologyNameExists() {
         when(repository.existsByTechnologyName("Solar")).thenReturn(true);
 
         assertThatThrownBy(() -> service.addTechnology(solar))
@@ -67,7 +67,7 @@ class TechnologyComparisonServiceImplUnitTest {
 
     @Test
     @DisplayName("Should get all technologies")
-    void shouldGetAllTechnologies() {
+    void testShouldGetAllTechnologies() {
         when(repository.findAll()).thenReturn(List.of(solar));
 
         List<TechnologyComparison> result = service.getAllTechnologies();
@@ -78,7 +78,7 @@ class TechnologyComparisonServiceImplUnitTest {
 
     @Test
     @DisplayName("Should get technology by ID")
-    void shouldGetById() {
+    void testShouldGetById() {
         when(repository.findById(1L)).thenReturn(Optional.of(solar));
 
         Optional<TechnologyComparison> result = service.getTechnologyById(1L);
@@ -89,7 +89,7 @@ class TechnologyComparisonServiceImplUnitTest {
 
     @Test
     @DisplayName("Should delete existing technology")
-    void shouldDeleteTechnology() {
+    void testShouldDeleteTechnology() {
         when(repository.existsById(1L)).thenReturn(true);
 
         service.deleteTechnology(1L);
@@ -99,7 +99,7 @@ class TechnologyComparisonServiceImplUnitTest {
 
     @Test
     @DisplayName("Should throw when deleting nonexistent technology")
-    void shouldThrowWhenDeletingNonexistent() {
+    void testShouldThrowWhenDeletingNonexistent() {
         when(repository.existsById(999L)).thenReturn(false);
 
         assertThatThrownBy(() -> service.deleteTechnology(999L))
@@ -111,7 +111,7 @@ class TechnologyComparisonServiceImplUnitTest {
 
     @Test
     @DisplayName("Should filter technologies by energy type")
-    void shouldFindByEnergyType() {
+    void testShouldFindByEnergyType() {
         when(repository.findByEnergyType("Solar")).thenReturn(List.of(solar));
 
         List<TechnologyComparison> result = service.getTechnologiesByEnergyType("Solar");
