@@ -1,14 +1,13 @@
 package com.renewsim.backend.technologyComparison;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import com.renewsim.backend.simulation.Simulation;
+import com.renewsim.backend.simulation.SimulationService;
+import com.renewsim.backend.technologyComparison.dto.TechnologyComparisonRequestDTO;
+import com.renewsim.backend.technologyComparison.dto.TechnologyComparisonResponseDTO;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-
-import com.renewsim.backend.simulation.Simulation;
-import com.renewsim.backend.simulation.SimulationService;
-
-import jakarta.validation.Valid;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -17,19 +16,19 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/technologies")
 public class TechnologyComparisonController {
 
+    private final TechnologyComparisonUseCase useCase;
     private final TechnologyComparisonService service;
     private final SimulationService simulationService;
     private final TechnologyComparisonMapper mapper;
 
-    @Autowired
-    public TechnologyComparisonController(TechnologyComparisonService service, SimulationService simulationService,
-            TechnologyComparisonMapper mapper) {
+    public TechnologyComparisonController(TechnologyComparisonUseCase useCase, TechnologyComparisonService service,
+            SimulationService simulationService, TechnologyComparisonMapper mapper) {
+        this.useCase = useCase;
         this.service = service;
         this.simulationService = simulationService;
         this.mapper = mapper;
     }
 
-    // Obtener todas las tecnologías
     @GetMapping
     public ResponseEntity<List<TechnologyComparisonResponseDTO>> getAllTechnologies() {
         List<TechnologyComparisonResponseDTO> responseList = service.getAllTechnologies()
@@ -39,7 +38,6 @@ public class TechnologyComparisonController {
         return ResponseEntity.ok(responseList);
     }
 
-    // Obtener una tecnología por ID
     @GetMapping("/{id}")
     public ResponseEntity<TechnologyComparisonResponseDTO> getTechnologyById(@PathVariable Long id) {
         return service.getTechnologyById(id)
@@ -48,31 +46,32 @@ public class TechnologyComparisonController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    // Agregar una nueva tecnología
+    @GetMapping("/type/{energyType}")
+    public ResponseEntity<List<TechnologyComparisonResponseDTO>> getTechnologiesByType(
+            @PathVariable String energyType) {
+        return ResponseEntity.ok(useCase.filterByType(energyType));
+    }
+
     @PostMapping
     public ResponseEntity<TechnologyComparisonResponseDTO> addTechnology(
             @Valid @RequestBody TechnologyComparisonRequestDTO requestDTO) {
         try {
-            TechnologyComparison technology = mapper.toEntity(requestDTO);
-            TechnologyComparison savedTechnology = service.addTechnology(technology);
-            return ResponseEntity.ok(mapper.toResponseDTO(savedTechnology));
+            return ResponseEntity.ok(useCase.createTechnology(requestDTO));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();
         }
     }
 
-    // Eliminar una tecnología por ID
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteTechnology(@PathVariable Long id) {
         try {
-            service.deleteTechnology(id);
+            useCase.deleteTechnology(id);
             return ResponseEntity.noContent().build();
         } catch (IllegalArgumentException e) {
             return ResponseEntity.notFound().build();
         }
     }
 
-    // Obtener tecnologías asociadas a una simulación
     @GetMapping("/simulation/{simulationId}")
     @PreAuthorize("hasAuthority('SCOPE_read:simulations')")
     public ResponseEntity<List<TechnologyComparisonResponseDTO>> getTechnologiesBySimulation(
@@ -81,7 +80,6 @@ public class TechnologyComparisonController {
         List<TechnologyComparisonResponseDTO> dtos = simulation.getTechnologies().stream()
                 .map(mapper::toResponseDTO)
                 .collect(Collectors.toList());
-
         return ResponseEntity.ok(dtos);
     }
 }

@@ -1,45 +1,19 @@
 package com.renewsim.backend.technologyComparison;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
 
-@Service
-public class TechnologyComparisonService {
+public interface TechnologyComparisonService {
+    
+    List<TechnologyComparison> getAllTechnologies();
 
-    private final TechnologyComparisonRepository repository;
+    Optional<TechnologyComparison> getTechnologyById(Long id);
 
-    @Autowired
-    public TechnologyComparisonService(TechnologyComparisonRepository repository) {
-        this.repository = repository;
-    }
+    TechnologyComparison addTechnology(TechnologyComparison technology);
 
-    // Obtener todas las tecnologías
-    public List<TechnologyComparison> getAllTechnologies() {
-        return repository.findAll();
-    }
+    void deleteTechnology(Long id);
 
-    // Obtener una tecnología por ID
-    public Optional<TechnologyComparison> getTechnologyById(Long id) {
-        return repository.findById(id);
-    }
-
-    // Agregar nueva tecnología
-    public TechnologyComparison addTechnology(TechnologyComparison technology) {
-        if (repository.existsByTechnologyName(technology.getTechnologyName())) {
-            throw new IllegalArgumentException("Technology with this name already exists.");
-        }
-        return repository.save(technology);
-    }
-
-    // Eliminar una tecnología por ID
-    public void deleteTechnology(Long id) {
-        if (!repository.existsById(id)) {
-            throw new IllegalArgumentException("Technology with ID " + id + " does not exist.");
-        }
-        repository.deleteById(id);
-    }
+    List<TechnologyComparison> getTechnologiesByEnergyType(String energyType);
 }
 

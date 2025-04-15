@@ -150,6 +150,7 @@ public class TechnologyComparison {
                 ", environmentalImpact='" + environmentalImpact + '\'' +
                 ", co2Reduction=" + co2Reduction +
                 ", energyProduction=" + energyProduction +
+                ", energyType='" + energyType + '\'' +
                 '}';
     }
 }

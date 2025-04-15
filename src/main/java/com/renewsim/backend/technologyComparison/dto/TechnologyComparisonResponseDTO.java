@@ -1,4 +1,4 @@
-package com.renewsim.backend.technologyComparison;
+package com.renewsim.backend.technologyComparison.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -18,4 +18,6 @@ public class TechnologyComparisonResponseDTO {
     private String environmentalImpact;
     private Double co2Reduction;
     private Double energyProduction;
+    private String energyType; 
 }
+

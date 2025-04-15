@@ -2,6 +2,9 @@ package com.renewsim.backend.technologyComparison;
 
 import org.springframework.stereotype.Component;
 
+import com.renewsim.backend.technologyComparison.dto.TechnologyComparisonRequestDTO;
+import com.renewsim.backend.technologyComparison.dto.TechnologyComparisonResponseDTO;
+
 @Component
 public class TechnologyComparisonMapper {
 
@@ -14,6 +17,7 @@ public class TechnologyComparisonMapper {
                 .environmentalImpact(entity.getEnvironmentalImpact())
                 .co2Reduction(entity.getCo2Reduction())
                 .energyProduction(entity.getEnergyProduction())
+                .energyType(entity.getEnergyType())
                 .build();
     }
 
