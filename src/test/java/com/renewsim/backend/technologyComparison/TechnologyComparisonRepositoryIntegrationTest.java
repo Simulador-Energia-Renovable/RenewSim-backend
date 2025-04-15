@@ -15,7 +15,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @DataJpaTest
 @ActiveProfiles("test")
 @DisplayName("Integration tests for TechnologyComparisonRepository")
-public class TechnologyComparisonRepositoryTest {
+public class TechnologyComparisonRepositoryIntegrationTest {
 
     @Autowired
     private TechnologyComparisonRepository repository;
