@@ -172,4 +172,18 @@ class TechnologyComparisonControllerUnitTest {
         assertThat(response.getBody()).contains(responseDTO);
     }
 
+    @Test
+    @DisplayName("Should return technologies filtered by energy type")
+    void testShouldReturnTechnologiesByType() {
+        String energyType = "Solar";
+
+        when(useCase.filterByType(energyType)).thenReturn(List.of(responseDTO));
+
+        ResponseEntity<List<TechnologyComparisonResponseDTO>> response = controller.getTechnologiesByType(energyType);
+
+        assertThat(response.getStatusCode().value()).isEqualTo(200);
+        assertThat(response.getBody()).contains(responseDTO);
+        verify(useCase).filterByType(energyType);
+    }
+
 }
