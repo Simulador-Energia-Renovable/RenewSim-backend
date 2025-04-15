@@ -23,15 +23,14 @@ public class TechnologyComparisonController {
     private final SimulationService simulationService;
     private final TechnologyComparisonMapper mapper;
 
-    @Autowired
-    public TechnologyComparisonController(TechnologyComparisonService service, SimulationService simulationService,
+    public TechnologyComparisonController(TechnologyComparisonService service,
+            SimulationService simulationService,
             TechnologyComparisonMapper mapper) {
         this.service = service;
         this.simulationService = simulationService;
         this.mapper = mapper;
     }
 
-    // Obtener todas las tecnologías
     @GetMapping
     public ResponseEntity<List<TechnologyComparisonResponseDTO>> getAllTechnologies() {
         List<TechnologyComparisonResponseDTO> responseList = service.getAllTechnologies()
@@ -41,7 +40,6 @@ public class TechnologyComparisonController {
         return ResponseEntity.ok(responseList);
     }
 
-    // Obtener una tecnología por ID
     @GetMapping("/{id}")
     public ResponseEntity<TechnologyComparisonResponseDTO> getTechnologyById(@PathVariable Long id) {
         return service.getTechnologyById(id)
@@ -50,7 +48,15 @@ public class TechnologyComparisonController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    // Agregar una nueva tecnología
+    @GetMapping("/type/{energyType}")
+    public ResponseEntity<List<TechnologyComparisonResponseDTO>> getTechnologiesByType(
+            @PathVariable String energyType) {
+        List<TechnologyComparisonResponseDTO> dtos = service.getTechnologiesByEnergyType(energyType).stream()
+                .map(mapper::toResponseDTO)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(dtos);
+    }
+
     @PostMapping
     public ResponseEntity<TechnologyComparisonResponseDTO> addTechnology(
             @Valid @RequestBody TechnologyComparisonRequestDTO requestDTO) {
@@ -63,7 +69,6 @@ public class TechnologyComparisonController {
         }
     }
 
-    // Eliminar una tecnología por ID
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteTechnology(@PathVariable Long id) {
         try {
@@ -74,7 +79,6 @@ public class TechnologyComparisonController {
         }
     }
 
-    // Obtener tecnologías asociadas a una simulación
     @GetMapping("/simulation/{simulationId}")
     @PreAuthorize("hasAuthority('SCOPE_read:simulations')")
     public ResponseEntity<List<TechnologyComparisonResponseDTO>> getTechnologiesBySimulation(
