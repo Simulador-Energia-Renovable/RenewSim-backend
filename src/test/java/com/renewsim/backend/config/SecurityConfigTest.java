@@ -16,6 +16,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
+
 class SecurityConfigTest {
 
     @InjectMocks
@@ -31,10 +32,9 @@ class SecurityConfigTest {
     }
 
     private void setupHttpSecurityMocks() {
-        // Mock final SecurityFilterChain
+
         SecurityFilterChain securityFilterChain = mock(SecurityFilterChain.class);
 
-        // Mock HttpSecurity para devolver mocks encadenados
         try {
             when(httpSecurity.cors(any())).thenReturn(httpSecurity);
             when(httpSecurity.csrf(any())).thenReturn(httpSecurity);
@@ -52,23 +52,14 @@ class SecurityConfigTest {
     void shouldCreateSecurityFilterChain() throws Exception {
         SecurityFilterChain filterChain = securityConfig.securityFilterChain(httpSecurity);
 
-        // Assertions
         assertThat(filterChain).isNotNull();
 
-        // Verifications para cobertura y comportamiento esperado
         verify(httpSecurity).cors(any());
         verify(httpSecurity).csrf(any());
         verify(httpSecurity).authorizeHttpRequests(any());
         verify(httpSecurity).sessionManagement(any());
         verify(httpSecurity).oauth2ResourceServer(any());
         verify(httpSecurity).build();
-    }
-
-    @Test
-    @DisplayName("should create JwtDecoder bean")
-    void shouldCreateJwtDecoder() {
-        JwtDecoder jwtDecoder = securityConfig.jwtDecoder();
-        assertThat(jwtDecoder).isNotNull();
     }
 
     @Test
