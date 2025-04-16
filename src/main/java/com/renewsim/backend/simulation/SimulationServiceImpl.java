@@ -20,6 +20,8 @@ import com.renewsim.backend.simulation.dto.NormalizationStatsDTO;
 import com.renewsim.backend.simulation.dto.SimulationHistoryDTO;
 import com.renewsim.backend.simulation.dto.SimulationRequestDTO;
 import com.renewsim.backend.simulation.dto.SimulationResponseDTO;
+import com.renewsim.backend.simulation.logic.SimulationCalculator;
+import com.renewsim.backend.simulation.logic.SimulationValidator;
 import com.renewsim.backend.technologyComparison.TechnologyComparison;
 import com.renewsim.backend.technologyComparison.TechnologyComparisonRepository;
 import com.renewsim.backend.technologyComparison.dto.TechnologyComparisonResponseDTO;
@@ -34,29 +36,22 @@ public class SimulationServiceImpl implements SimulationService {
     private final UserRepository userRepository;
     private final TechnologyComparisonRepository technologyComparisonRepository;
     private final SimulationMapper simulationMapper;
+    private final SimulationValidator simulationValidator;
+    private final SimulationCalculator simulationCalculator;
 
-    // ✅ Simulate and save
     @Override
-    @Transactional
+    @Transactional  
     public SimulationResponseDTO simulateAndSave(SimulationRequestDTO dto) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        String username = auth.getName();
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado"));
 
-        // Validations
-        if (dto.getProjectSize() <= 0 || dto.getProjectSize() > 500) {
-            throw new IllegalArgumentException("El tamaño del proyecto debe ser entre 1 y 500 m².");
-        }
-        if (dto.getBudget() <= 0) {
-            throw new IllegalArgumentException("El presupuesto debe ser mayor que cero.");
-        }
-        if (dto.getEnergyConsumption() < 50 || dto.getEnergyConsumption() > 100000) {
-            throw new IllegalArgumentException("El consumo energético debe estar entre 50 y 100000 kWh/mes.");
-        }
+        // Validación de entrada
+        simulationValidator.validate(dto);
 
-        List<TechnologyComparison> selectedTechnologies = technologyComparisonRepository
-                .findByEnergyType(dto.getEnergyType());
+        // Tecnologías por tipo
+        List<TechnologyComparison> selectedTechnologies =
+                technologyComparisonRepository.findByEnergyType(dto.getEnergyType());
 
         List<TechnologyComparisonResponseDTO> technologyDTOs = selectedTechnologies.stream()
                 .map(this::mapToDTO)
@@ -64,30 +59,29 @@ public class SimulationServiceImpl implements SimulationService {
 
         var stats = calculateNormalizationStats(technologyDTOs);
 
+        // Lógica de recomendación (más adelante con TechnologyRecommender)
         String recommendedTechnology = technologyDTOs.stream()
                 .max(Comparator.comparingDouble(tech -> calculateScoreDynamic(tech, stats)))
                 .map(TechnologyComparisonResponseDTO::getTechnologyName)
                 .orElse("No recommendation available");
 
-        double irradiance = getIrradiance(dto);
-        double efficiency = getEfficiency(dto.getEnergyType());
+        // Cálculos
+        double energyGenerated = simulationCalculator.calculateEnergyGenerated(dto);
+        double estimatedSavings = simulationCalculator.calculateEstimatedSavings(energyGenerated);
+        double returnOnInvestment = simulationCalculator.calculateROI(dto.getBudget(), estimatedSavings);
 
-        double energyGenerated = irradiance * efficiency * dto.getProjectSize() * 365;
-        double estimatedSavings = energyGenerated * 0.2;
-        double returnOnInvestment = estimatedSavings > 0 ? dto.getBudget() / estimatedSavings : 0;
-
-        Simulation simulation = new Simulation();
-        simulation.setLocation(dto.getLocation());
-        simulation.setEnergyType(dto.getEnergyType());
-        simulation.setProjectSize(dto.getProjectSize());
-        simulation.setBudget(dto.getBudget());
-        simulation.setEnergyConsumption(dto.getEnergyConsumption());
-        simulation.setEnergyGenerated(energyGenerated);
-        simulation.setEstimatedSavings(estimatedSavings);
-        simulation.setReturnOnInvestment(returnOnInvestment);
-        simulation.setUser(user);
-        simulation.setTechnologies(selectedTechnologies);
-        
+        Simulation simulation = Simulation.builder()
+                .location(dto.getLocation())
+                .energyType(dto.getEnergyType())
+                .projectSize(dto.getProjectSize())
+                .budget(dto.getBudget())
+                .energyConsumption(dto.getEnergyConsumption())
+                .energyGenerated(energyGenerated)
+                .estimatedSavings(estimatedSavings)
+                .returnOnInvestment(returnOnInvestment)
+                .user(user)
+                .technologies(selectedTechnologies)
+                .build();
 
         Simulation savedSimulation = simulationRepository.save(simulation);
 
@@ -98,7 +92,8 @@ public class SimulationServiceImpl implements SimulationService {
                 savedSimulation.getReturnOnInvestment(),
                 savedSimulation.getTimestamp(),
                 technologyDTOs,
-                recommendedTechnology);
+                recommendedTechnology
+        );
     }
 
     // Calculate simulation without saving
