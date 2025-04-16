@@ -1,6 +1,5 @@
 package com.renewsim.backend.simulation.dto;
 
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -20,4 +19,5 @@ public class NormalizationStatsDTO {
     private double minEfficiency;
     private double maxEfficiency;
 }
+
 
