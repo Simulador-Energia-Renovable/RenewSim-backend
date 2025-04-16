@@ -31,7 +31,7 @@ class SimulationIntegrationTest {
 
     @Test
     @DisplayName("Should persist simulation with user and technologies")
-    void shouldPersistSimulationCorrectly() {
+    void testShouldPersistSimulationCorrectly() {
 
         User user = new User();
         user.setUsername("jane@example.com");
@@ -75,7 +75,7 @@ class SimulationIntegrationTest {
 
     @Test
     @DisplayName("Should fail when required fields are missing")
-    void shouldFailWhenRequiredFieldsAreMissing() {
+    void testShouldFailWhenRequiredFieldsAreMissing() {
         Simulation sim = new Simulation(); 
 
         assertThrows(Exception.class, () -> simulationRepository.saveAndFlush(sim));
