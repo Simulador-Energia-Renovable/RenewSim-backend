@@ -34,7 +34,7 @@ class SimulationCalculatorTest {
 
     @Test
     @DisplayName("Should calculate energy generated for solar")
-    void shouldCalculateEnergyForSolar() {
+    void testShouldCalculateEnergyForSolar() {
         SimulationRequestDTO dto = createDTO("solar", 10);
         double energy = calculator.calculateEnergyGenerated(dto);
         assertThat(energy).isEqualTo(5.0 * 0.18 * 10 * 365);
@@ -42,7 +42,7 @@ class SimulationCalculatorTest {
 
     @Test
     @DisplayName("Should calculate energy generated for wind")
-    void shouldCalculateEnergyForWind() {
+    void testShouldCalculateEnergyForWind() {
         SimulationRequestDTO dto = createDTO("wind", 20);
         double energy = calculator.calculateEnergyGenerated(dto);
         assertThat(energy).isEqualTo(6.0 * 0.40 * 20 * 365);
@@ -50,7 +50,7 @@ class SimulationCalculatorTest {
 
     @Test
     @DisplayName("Should calculate energy generated for hydro")
-    void shouldCalculateEnergyForHydro() {
+    void testShouldCalculateEnergyForHydro() {
         SimulationRequestDTO dto = createDTO("hydro", 15);
         double energy = calculator.calculateEnergyGenerated(dto);
         assertThat(energy).isEqualTo(4.0 * 0.50 * 15 * 365);
@@ -58,28 +58,28 @@ class SimulationCalculatorTest {
 
     @Test
     @DisplayName("Should calculate estimated savings correctly")
-    void shouldCalculateEstimatedSavings() {
+    void testShouldCalculateEstimatedSavings() {
         double savings = calculator.calculateEstimatedSavings(10000);
         assertThat(savings).isEqualTo(2000.0);
     }
 
     @Test
     @DisplayName("Should calculate ROI correctly")
-    void shouldCalculateROI() {
+    void testShouldCalculateROI() {
         double roi = calculator.calculateROI(10000, 2500);
         assertThat(roi).isEqualTo(4.0);
     }
 
     @Test
     @DisplayName("Should return ROI 0 if estimated savings is zero")
-    void shouldHandleZeroEstimatedSavingsInROI() {
+    void testShouldHandleZeroEstimatedSavingsInROI() {
         double roi = calculator.calculateROI(5000, 0);
         assertThat(roi).isZero();
     }
 
     @Test
     @DisplayName("Should throw exception for unknown energy type in getIrradiance")
-    void shouldThrowForUnknownEnergyTypeInIrradiance() {
+    void testShouldThrowForUnknownEnergyTypeInIrradiance() {
         SimulationRequestDTO dto = createDTO("nuclear", 10);
         assertThatThrownBy(() -> calculator.calculateEnergyGenerated(dto))
                 .isInstanceOf(IllegalArgumentException.class)
@@ -88,7 +88,7 @@ class SimulationCalculatorTest {
 
     @Test
     @DisplayName("Should throw exception for unknown energy type in getEfficiency")
-    void shouldThrowForUnknownEnergyTypeInEfficiency() {
+    void testShouldThrowForUnknownEnergyTypeInEfficiency() {
         SimulationRequestDTO dto = createDTO("nuclear", 10);
 
         assertThatThrownBy(() -> calculator.calculateEnergyGenerated(dto))
@@ -97,7 +97,7 @@ class SimulationCalculatorTest {
 
     @Test
     @DisplayName("Should handle edge case: zero project size")
-    void shouldReturnZeroEnergyIfProjectSizeIsZero() {
+    void testShouldReturnZeroEnergyIfProjectSizeIsZero() {
         SimulationRequestDTO dto = createDTO("solar", 0);
         double result = calculator.calculateEnergyGenerated(dto);
         assertThat(result).isZero();
@@ -105,11 +105,21 @@ class SimulationCalculatorTest {
 
     @Test
     @DisplayName("Should handle edge case: negative climate values")
-    void shouldCalculateEnergyWithNegativeClimateData() {
+    void testShouldCalculateEnergyWithNegativeClimateData() {
         climate.setIrradiance(-3.0);
         SimulationRequestDTO dto = createDTO("solar", 5);
         double energy = calculator.calculateEnergyGenerated(dto);
         assertThat(energy).isLessThan(0);
     }
-}
 
+    @Test
+    @DisplayName("Should throw exception for unknown energy type in getEfficiency only")
+    void testShouldThrowForUnknownEnergyTypeInGetEfficiency() {
+
+        assertThatThrownBy(() -> calculator.calculateROI(1000, calculator.calculateEstimatedSavings(
+                calculator.calculateEnergyGenerated(createDTO("desconocido", 10)))))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Tipo de energía no reconocido");
+    }
+
+}
