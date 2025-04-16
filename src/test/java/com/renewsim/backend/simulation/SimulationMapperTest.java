@@ -42,5 +42,18 @@ class SimulationMapperTest {
         assertThat(dto.getReturnOnInvestment()).isEqualTo(2.5);
         assertThat(dto.getTimestamp()).isEqualTo(LocalDateTime.of(2024, 4, 15, 12, 0));
     }
-}
 
+    @Test
+    @DisplayName("Should map null fields without throwing exception")
+    void testShouldMapEvenWithNullFields() {
+        Simulation sim = new Simulation();
+
+        SimulationHistoryDTO dto = simulationMapper.toHistoryDTO(sim);
+
+        assertThat(dto.getLocation()).isNull();
+        assertThat(dto.getTimestamp()).isNull();
+    }
+
+    
+
+}
