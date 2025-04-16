@@ -1,7 +1,5 @@
 package com.renewsim.backend.config;
 
-import java.nio.charset.StandardCharsets;
-
 import javax.crypto.spec.SecretKeySpec;
 
 import lombok.RequiredArgsConstructor;
@@ -20,41 +18,42 @@ import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.beans.factory.annotation.Value;
+import io.jsonwebtoken.io.Decoders;
 
 import com.renewsim.backend.security.JwtUtils;
 
 @Configuration
 @RequiredArgsConstructor
-public  class SecurityConfig {
+public class SecurityConfig {
 
     private final JwtUtils jwtUtils;
+
+    @Value("${jwt.secret}")
+    private String jwtSecret;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-            .cors(cors -> {}) 
-            .csrf(AbstractHttpConfigurer::disable)
-            .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/v1/auth/**").permitAll()
-                .requestMatchers(HttpMethod.GET, "/api/v1/simulation/**").hasAuthority("SCOPE_read:simulations")
-                .requestMatchers(HttpMethod.POST, "/api/v1/simulation").hasAuthority("SCOPE_write:simulations")
-                .requestMatchers("/api/v1/admin/**").hasAuthority("SCOPE_manage:users")
-                .anyRequest().authenticated()
-            )
-            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .oauth2ResourceServer(oauth2 -> oauth2
-                .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter()))
-            );
+                .cors(cors -> {
+                })
+                .csrf(AbstractHttpConfigurer::disable)
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/api/v1/auth/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/simulation/**").hasAuthority("SCOPE_read:simulations")
+                        .requestMatchers(HttpMethod.POST, "/api/v1/simulation").hasAuthority("SCOPE_write:simulations")
+                        .requestMatchers("/api/v1/admin/**").hasAuthority("SCOPE_manage:users")
+                        .anyRequest().authenticated())
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .oauth2ResourceServer(oauth2 -> oauth2
+                        .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter())));
 
         return http.build();
     }
 
-
     @Bean
     public JwtDecoder jwtDecoder() {
-       
-        String secret = "J6s8wQ0eK2rLdP9yXbTmGhV7zM9aFgRk";
-        byte[] keyBytes = secret.getBytes(StandardCharsets.UTF_8);
+        byte[] keyBytes = Decoders.BASE64.decode(jwtSecret);
         SecretKeySpec secretKey = new SecretKeySpec(keyBytes, "HmacSHA256");
         return NimbusJwtDecoder.withSecretKey(secretKey).build();
     }
@@ -68,8 +67,8 @@ public  class SecurityConfig {
     public RoleHierarchy roleHierarchy() {
         RoleHierarchyImpl roleHierarchy = new RoleHierarchyImpl();
         String hierarchy = """
-            ROLE_ADMIN > ROLE_USER           
-            """;
+                ROLE_ADMIN > ROLE_USER
+                """;
         roleHierarchy.setHierarchy(hierarchy);
         return roleHierarchy;
     }
@@ -85,4 +84,3 @@ public  class SecurityConfig {
         return converter;
     }
 }
-
