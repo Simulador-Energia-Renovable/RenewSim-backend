@@ -40,7 +40,7 @@ public class SimulationServiceImpl implements SimulationService {
     private final SimulationCalculator simulationCalculator;
 
     @Override
-    @Transactional  
+    @Transactional
     public SimulationResponseDTO simulateAndSave(SimulationRequestDTO dto) {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         User user = userRepository.findByUsername(username)
@@ -50,8 +50,8 @@ public class SimulationServiceImpl implements SimulationService {
         simulationValidator.validate(dto);
 
         // Tecnologías por tipo
-        List<TechnologyComparison> selectedTechnologies =
-                technologyComparisonRepository.findByEnergyType(dto.getEnergyType());
+        List<TechnologyComparison> selectedTechnologies = technologyComparisonRepository
+                .findByEnergyType(dto.getEnergyType());
 
         List<TechnologyComparisonResponseDTO> technologyDTOs = selectedTechnologies.stream()
                 .map(this::mapToDTO)
@@ -92,23 +92,22 @@ public class SimulationServiceImpl implements SimulationService {
                 savedSimulation.getReturnOnInvestment(),
                 savedSimulation.getTimestamp(),
                 technologyDTOs,
-                recommendedTechnology
-        );
+                recommendedTechnology);
     }
 
-    // Calculate simulation without saving
     @Override
     @Cacheable(value = "simulations", key = "#dto.hashCode()")
     public SimulationResponseDTO calculateSimulation(SimulationRequestDTO dto) {
-        double irradiance = getIrradiance(dto);
-        double efficiency = getEfficiency(dto.getEnergyType());
 
+        // Obtener tecnologías disponibles
         List<TechnologyComparisonResponseDTO> technologyDTOs = technologyComparisonRepository.findAll().stream()
                 .map(this::mapToDTO)
                 .collect(Collectors.toList());
 
+        // Calcular estadísticas de normalización
         var stats = calculateNormalizationStats(technologyDTOs);
 
+        // Recomendación simple basada en score
         String recommendedTechnology = technologyDTOs.isEmpty()
                 ? "No hay tecnologías disponibles para recomendar."
                 : technologyDTOs.stream()
@@ -116,9 +115,10 @@ public class SimulationServiceImpl implements SimulationService {
                         .map(TechnologyComparisonResponseDTO::getTechnologyName)
                         .orElse("No se pudo determinar una recomendación.");
 
-        double energyGenerated = irradiance * efficiency * dto.getProjectSize() * 365;
-        double estimatedSavings = energyGenerated * 0.2;
-        double returnOnInvestment = estimatedSavings > 0 ? dto.getBudget() / estimatedSavings : 0;
+        // Cálculos usando SimulationCalculator
+        double energyGenerated = simulationCalculator.calculateEnergyGenerated(dto);
+        double estimatedSavings = simulationCalculator.calculateEstimatedSavings(energyGenerated);
+        double returnOnInvestment = simulationCalculator.calculateROI(dto.getBudget(), estimatedSavings);
 
         return SimulationResponseDTO.builder()
                 .simulationId(null)
