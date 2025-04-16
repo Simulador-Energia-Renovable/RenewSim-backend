@@ -54,6 +54,20 @@ class SimulationMapperTest {
         assertThat(dto.getTimestamp()).isNull();
     }
 
-    
+    @Test
+    @DisplayName("Should map null fields without throwing exception")
+    void shouldMapEvenWithNullFields() {
+        Simulation emptySim = new Simulation();
+
+        SimulationHistoryDTO dto = simulationMapper.toHistoryDTO(emptySim);
+
+        assertThat(dto.getId()).isNull();
+        assertThat(dto.getLocation()).isNull();
+        assertThat(dto.getEnergyType()).isNull();
+        assertThat(dto.getEnergyGenerated()).isEqualTo(0.0);
+        assertThat(dto.getEstimatedSavings()).isEqualTo(0.0);
+        assertThat(dto.getReturnOnInvestment()).isEqualTo(0.0);
+        assertThat(dto.getTimestamp()).isNull();
+    }
 
 }
