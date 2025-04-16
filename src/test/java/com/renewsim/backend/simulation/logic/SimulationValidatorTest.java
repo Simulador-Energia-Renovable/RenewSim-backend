@@ -24,14 +24,14 @@ class SimulationValidatorTest {
 
     @Test
     @DisplayName("Should validate a correct SimulationRequestDTO")
-    void shouldValidateCorrectDTO() {
+    void testShouldValidateCorrectDTO() {
         assertThatCode(() -> validator.validate(dto))
                 .doesNotThrowAnyException();
     }
 
     @Test
     @DisplayName("Should fail when project size is zero")
-    void shouldFailWhenProjectSizeIsZero() {
+    void testShouldFailWhenProjectSizeIsZero() {
         dto.setProjectSize(0);
         assertThatThrownBy(() -> validator.validate(dto))
                 .isInstanceOf(IllegalArgumentException.class)
@@ -40,7 +40,7 @@ class SimulationValidatorTest {
 
     @Test
     @DisplayName("Should fail when project size is negative")
-    void shouldFailWhenProjectSizeIsNegative() {
+    void testShouldFailWhenProjectSizeIsNegative() {
         dto.setProjectSize(-50);
         assertThatThrownBy(() -> validator.validate(dto))
                 .isInstanceOf(IllegalArgumentException.class);
@@ -48,7 +48,7 @@ class SimulationValidatorTest {
 
     @Test
     @DisplayName("Should fail when project size exceeds 500")
-    void shouldFailWhenProjectSizeExceedsMax() {
+    void testShouldFailWhenProjectSizeExceedsMax() {
         dto.setProjectSize(501);
         assertThatThrownBy(() -> validator.validate(dto))
                 .isInstanceOf(IllegalArgumentException.class);
@@ -56,7 +56,7 @@ class SimulationValidatorTest {
 
     @Test
     @DisplayName("Should fail when budget is zero")
-    void shouldFailWhenBudgetIsZero() {
+    void testShouldFailWhenBudgetIsZero() {
         dto.setBudget(0);
         assertThatThrownBy(() -> validator.validate(dto))
                 .isInstanceOf(IllegalArgumentException.class)
@@ -65,7 +65,7 @@ class SimulationValidatorTest {
 
     @Test
     @DisplayName("Should fail when budget is negative")
-    void shouldFailWhenBudgetIsNegative() {
+    void testShouldFailWhenBudgetIsNegative() {
         dto.setBudget(-100);
         assertThatThrownBy(() -> validator.validate(dto))
                 .isInstanceOf(IllegalArgumentException.class);
@@ -73,7 +73,7 @@ class SimulationValidatorTest {
 
     @Test
     @DisplayName("Should fail when energy consumption is below 50")
-    void shouldFailWhenConsumptionTooLow() {
+    void testShouldFailWhenConsumptionTooLow() {
         dto.setEnergyConsumption(49);
         assertThatThrownBy(() -> validator.validate(dto))
                 .isInstanceOf(IllegalArgumentException.class)
@@ -82,7 +82,7 @@ class SimulationValidatorTest {
 
     @Test
     @DisplayName("Should fail when energy consumption exceeds 100000")
-    void shouldFailWhenConsumptionTooHigh() {
+    void testShouldFailWhenConsumptionTooHigh() {
         dto.setEnergyConsumption(100001);
         assertThatThrownBy(() -> validator.validate(dto))
                 .isInstanceOf(IllegalArgumentException.class);
@@ -90,7 +90,7 @@ class SimulationValidatorTest {
 
     @Test
     @DisplayName("Should validate edge values correctly")
-    void shouldAllowEdgeValues() {
+    void testShouldAllowEdgeValues() {
         dto.setProjectSize(1);
         dto.setBudget(1);
         dto.setEnergyConsumption(50);
