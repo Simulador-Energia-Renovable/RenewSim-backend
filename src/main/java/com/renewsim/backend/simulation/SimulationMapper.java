@@ -5,10 +5,10 @@ import org.springframework.stereotype.Component;
 import com.renewsim.backend.simulation.dto.SimulationHistoryDTO;
 
 @Component
-public class SimulationMapper {   
+public class SimulationMapper {
 
-        public SimulationHistoryDTO toHistoryDTO(Simulation simulation) {
-            return SimulationHistoryDTO.builder()
+    public SimulationHistoryDTO toHistoryDTO(Simulation simulation) {
+        return SimulationHistoryDTO.builder()
                 .id(simulation.getId())
                 .location(simulation.getLocation())
                 .energyType(simulation.getEnergyType())
@@ -17,8 +17,7 @@ public class SimulationMapper {
                 .returnOnInvestment(simulation.getReturnOnInvestment())
                 .timestamp(simulation.getTimestamp())
                 .build();
-        }
     }
-    
+}  
 
 
