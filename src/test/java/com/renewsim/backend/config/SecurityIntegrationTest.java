@@ -35,18 +35,15 @@ import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
-
 import java.util.Collections;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-
 @SpringBootTest
 @AutoConfigureMockMvc
 @ContextConfiguration
 @ActiveProfiles("test")
-
 class SecurityIntegrationTest {
 
     @Autowired
@@ -69,39 +66,46 @@ class SecurityIntegrationTest {
     @Autowired
     private RoleRepository roleRepository;
 
-@Autowired
-private TechnologyComparisonRepository technologyComparisonRepository;
+    @Autowired
+    private TechnologyComparisonRepository technologyComparisonRepository;
 
-@BeforeEach
-void setUp() {
-    Role userRole = new Role();
-    userRole.setName(RoleName.USER);
-    roleRepository.save(userRole); 
+    @BeforeEach
+    void cleanDatabase() {
+        userRepository.deleteAll();
+        roleRepository.deleteAll();
+        technologyComparisonRepository.deleteAll();
+    }
 
-    User user = new User();
-    user.setUsername("test-user");
-    user.setPassword(passwordEncoder.encode("test-password"));
-    user.setRoles(Collections.singleton(userRole));
+    @BeforeEach
+    void setUp() {
+        Role userRole = new Role();
+        userRole.setName(RoleName.USER);
+        roleRepository.save(userRole);
 
-    userRepository.save(user);
+        User user = new User();
+        user.setUsername("test-user");
+        user.setPassword(passwordEncoder.encode("test-password"));
+        user.setRoles(Collections.singleton(userRole));
+        userRepository.save(user);
 
-    TechnologyComparison tech = new TechnologyComparison();
-    tech.setTechnologyName("Solar Panel");
-    tech.setEnergyType("SOLAR");
-    tech.setInstallationCost(1000.0);
-    tech.setMaintenanceCost(100.0);
-    tech.setEfficiency(85.0);
-    tech.setEnergyProduction(5000.0);
-    tech.setCo2Reduction(500.0);
-    technologyComparisonRepository.save(tech);
+        TechnologyComparison tech = new TechnologyComparison();
+        tech.setTechnologyName("Solar Panel");
+        tech.setEnergyType("SOLAR");
+        tech.setInstallationCost(1000.0);
+        tech.setMaintenanceCost(100.0);
+        tech.setEfficiency(85.0);
+        tech.setEnergyProduction(5000.0);
+        tech.setCo2Reduction(500.0);
+        technologyComparisonRepository.save(tech);
 
-    this.mockMvc = MockMvcBuilders.webAppContextSetup(context)
-            .apply(SecurityMockMvcConfigurers.springSecurity())
-            .build();
-}
+        this.mockMvc = MockMvcBuilders.webAppContextSetup(context)
+                .apply(SecurityMockMvcConfigurers.springSecurity())
+                .build();
+    }
 
     private String generateJwtToken(String scope) {
-        String secret = "J6s8wQ0eK2rLdP9yXbTmGhV7zM9aFgRk";
+
+        String secret = "This is a very secure secret for testing purpose and secure";
         SecretKey key = new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8), "HmacSHA256");
 
         return Jwts.builder()
@@ -120,17 +124,15 @@ void setUp() {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"username\": \"test-user\", \"password\": \"test-password\"}"))
                 .andExpect(status().isOk());
-
     }
+
     @Test
     @DisplayName("Protected GET /api/v1/simulation requires scope SCOPE_read:simulations")
-    @WithMockUser(username = "test-user", authorities = {"SCOPE_read:simulations"})
+    @WithMockUser(username = "test-user", authorities = { "SCOPE_read:simulations" })
     void shouldAllowAccessToSimulationReadWithProperScope() throws Exception {
-        mockMvc.perform(get("/api/v1/simulation/user")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"username\": \"test-user\", \"password\": \"test-password\"}"))
+        mockMvc.perform(get("/api/v1/simulation/user"))
                 .andExpect(status().isOk());
-    }   
+    }
 
     @Test
     @DisplayName("Protected route should return 403 if user lacks required scope")
@@ -156,7 +158,7 @@ void setUp() {
         mockMvc.perform(get("/api/v1/simulation/test")
                 .header(HttpHeaders.AUTHORIZATION, "Bearer invalid.token.here"))
                 .andExpect(status().isUnauthorized());
-    }    
+    }
 
     @Test
     @WithAnonymousUser
@@ -165,11 +167,4 @@ void setUp() {
         mockMvc.perform(get("/api/v1/simulation/test"))
                 .andExpect(status().isUnauthorized());
     }
-
-    @BeforeEach
-    void cleanDatabase() {
-        userRepository.deleteAll();
-        roleRepository.deleteAll();
-    }
-
 }

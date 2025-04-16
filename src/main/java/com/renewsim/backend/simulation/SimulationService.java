@@ -25,6 +25,4 @@ public interface SimulationService {
     NormalizationStatsDTO getCurrentNormalizationStats();
 
     List<TechnologyComparisonResponseDTO> getAllTechnologies();
-
-
 }

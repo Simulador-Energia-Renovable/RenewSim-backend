@@ -5,11 +5,23 @@ import com.renewsim.backend.technologyComparison.dto.TechnologyComparisonRespons
 
 import java.util.List;
 
+/**
+ * Clase utilitaria para calcular estadísticas de normalización  y puntuar tecnologías basadas en criterios energéticos.
+ */
 public class TechnologyScoringUtil {
 
-    private TechnologyScoringUtil() {      
+    // Pesos configurables (pueden extraerse a properties o constantes)
+    private static final double WEIGHT_CO2 = 0.25;
+    private static final double WEIGHT_ENERGY = 0.30;
+    private static final double WEIGHT_EFFICIENCY = 0.25;
+    private static final double WEIGHT_COST = 0.20;
+
+    private TechnologyScoringUtil() {
     }
 
+    /**
+     * Calcula los valores min y max de cada métrica a partir de una lista de tecnologías.
+     */
     public static NormalizationStatsDTO calculateNormalizationStats(List<TechnologyComparisonResponseDTO> techList) {
         return NormalizationStatsDTO.builder()
                 .minCo2(techList.stream().mapToDouble(TechnologyComparisonResponseDTO::getCo2Reduction).min().orElse(0))
@@ -23,23 +35,24 @@ public class TechnologyScoringUtil {
                 .build();
     }
 
+    /**
+     * Calcula una puntuación ponderada para una tecnología.
+     */
     public static double calculateScoreDynamic(TechnologyComparisonResponseDTO tech, NormalizationStatsDTO stats) {
-        double co2 = tech.getCo2Reduction();
-        double energy = tech.getEnergyProduction();
-        double cost = tech.getInstallationCost();
-        double eff = tech.getEfficiency();
+        double normalizedCo2 = normalize(tech.getCo2Reduction(), stats.getMinCo2(), stats.getMaxCo2());
+        double normalizedEnergy = normalize(tech.getEnergyProduction(), stats.getMinEnergy(), stats.getMaxEnergy());
+        double normalizedCost = normalize(tech.getInstallationCost(), stats.getMinCost(), stats.getMaxCost());
+        double normalizedEff = normalize(tech.getEfficiency(), stats.getMinEfficiency(), stats.getMaxEfficiency());
 
-        double normalizedCo2 = normalize(co2, stats.getMinCo2(), stats.getMaxCo2());
-        double normalizedEnergy = normalize(energy, stats.getMinEnergy(), stats.getMaxEnergy());
-        double normalizedCost = normalize(cost, stats.getMinCost(), stats.getMaxCost());
-        double normalizedEff = normalize(eff, stats.getMinEfficiency(), stats.getMaxEfficiency());
-
-        return (normalizedCo2 * 0.25) +
-               (normalizedEnergy * 0.30) +
-               (normalizedEff * 0.25) -
-               (normalizedCost * 0.20);
+        return (normalizedCo2 * WEIGHT_CO2) +
+               (normalizedEnergy * WEIGHT_ENERGY) +
+               (normalizedEff * WEIGHT_EFFICIENCY) -
+               (normalizedCost * WEIGHT_COST);
     }
 
+    /**
+     * Normaliza un valor dentro de un rango definido.
+     */
     public static double normalize(double value, double min, double max) {
         if (max - min == 0) {
             return 0.0;
@@ -47,3 +60,4 @@ public class TechnologyScoringUtil {
         return (value - min) / (max - min);
     }
 }
+
