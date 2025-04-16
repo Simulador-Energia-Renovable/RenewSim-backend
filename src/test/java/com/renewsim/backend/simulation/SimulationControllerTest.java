@@ -40,7 +40,7 @@ class SimulationControllerTest {
 
     @Test
     @WithMockUser(username = "user@example.com", authorities = "SCOPE_write:simulations")
-    void shouldSimulateAndReturnResponse() throws Exception {
+    void testShouldSimulateAndReturnResponse() throws Exception {
         SimulationRequestDTO request = new SimulationRequestDTO();
         request.setEnergyType("solar");
         request.setProjectSize(100);
@@ -56,15 +56,15 @@ class SimulationControllerTest {
                 .thenReturn(response);
 
         mockMvc.perform(post("/api/v1/simulation")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.energyGenerated").value(10000));
     }
 
     @Test
     @WithMockUser(username = "user@example.com", authorities = "SCOPE_read:simulations")
-    void shouldGetUserSimulations() throws Exception {
+    void testShouldGetUserSimulations() throws Exception {
         SimulationHistoryDTO history = SimulationHistoryDTO.builder()
                 .id(1L)
                 .location("Madrid")
@@ -80,7 +80,7 @@ class SimulationControllerTest {
 
     @Test
     @WithMockUser(authorities = "SCOPE_read:simulations")
-    void shouldGetTechnologiesForSimulation() throws Exception {
+    void testShouldGetTechnologiesForSimulation() throws Exception {
         TechnologyComparisonResponseDTO tech = new TechnologyComparisonResponseDTO();
         tech.setTechnologyName("Solar");
 
@@ -94,7 +94,7 @@ class SimulationControllerTest {
 
     @Test
     @WithMockUser(username = "user@example.com", authorities = "SCOPE_write:simulations")
-    void shouldDeleteUserSimulations() throws Exception {
+    void testShouldDeleteUserSimulations() throws Exception {
         mockMvc.perform(delete("/api/v1/simulation/user"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.message").value("User simulations deleted successfully"));
@@ -104,7 +104,7 @@ class SimulationControllerTest {
 
     @Test
     @WithMockUser(authorities = "SCOPE_read:simulations")
-    void shouldGetNormalizationStats() throws Exception {
+    void testShouldGetNormalizationStats() throws Exception {
         NormalizationStatsDTO stats = NormalizationStatsDTO.builder()
                 .minCo2(1).maxCo2(5)
                 .minEnergy(1000).maxEnergy(5000)
@@ -121,7 +121,7 @@ class SimulationControllerTest {
 
     @Test
     @WithMockUser(authorities = "SCOPE_read:simulations")
-    void shouldGetNormalizedTechnologies() throws Exception {
+    void testShouldGetNormalizedTechnologies() throws Exception {
         NormalizedTechnologyDTO tech = new NormalizedTechnologyDTO();
         tech.setTechnologyName("Wind");
 
@@ -134,7 +134,7 @@ class SimulationControllerTest {
 
     @Test
     @WithMockUser(authorities = "SCOPE_read:simulations")
-    void shouldGetAllTechnologies() throws Exception {
+    void testShouldGetAllTechnologies() throws Exception {
         TechnologyComparisonResponseDTO tech = new TechnologyComparisonResponseDTO();
         tech.setTechnologyName("Hydro");
 
@@ -144,5 +144,21 @@ class SimulationControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].technologyName").value("Hydro"));
     }
-}
 
+    @Test
+    @WithMockUser(username = "user@example.com", authorities = "SCOPE_read:simulations")
+    void testShouldGetSimulationHistory() throws Exception {
+        SimulationHistoryDTO history = SimulationHistoryDTO.builder()
+                .id(2L)
+                .location("Barcelona")
+                .build();
+
+        Mockito.when(simulationUseCase.getUserSimulationHistoryDTOs("user@example.com"))
+                .thenReturn(List.of(history));
+
+        mockMvc.perform(get("/api/v1/simulation/history"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].location").value("Barcelona"));
+    }
+
+}
