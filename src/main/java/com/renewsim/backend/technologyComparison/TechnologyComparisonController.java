@@ -53,6 +53,7 @@ public class TechnologyComparisonController {
     }
 
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<TechnologyComparisonResponseDTO> addTechnology(
             @Valid @RequestBody TechnologyComparisonRequestDTO requestDTO) {
         try {
