@@ -22,6 +22,8 @@ public interface SimulationService {
 
     void deleteSimulationsByUser(String username);
 
+    void deleteSimulationById(Long id);
+
     NormalizationStatsDTO getCurrentNormalizationStats();
 
     List<TechnologyComparisonResponseDTO> getAllTechnologies();
