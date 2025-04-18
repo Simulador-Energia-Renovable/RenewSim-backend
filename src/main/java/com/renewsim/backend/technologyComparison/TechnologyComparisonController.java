@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/api/technologies")
+@RequestMapping("/api/v1/technologies")
 public class TechnologyComparisonController {
 
     private final TechnologyComparisonUseCase useCase;
