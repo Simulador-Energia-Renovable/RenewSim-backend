@@ -13,13 +13,22 @@ public class SimulationCalculator {
     }
 
     public double calculateEstimatedSavings(double energyGenerated) {
-        return energyGenerated * 0.2;
+        double realisticPricePerKWh = 0.12; 
+        return energyGenerated * realisticPricePerKWh;
     }
+    
 
     public double calculateROI(double budget, double estimatedSavings) {
-        return estimatedSavings > 0 ? budget / estimatedSavings : 0;
-    }
+        if (estimatedSavings <= 0) {
+            return 0;         }
+    
+        double roi = budget / estimatedSavings;
+ 
+        roi = Math.max(roi, 0.5);
 
+        return Math.round(roi * 100.0) / 100.0;
+    }
+    
     private double getIrradiance(SimulationRequestDTO dto) {
         return switch (dto.getEnergyType().toLowerCase()) {
             case "solar" -> dto.getClimate().getIrradiance();
