@@ -44,6 +44,14 @@ public class SimulationServiceImpl implements SimulationService {
                 User user = userRepository.findByUsername(username)
                                 .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado"));
 
+                if (dto.getProjectSize() <= 0) {
+                        double estimatedSize = simulationCalculator.estimateProjectSize(
+                                        dto.getEnergyConsumption(),
+                                        dto.getEnergyType(),
+                                        dto.getClimate());
+                        dto.setProjectSize(estimatedSize);
+                }
+
                 simulationValidator.validate(dto);
 
                 List<TechnologyComparison> selectedTechnologies = technologyComparisonRepository
@@ -80,6 +88,7 @@ public class SimulationServiceImpl implements SimulationService {
                                 savedSimulation.getEnergyGenerated(),
                                 savedSimulation.getEstimatedSavings(),
                                 savedSimulation.getReturnOnInvestment(),
+                                savedSimulation.getProjectSize(),
                                 savedSimulation.getTimestamp(),
                                 technologyDTOs,
                                 recommendedTechnology);
