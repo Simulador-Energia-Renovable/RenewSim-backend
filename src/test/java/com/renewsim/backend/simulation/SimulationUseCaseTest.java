@@ -55,6 +55,7 @@ class SimulationUseCaseTest {
                 .minEfficiency(0.1).maxEfficiency(0.3)
                 .build();
     }
+
     @Test
     @DisplayName("Should simulate and save")
     void shouldSimulateAndSave() {
@@ -151,7 +152,14 @@ class SimulationUseCaseTest {
             assertThat(result.get(0).getScore()).isEqualTo(0.8);
         }
     }
+
+    @Test
+    @DisplayName("Should return empty list when user has no simulations")
+    void shouldReturnEmptyHistoryIfNoSimulations() {
+        when(simulationService.getUserSimulations("user")).thenReturn(List.of());
+
+        List<SimulationHistoryDTO> result = simulationUseCase.getUserSimulationHistoryDTOs("user");
+
+        assertThat(result).isEmpty();
+    }
 }
-
-
-
