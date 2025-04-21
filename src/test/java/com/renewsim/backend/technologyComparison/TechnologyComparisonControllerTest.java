@@ -2,7 +2,7 @@ package com.renewsim.backend.technologyComparison;
 
 import com.renewsim.backend.simulation.Simulation;
 import com.renewsim.backend.simulation.SimulationService;
-import com.renewsim.backend.technologyComparison.dto.TechnologyComparisonRequestDTO;
+
 import com.renewsim.backend.technologyComparison.dto.TechnologyComparisonResponseDTO;
 
 import org.junit.jupiter.api.BeforeEach;

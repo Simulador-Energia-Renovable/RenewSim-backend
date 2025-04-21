@@ -32,10 +32,7 @@ class UserServiceImplIntegrationTest {
     private UserService userService;
 
     @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private UserMapper userMapper;
+    private UserRepository userRepository;  
 
     @Autowired
     private RoleRepository roleRepository;
