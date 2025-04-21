@@ -182,4 +182,12 @@ class SimulationServiceImplTest {
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
+     @Test
+    @DisplayName("Should delete simulation by id")
+    void testShouldDeleteSimulationById() {
+        when(simulationRepository.existsById(1L)).thenReturn(true);
+        simulationService.deleteSimulationById(1L);
+        verify(simulationRepository).deleteById(1L);
+    }
+
 }
