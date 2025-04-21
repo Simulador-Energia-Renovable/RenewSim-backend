@@ -154,4 +154,13 @@ class SimulationServiceImplTest {
         verify(simulationRepository).findAllByUser(user);
     }
 
+    @Test
+    @DisplayName("Should throw when user not found in getUserSimulations")
+    void testShouldGetUserSimulations_userNotFound() {
+        when(userRepository.findByUsername("user")).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> simulationService.getUserSimulations("user"))
+                .isInstanceOf(UsernameNotFoundException.class);
+    }
+
 }
