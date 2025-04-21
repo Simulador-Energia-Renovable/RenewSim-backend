@@ -162,4 +162,17 @@ class SimulationUseCaseTest {
 
         assertThat(result).isEmpty();
     }
+
+    @Test
+    @DisplayName("Should return empty normalized tech list when no techs available")
+    void shouldReturnEmptyNormalizedTechList() {
+        when(simulationService.getAllTechnologies()).thenReturn(List.of());
+
+        try (MockedStatic<TechnologyScoringUtil> mocked = mockStatic(TechnologyScoringUtil.class)) {
+            mocked.when(() -> TechnologyScoringUtil.calculateNormalizationStats(any()))
+                    .thenReturn(stats); 
+            List<NormalizedTechnologyDTO> result = simulationUseCase.getNormalizedTechnologies();
+            assertThat(result).isEmpty();
+        }
+    }
 }
