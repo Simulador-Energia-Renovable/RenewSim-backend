@@ -7,7 +7,7 @@ import com.renewsim.backend.simulation.logic.SimulationValidator;
 import com.renewsim.backend.simulation.logic.TechnologyRecommender;
 
 import com.renewsim.backend.technologyComparison.TechnologyComparisonRepository;
-
+import com.renewsim.backend.technologyComparison.dto.TechnologyComparisonResponseDTO;
 import com.renewsim.backend.user.User;
 import com.renewsim.backend.user.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -248,7 +248,7 @@ class SimulationServiceImplTest {
     void testShouldThrowWhenDeletingUnknownSimulation() {
         when(simulationRepository.existsById(999L)).thenReturn(false);
         assertThatThrownBy(() -> simulationService.deleteSimulationById(999L))
-                .isInstanceOf(com.renewsim.backend.exception.ResourceNotFoundException.class)
+                .isInstanceOf(ResourceNotFoundException.class)
                 .hasMessageContaining("Simulación no encontrada con ID");
     }
 
@@ -257,7 +257,7 @@ class SimulationServiceImplTest {
     void testShouldThrowIfUsernameNotFoundInUserSimulations() {
         when(userRepository.findByUsername("missingUser")).thenReturn(Optional.empty());
         assertThatThrownBy(() -> simulationService.getUserSimulations("missingUser"))
-                .isInstanceOf(org.springframework.security.core.userdetails.UsernameNotFoundException.class)
+                .isInstanceOf(UsernameNotFoundException.class)
                 .hasMessageContaining("Usuario no encontrado");
     }
 
@@ -266,8 +266,16 @@ class SimulationServiceImplTest {
     void TestShouldThrowIfUsernameNotFoundInDeleteSimulations() {
         when(userRepository.findByUsername("unknown")).thenReturn(Optional.empty());
         assertThatThrownBy(() -> simulationService.deleteSimulationsByUser("unknown"))
-                .isInstanceOf(org.springframework.security.core.userdetails.UsernameNotFoundException.class)
+                .isInstanceOf(UsernameNotFoundException.class)
                 .hasMessageContaining("Usuario no encontrado");
+    }
+
+    @Test
+    @DisplayName("Should return empty list if no technologies exist")
+    void testShouldReturnEmptyWhenNoTechnologiesExist() {
+        when(technologyComparisonRepository.findAll()).thenReturn(List.of());
+        List<TechnologyComparisonResponseDTO> result = simulationService.getAllTechnologies();
+        assertThat(result).isEmpty();
     }
 
 }
