@@ -1,7 +1,8 @@
 package com.renewsim.backend.technologyComparison;
 
+import com.renewsim.backend.simulation.Simulation;
 import com.renewsim.backend.simulation.SimulationService;
-
+import com.renewsim.backend.technologyComparison.dto.TechnologyComparisonRequestDTO;
 import com.renewsim.backend.technologyComparison.dto.TechnologyComparisonResponseDTO;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -100,4 +101,23 @@ class TechnologyComparisonControllerTest {
         mockMvc.perform(get("/api/v1/technologies/type/solar"))
                 .andExpect(status().isOk());
     }
+
+    @Test
+    @WithMockUser(authorities = "SCOPE_read:simulations")
+    @DisplayName("Should return technologies by simulation ID")
+    void shouldReturnTechnologiesBySimulation() throws Exception {
+        Simulation sim = new Simulation();
+        sim.setTechnologies(List.of(new TechnologyComparison()));
+
+        when(simulationService.getSimulationById(1L)).thenReturn(sim);
+        when(mapper.toResponseDTO(any())).thenReturn(
+                TechnologyComparisonResponseDTO.builder().technologyName("Wind").build());
+
+        mockMvc.perform(get("/api/v1/technologies/simulation/1"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].technologyName").value("Wind"));
+    }
+
+    
+
 }
