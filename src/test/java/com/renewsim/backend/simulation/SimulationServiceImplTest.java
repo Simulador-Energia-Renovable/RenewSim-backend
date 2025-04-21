@@ -163,4 +163,14 @@ class SimulationServiceImplTest {
                 .isInstanceOf(UsernameNotFoundException.class);
     }
 
+    @Test
+    @DisplayName("Should get simulation by id")
+    void testShouldGetSimulationById() {
+        when(simulationRepository.findById(1L)).thenReturn(Optional.of(simulation));
+
+        Simulation result = simulationService.getSimulationById(1L);
+
+        assertThat(result).isEqualTo(simulation);
+    }
+
 }
