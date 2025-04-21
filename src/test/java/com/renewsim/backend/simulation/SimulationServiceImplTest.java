@@ -252,4 +252,13 @@ class SimulationServiceImplTest {
                 .hasMessageContaining("Simulación no encontrada con ID");
     }
 
+    @Test
+    @DisplayName("Should throw if username not found in getUserSimulations")
+    void testShouldThrowIfUsernameNotFoundInUserSimulations() {
+        when(userRepository.findByUsername("missingUser")).thenReturn(Optional.empty());
+        assertThatThrownBy(() -> simulationService.getUserSimulations("missingUser"))
+                .isInstanceOf(org.springframework.security.core.userdetails.UsernameNotFoundException.class)
+                .hasMessageContaining("Usuario no encontrado");
+    }
+
 }
