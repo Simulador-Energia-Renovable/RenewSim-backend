@@ -278,4 +278,22 @@ class SimulationServiceImplTest {
         assertThat(result).isEmpty();
     }
 
+    @Test
+    @DisplayName("Should map user simulations to DTOs using mapper")
+    void tetShouldMapSimulationsToDTOsCorrectly() {
+
+        String username = "testuser";
+        Simulation simulation = new Simulation();
+        SimulationHistoryDTO dto = new SimulationHistoryDTO();
+
+        when(userRepository.findByUsername(username)).thenReturn(Optional.of(new User()));
+        when(simulationRepository.findAllByUser(any())).thenReturn(List.of(simulation));
+        when(simulationMapper.toHistoryDTO(simulation)).thenReturn(dto);
+
+        List<SimulationHistoryDTO> result = simulationService.getUserSimulationHistoryDTOs(username);
+
+        assertThat(result).containsExactly(dto);
+        verify(simulationMapper).toHistoryDTO(simulation); 
+    }
+
 }
