@@ -261,4 +261,13 @@ class SimulationServiceImplTest {
                 .hasMessageContaining("Usuario no encontrado");
     }
 
+    @Test
+    @DisplayName("Should throw if username not found in deleteSimulationsByUser")
+    void TestShouldThrowIfUsernameNotFoundInDeleteSimulations() {
+        when(userRepository.findByUsername("unknown")).thenReturn(Optional.empty());
+        assertThatThrownBy(() -> simulationService.deleteSimulationsByUser("unknown"))
+                .isInstanceOf(org.springframework.security.core.userdetails.UsernameNotFoundException.class)
+                .hasMessageContaining("Usuario no encontrado");
+    }
+
 }
