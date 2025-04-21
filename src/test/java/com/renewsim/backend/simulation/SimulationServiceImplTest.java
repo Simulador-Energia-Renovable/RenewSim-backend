@@ -18,6 +18,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 import java.util.List;
 import java.util.Optional;
@@ -91,7 +92,7 @@ class SimulationServiceImplTest {
         SecurityContextHolder.setContext(securityContext);
     }
 
-     @Test
+    @Test
     @DisplayName("Should simulate and save when project size > 0")
     void simulateAndSave_withProjectSize() {
         mockSecurityContext("user");
@@ -116,9 +117,9 @@ class SimulationServiceImplTest {
         request.setProjectSize(0);
         request.setEnergyConsumption(500);
         request.setEnergyType("solar");
-    
+
         mockSecurityContext("user");
-    
+
         when(userRepository.findByUsername("user")).thenReturn(Optional.of(user));
         when(simulationCalculator.estimateProjectSize(500, "solar", request.getClimate())).thenReturn(12.5);
         when(technologyComparisonRepository.findByEnergyType("solar")).thenReturn(List.of());
@@ -127,12 +128,22 @@ class SimulationServiceImplTest {
         when(simulationCalculator.calculateROI(10000, 700)).thenReturn(3.2);
         when(technologyRecommender.recommendTechnology(any(), any())).thenReturn("Solar");
         when(simulationRepository.save(any())).thenReturn(simulation);
-    
-        simulationService.simulateAndSave(request); 
-    
+
+        simulationService.simulateAndSave(request);
+
         assertThat(request.getProjectSize()).isEqualTo(12.5);
         verify(simulationValidator).validate(request);
     }
 
+    @Test
+    @DisplayName("Should throw UsernameNotFoundException if user not found in simulateAndSave")
+    void simulateAndSave_userNotFound() {
+        mockSecurityContext("user");
+        when(userRepository.findByUsername("user")).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> simulationService.simulateAndSave(request))
+                .isInstanceOf(UsernameNotFoundException.class)
+                .hasMessageContaining("Usuario no encontrado");
+    }
 
 }
