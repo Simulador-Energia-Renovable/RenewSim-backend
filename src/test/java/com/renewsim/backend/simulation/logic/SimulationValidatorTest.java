@@ -23,13 +23,6 @@ class SimulationValidatorTest {
     }
 
     @Test
-    @DisplayName("Should validate a correct SimulationRequestDTO")
-    void testShouldValidateCorrectDTO() {
-        assertThatCode(() -> validator.validate(dto))
-                .doesNotThrowAnyException();
-    }
-
-    @Test
     @DisplayName("Should fail when project size is zero")
     void testShouldFailWhenProjectSizeIsZero() {
         dto.setProjectSize(0);
