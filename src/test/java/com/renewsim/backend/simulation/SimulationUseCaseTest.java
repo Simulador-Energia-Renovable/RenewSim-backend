@@ -170,9 +170,24 @@ class SimulationUseCaseTest {
 
         try (MockedStatic<TechnologyScoringUtil> mocked = mockStatic(TechnologyScoringUtil.class)) {
             mocked.when(() -> TechnologyScoringUtil.calculateNormalizationStats(any()))
-                    .thenReturn(stats); 
+                    .thenReturn(stats);
             List<NormalizedTechnologyDTO> result = simulationUseCase.getNormalizedTechnologies();
             assertThat(result).isEmpty();
         }
     }
+
+    @Test
+    @DisplayName("Should return technologies for a given simulation")
+    void shouldReturnTechnologiesForSimulation() {
+        Simulation simulation = new Simulation();
+        simulation.setTechnologies(List.of(new com.renewsim.backend.technologyComparison.TechnologyComparison()));
+
+        when(simulationService.getSimulationById(1L)).thenReturn(simulation);
+        when(technologyComparisonMapper.toResponseDTO(any())).thenReturn(tech);
+
+        List<TechnologyComparisonResponseDTO> result = simulationUseCase.getTechnologiesForSimulation(1L);
+
+        assertThat(result).containsExactly(tech);
+    }
+
 }
