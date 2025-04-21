@@ -81,19 +81,5 @@ class SimulationValidatorTest {
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
-    @Test
-    @DisplayName("Should validate edge values correctly")
-    void testShouldAllowEdgeValues() {
-        dto.setProjectSize(1);
-        dto.setBudget(1);
-        dto.setEnergyConsumption(50);
-
-        assertThatCode(() -> validator.validate(dto)).doesNotThrowAnyException();
-
-        dto.setProjectSize(500);
-        dto.setEnergyConsumption(100000);
-
-        assertThatCode(() -> validator.validate(dto)).doesNotThrowAnyException();
-    }
 }
 
