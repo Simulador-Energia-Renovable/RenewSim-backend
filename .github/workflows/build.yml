@@ -1,4 +1,4 @@
-name: CI - Build and Test Spring Boot App
+name: CI - Build, Test and Coverage Report
 
 on:
   push:
@@ -20,9 +20,16 @@ jobs:
           java-version: '21'
           distribution: 'temurin'
 
-      - name: Compile the project
+      - name: Build the project
         run: mvn clean compile
 
-      - name: Run tests
-        run: mvn test
+      - name: Run tests with JaCoCo coverage
+        run: mvn test jacoco:report
+
+      - name: Upload JaCoCo coverage report
+        uses: actions/upload-artifact@v3
+        with:
+          name: jacoco-report
+          path: target/site/jacoco
+
 
