@@ -122,4 +122,24 @@ class SimulationCalculatorTest {
                 .hasMessageContaining("Tipo de energía no reconocido");
     }
 
+    @Test
+    @DisplayName("Should estimate project size correctly for solar")
+    void testShouldEstimateProjectSizeForSolar() {
+        double monthlyConsumption = 540.0;
+        double expectedSize = 540.0 / (5.0 * 0.18 * 30);
+
+        double result = calculator.estimateProjectSize(monthlyConsumption, "solar", climate);
+
+        assertThat(result).isEqualTo(Math.round(expectedSize * 100.0) / 100.0);
+    }
+
+    @Test
+    @DisplayName("Should throw exception for unknown energy type in estimateProjectSize")
+    void testShouldThrowForUnknownEnergyTypeInEstimateProjectSize() {
+        assertThatThrownBy(() -> calculator.estimateProjectSize(500, "nuclear", climate))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Tipo de energía no reconocido");
+    }
+
+    
 }
