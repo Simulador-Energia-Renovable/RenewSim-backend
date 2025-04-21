@@ -173,4 +173,13 @@ class SimulationServiceImplTest {
         assertThat(result).isEqualTo(simulation);
     }
 
+    @Test
+    @DisplayName("Should throw if simulation not found")
+    void testShouldGetSimulationById_notFound() {
+        when(simulationRepository.findById(1L)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> simulationService.getSimulationById(1L))
+                .isInstanceOf(IllegalArgumentException.class);
+    }
+
 }
