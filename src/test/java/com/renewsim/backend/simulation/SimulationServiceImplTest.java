@@ -94,7 +94,7 @@ class SimulationServiceImplTest {
 
     @Test
     @DisplayName("Should simulate and save when project size > 0")
-    void simulateAndSave_withProjectSize() {
+    void testShouldSimulateAndSave_withProjectSize() {
         mockSecurityContext("user");
         when(userRepository.findByUsername("user")).thenReturn(Optional.of(user));
         when(technologyComparisonRepository.findByEnergyType("solar")).thenReturn(List.of());
@@ -113,7 +113,7 @@ class SimulationServiceImplTest {
 
     @Test
     @DisplayName("Should simulate and estimate project size when size is zero")
-    void simulateAndSave_withEstimatedSize() {
+    void testShouldSimulateAndSave_withEstimatedSize() {
         request.setProjectSize(0);
         request.setEnergyConsumption(500);
         request.setEnergyType("solar");
@@ -137,13 +137,21 @@ class SimulationServiceImplTest {
 
     @Test
     @DisplayName("Should throw UsernameNotFoundException if user not found in simulateAndSave")
-    void simulateAndSave_userNotFound() {
+    void testShouldSimulateAndSave_userNotFound() {
         mockSecurityContext("user");
         when(userRepository.findByUsername("user")).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> simulationService.simulateAndSave(request))
                 .isInstanceOf(UsernameNotFoundException.class)
                 .hasMessageContaining("Usuario no encontrado");
+    }
+
+    @Test
+    @DisplayName("Should get user simulations")
+    void testShouldGetUserSimulations() {
+        when(userRepository.findByUsername("user")).thenReturn(Optional.of(user));
+        simulationService.getUserSimulations("user");
+        verify(simulationRepository).findAllByUser(user);
     }
 
 }
