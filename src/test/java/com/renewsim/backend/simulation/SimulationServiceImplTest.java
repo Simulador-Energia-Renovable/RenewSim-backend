@@ -1,5 +1,6 @@
 package com.renewsim.backend.simulation;
 
+import com.renewsim.backend.exception.ResourceNotFoundException;
 import com.renewsim.backend.simulation.dto.*;
 import com.renewsim.backend.simulation.logic.SimulationCalculator;
 import com.renewsim.backend.simulation.logic.SimulationValidator;
@@ -188,6 +189,16 @@ class SimulationServiceImplTest {
         when(simulationRepository.existsById(1L)).thenReturn(true);
         simulationService.deleteSimulationById(1L);
         verify(simulationRepository).deleteById(1L);
+    }
+
+     @Test
+    @DisplayName("Should throw when deleting simulation by invalid id")
+    void testShouldDeleteSimulationById_notFound() {
+        when(simulationRepository.existsById(1L)).thenReturn(false);
+
+        assertThatThrownBy(() -> simulationService.deleteSimulationById(1L))
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessageContaining("Simulación no encontrada");
     }
 
 }
