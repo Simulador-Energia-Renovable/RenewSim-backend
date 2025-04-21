@@ -110,5 +110,29 @@ class SimulationServiceImplTest {
         verify(simulationRepository).save(any(Simulation.class));
     }
 
+    @Test
+    @DisplayName("Should simulate and estimate project size when size is zero")
+    void simulateAndSave_withEstimatedSize() {
+        request.setProjectSize(0);
+        request.setEnergyConsumption(500);
+        request.setEnergyType("solar");
+    
+        mockSecurityContext("user");
+    
+        when(userRepository.findByUsername("user")).thenReturn(Optional.of(user));
+        when(simulationCalculator.estimateProjectSize(500, "solar", request.getClimate())).thenReturn(12.5);
+        when(technologyComparisonRepository.findByEnergyType("solar")).thenReturn(List.of());
+        when(simulationCalculator.calculateEnergyGenerated(request)).thenReturn(3500.0);
+        when(simulationCalculator.calculateEstimatedSavings(3500)).thenReturn(700.0);
+        when(simulationCalculator.calculateROI(10000, 700)).thenReturn(3.2);
+        when(technologyRecommender.recommendTechnology(any(), any())).thenReturn("Solar");
+        when(simulationRepository.save(any())).thenReturn(simulation);
+    
+        simulationService.simulateAndSave(request); 
+    
+        assertThat(request.getProjectSize()).isEqualTo(12.5);
+        verify(simulationValidator).validate(request);
+    }
+
 
 }
