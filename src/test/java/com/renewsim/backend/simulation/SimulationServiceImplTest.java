@@ -5,7 +5,7 @@ import com.renewsim.backend.simulation.dto.*;
 import com.renewsim.backend.simulation.logic.SimulationCalculator;
 import com.renewsim.backend.simulation.logic.SimulationValidator;
 import com.renewsim.backend.simulation.logic.TechnologyRecommender;
-
+import com.renewsim.backend.technologyComparison.TechnologyComparison;
 import com.renewsim.backend.technologyComparison.TechnologyComparisonRepository;
 import com.renewsim.backend.technologyComparison.dto.TechnologyComparisonResponseDTO;
 import com.renewsim.backend.user.User;
@@ -20,6 +20,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.List;
 import java.util.Optional;
@@ -321,5 +322,32 @@ class SimulationServiceImplTest {
                 .isInstanceOf(UsernameNotFoundException.class)
                 .hasMessageContaining("Usuario no encontrado");
     }   
+
+     @Test
+@DisplayName("Should map TechnologyComparison to DTO correctly")
+void testShouldMapTechnologyComparisonToDTO() {
+    TechnologyComparison tech = new TechnologyComparison();
+    tech.setTechnologyName("Solar");
+    tech.setEfficiency(0.9);
+    tech.setInstallationCost(10000.0);
+    tech.setMaintenanceCost(500.0);
+    tech.setEnvironmentalImpact(String.valueOf(0.1));
+    tech.setCo2Reduction(200.0);
+    tech.setEnergyProduction(4000.0);
+    tech.setEnergyType("solar");
+
+    TechnologyComparisonResponseDTO dto = ReflectionTestUtils.invokeMethod(
+            simulationService, "mapToDTO", tech);
+
+    assertThat(dto.getTechnologyName()).isEqualTo("Solar");
+    assertThat(dto.getEfficiency()).isEqualTo(0.9);
+    assertThat(dto.getInstallationCost()).isEqualTo(10000.0);
+    assertThat(dto.getMaintenanceCost()).isEqualTo(500.0);
+    assertThat(Double.parseDouble(dto.getEnvironmentalImpact())).isCloseTo(0.1, within(0.0001));
+
+    assertThat(dto.getCo2Reduction()).isEqualTo(200.0);
+    assertThat(dto.getEnergyProduction()).isEqualTo(4000.0);
+    assertThat(dto.getEnergyType()).isEqualTo("solar");
+}
 
 }
