@@ -201,4 +201,21 @@ class SimulationServiceImplTest {
                 .hasMessageContaining("Simulación no encontrada");
     }
 
+    @Test
+    @DisplayName("Should calculate simulation without saving")
+    void testShouldCalculateSimulation() {
+        when(technologyComparisonRepository.findAll()).thenReturn(List.of());
+        when(technologyRecommender.recommendTechnology(any(), any())).thenReturn("Solar");
+        when(simulationCalculator.calculateEnergyGenerated(request)).thenReturn(4000.0);
+        when(simulationCalculator.calculateEstimatedSavings(4000.0)).thenReturn(800.0);
+        when(simulationCalculator.calculateROI(10000, 800.0)).thenReturn(2.5);
+
+        SimulationResponseDTO response = simulationService.calculateSimulation(request);
+
+        assertThat(response.getEnergyGenerated()).isEqualTo(4000.0);
+        assertThat(response.getEstimatedSavings()).isEqualTo(800.0);
+        assertThat(response.getReturnOnInvestment()).isEqualTo(2.5);
+        assertThat(response.getRecommendedTechnology()).isEqualTo("Solar");
+    }
+
 }
