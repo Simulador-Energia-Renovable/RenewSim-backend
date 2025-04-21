@@ -243,4 +243,13 @@ class SimulationServiceImplTest {
                 .hasMessageContaining("Simulación no encontrada");
     }
 
+    @Test
+    @DisplayName("Should throw when deleting simulation with unknown ID")
+    void testShouldThrowWhenDeletingUnknownSimulation() {
+        when(simulationRepository.existsById(999L)).thenReturn(false);
+        assertThatThrownBy(() -> simulationService.deleteSimulationById(999L))
+                .isInstanceOf(com.renewsim.backend.exception.ResourceNotFoundException.class)
+                .hasMessageContaining("Simulación no encontrada con ID");
+    }
+
 }
