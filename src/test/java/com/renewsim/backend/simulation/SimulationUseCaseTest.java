@@ -200,4 +200,14 @@ class SimulationUseCaseTest {
                 .hasMessageContaining("Not found");
     }
 
+    @Test
+    @DisplayName("Should throw when simulation request is null")
+    void shouldThrowWhenSimulationRequestIsNull() {
+        when(simulationService.simulateAndSave(null)).thenThrow(new IllegalArgumentException("Request cannot be null"));
+
+        assertThatThrownBy(() -> simulationUseCase.simulateAndSave(null, "user"))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Request cannot be null");
+    }
+
 }
