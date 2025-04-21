@@ -234,4 +234,13 @@ class SimulationServiceImplTest {
         verify(technologyComparisonRepository).findAll();
     }
 
+    @Test
+    @DisplayName("Should throw if simulation ID does not exist")
+    void testShouldThrowIfSimulationNotFound() {
+        when(simulationRepository.findById(1L)).thenReturn(Optional.empty());
+        assertThatThrownBy(() -> simulationService.getSimulationById(1L))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Simulación no encontrada");
+    }
+
 }
