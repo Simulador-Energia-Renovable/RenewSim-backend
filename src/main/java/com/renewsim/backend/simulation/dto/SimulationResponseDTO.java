@@ -18,6 +18,7 @@ public class SimulationResponseDTO {
     private double energyGenerated;
     private double estimatedSavings;
     private double returnOnInvestment;
+    private double projectSize;
     private LocalDateTime timestamp; 
     private List<TechnologyComparisonResponseDTO> technologies;
     private String recommendedTechnology;

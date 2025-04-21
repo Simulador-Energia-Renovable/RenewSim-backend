@@ -1,5 +1,6 @@
 package com.renewsim.backend.simulation.logic;
 
+import com.renewsim.backend.simulation.dto.ClimateData;
 import com.renewsim.backend.simulation.dto.SimulationRequestDTO;
 import org.springframework.stereotype.Component;
 
@@ -13,11 +14,41 @@ public class SimulationCalculator {
     }
 
     public double calculateEstimatedSavings(double energyGenerated) {
-        return energyGenerated * 0.2;
+        double realisticPricePerKWh = 0.12;
+        return energyGenerated * realisticPricePerKWh;
     }
 
     public double calculateROI(double budget, double estimatedSavings) {
-        return estimatedSavings > 0 ? budget / estimatedSavings : 0;
+        if (estimatedSavings <= 0) {
+            return 0;
+        }
+
+        double roi = budget / estimatedSavings;
+
+        roi = Math.max(roi, 0.5);
+
+        return Math.round(roi * 100.0) / 100.0;
+    }
+
+    public double estimateProjectSize(double monthlyConsumptionKWh, String energyType, ClimateData climate) {
+        double irradiance = switch (energyType.toLowerCase()) {
+            case "solar" -> climate.getIrradiance();
+            case "wind" -> climate.getWind();
+            case "hydro" -> climate.getHydrology();
+            default -> throw new IllegalArgumentException("Tipo de energía no reconocido.");
+        };
+
+        double efficiency = switch (energyType.toLowerCase()) {
+            case "solar" -> 0.18;
+            case "wind" -> 0.4;
+            case "hydro" -> 0.5;
+            default -> 0.2;
+        };
+
+        double monthlyEnergyPerKW = irradiance * efficiency * 30; // energía por kW al mes
+        double requiredKW = monthlyConsumptionKWh / monthlyEnergyPerKW;
+
+        return Math.round(requiredKW * 100.0) / 100.0; // redondeo a 2 decimales
     }
 
     private double getIrradiance(SimulationRequestDTO dto) {
@@ -38,4 +69,3 @@ public class SimulationCalculator {
         };
     }
 }
-

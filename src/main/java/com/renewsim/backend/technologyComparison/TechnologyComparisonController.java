@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/api/technologies")
+@RequestMapping("/api/v1/technologies")
 public class TechnologyComparisonController {
 
     private final TechnologyComparisonUseCase useCase;
@@ -53,6 +53,7 @@ public class TechnologyComparisonController {
     }
 
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<TechnologyComparisonResponseDTO> addTechnology(
             @Valid @RequestBody TechnologyComparisonRequestDTO requestDTO) {
         try {

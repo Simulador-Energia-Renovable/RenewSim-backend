@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.*;
 import com.renewsim.backend.simulation.dto.*;
 import com.renewsim.backend.technologyComparison.dto.TechnologyComparisonResponseDTO;
 
-
 @RestController
 @RequestMapping("/api/v1/simulation")
 @CrossOrigin(origins = "http://localhost:5173")
@@ -60,6 +59,13 @@ public class SimulationController {
         return ResponseEntity.ok(Map.of("message", "User simulations deleted successfully"));
     }
 
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasAuthority('SCOPE_write:simulations')")
+    public ResponseEntity<Void> deleteSimulation(@PathVariable Long id) {
+        simulationUseCase.deleteSimulationById(id);
+        return ResponseEntity.noContent().build();
+    }
+
     @GetMapping("/normalization-stats")
     @PreAuthorize("hasAuthority('SCOPE_read:simulations')")
     public ResponseEntity<NormalizationStatsResponseDTO> getNormalizationStats() {
@@ -93,4 +99,3 @@ public class SimulationController {
         return SecurityContextHolder.getContext().getAuthentication().getName();
     }
 }
-

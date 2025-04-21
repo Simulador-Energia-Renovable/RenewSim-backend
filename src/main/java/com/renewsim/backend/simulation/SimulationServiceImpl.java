@@ -14,6 +14,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import com.renewsim.backend.exception.ResourceNotFoundException;
 import com.renewsim.backend.simulation.dto.*;
 import com.renewsim.backend.simulation.logic.SimulationCalculator;
 import com.renewsim.backend.simulation.logic.SimulationValidator;
@@ -28,146 +29,161 @@ import com.renewsim.backend.user.UserRepository;
 @RequiredArgsConstructor
 public class SimulationServiceImpl implements SimulationService {
 
-    private final SimulationRepository simulationRepository;
-    private final UserRepository userRepository;
-    private final TechnologyComparisonRepository technologyComparisonRepository;
-    private final SimulationMapper simulationMapper;
-    private final SimulationValidator simulationValidator;
-    private final SimulationCalculator simulationCalculator;
-    private final TechnologyRecommender technologyRecommender;
+        private final SimulationRepository simulationRepository;
+        private final UserRepository userRepository;
+        private final TechnologyComparisonRepository technologyComparisonRepository;
+        private final SimulationMapper simulationMapper;
+        private final SimulationValidator simulationValidator;
+        private final SimulationCalculator simulationCalculator;
+        private final TechnologyRecommender technologyRecommender;
 
-    @Override
-    @Transactional
-    public SimulationResponseDTO simulateAndSave(SimulationRequestDTO dto) {
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado"));
+        @Override
+        @Transactional
+        public SimulationResponseDTO simulateAndSave(SimulationRequestDTO dto) {
+                String username = SecurityContextHolder.getContext().getAuthentication().getName();
+                User user = userRepository.findByUsername(username)
+                                .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado"));
 
-        simulationValidator.validate(dto);
+                if (dto.getProjectSize() <= 0) {
+                        double estimatedSize = simulationCalculator.estimateProjectSize(
+                                        dto.getEnergyConsumption(),
+                                        dto.getEnergyType(),
+                                        dto.getClimate());
+                        dto.setProjectSize(estimatedSize);
+                }
 
-        List<TechnologyComparison> selectedTechnologies =
-                technologyComparisonRepository.findByEnergyType(dto.getEnergyType());
+                simulationValidator.validate(dto);
 
-        List<TechnologyComparisonResponseDTO> technologyDTOs = selectedTechnologies.stream()
-                .map(this::mapToDTO)
-                .collect(Collectors.toList());
+                List<TechnologyComparison> selectedTechnologies = technologyComparisonRepository
+                                .findByEnergyType(dto.getEnergyType());
 
-        NormalizationStatsDTO stats = calculateNormalizationStats(technologyDTOs);
-        String recommendedTechnology = technologyRecommender.recommendTechnology(technologyDTOs, stats);
+                List<TechnologyComparisonResponseDTO> technologyDTOs = selectedTechnologies.stream()
+                                .map(this::mapToDTO)
+                                .collect(Collectors.toList());
 
-        double energyGenerated = simulationCalculator.calculateEnergyGenerated(dto);
-        double estimatedSavings = simulationCalculator.calculateEstimatedSavings(energyGenerated);
-        double returnOnInvestment = simulationCalculator.calculateROI(dto.getBudget(), estimatedSavings);
+                NormalizationStatsDTO stats = calculateNormalizationStats(technologyDTOs);
+                String recommendedTechnology = technologyRecommender.recommendTechnology(technologyDTOs, stats);
 
-        Simulation simulation = Simulation.builder()
-                .location(dto.getLocation())
-                .energyType(dto.getEnergyType())
-                .projectSize(dto.getProjectSize())
-                .budget(dto.getBudget())
-                .energyConsumption(dto.getEnergyConsumption())
-                .energyGenerated(energyGenerated)
-                .estimatedSavings(estimatedSavings)
-                .returnOnInvestment(returnOnInvestment)
-                .user(user)
-                .technologies(selectedTechnologies)
-                .build();
+                double energyGenerated = simulationCalculator.calculateEnergyGenerated(dto);
+                double estimatedSavings = simulationCalculator.calculateEstimatedSavings(energyGenerated);
+                double returnOnInvestment = simulationCalculator.calculateROI(dto.getBudget(), estimatedSavings);
 
-        Simulation savedSimulation = simulationRepository.save(simulation);
+                Simulation simulation = Simulation.builder()
+                                .location(dto.getLocation())
+                                .energyType(dto.getEnergyType())
+                                .projectSize(dto.getProjectSize())
+                                .budget(dto.getBudget())
+                                .energyConsumption(dto.getEnergyConsumption())
+                                .energyGenerated(energyGenerated)
+                                .estimatedSavings(estimatedSavings)
+                                .returnOnInvestment(returnOnInvestment)
+                                .user(user)
+                                .technologies(selectedTechnologies)
+                                .build();
 
-        return new SimulationResponseDTO(
-                savedSimulation.getId(),
-                savedSimulation.getEnergyGenerated(),
-                savedSimulation.getEstimatedSavings(),
-                savedSimulation.getReturnOnInvestment(),
-                savedSimulation.getTimestamp(),
-                technologyDTOs,
-                recommendedTechnology
-        );
-    }
+                Simulation savedSimulation = simulationRepository.save(simulation);
 
-    @Override
-    @Cacheable(value = "simulations", key = "#dto.hashCode()")
-    public SimulationResponseDTO calculateSimulation(SimulationRequestDTO dto) {
-        List<TechnologyComparisonResponseDTO> technologyDTOs = technologyComparisonRepository.findAll().stream()
-                .map(this::mapToDTO)
-                .collect(Collectors.toList());
+                return new SimulationResponseDTO(
+                                savedSimulation.getId(),
+                                savedSimulation.getEnergyGenerated(),
+                                savedSimulation.getEstimatedSavings(),
+                                savedSimulation.getReturnOnInvestment(),
+                                savedSimulation.getProjectSize(),
+                                savedSimulation.getTimestamp(),
+                                technologyDTOs,
+                                recommendedTechnology);
+        }
 
-        NormalizationStatsDTO stats = calculateNormalizationStats(technologyDTOs);
-        String recommendedTechnology = technologyRecommender.recommendTechnology(technologyDTOs, stats);
+        @Override
+        @Cacheable(value = "simulations", key = "#dto.hashCode()")
+        public SimulationResponseDTO calculateSimulation(SimulationRequestDTO dto) {
+                List<TechnologyComparisonResponseDTO> technologyDTOs = technologyComparisonRepository.findAll().stream()
+                                .map(this::mapToDTO)
+                                .collect(Collectors.toList());
 
-        double energyGenerated = simulationCalculator.calculateEnergyGenerated(dto);
-        double estimatedSavings = simulationCalculator.calculateEstimatedSavings(energyGenerated);
-        double returnOnInvestment = simulationCalculator.calculateROI(dto.getBudget(), estimatedSavings);
+                NormalizationStatsDTO stats = calculateNormalizationStats(technologyDTOs);
+                String recommendedTechnology = technologyRecommender.recommendTechnology(technologyDTOs, stats);
 
-        return SimulationResponseDTO.builder()
-                .simulationId(null)
-                .energyGenerated(energyGenerated)
-                .estimatedSavings(estimatedSavings)
-                .returnOnInvestment(returnOnInvestment)
-                .timestamp(LocalDateTime.now())
-                .technologies(technologyDTOs)
-                .recommendedTechnology(recommendedTechnology)
-                .build();
-    }
+                double energyGenerated = simulationCalculator.calculateEnergyGenerated(dto);
+                double estimatedSavings = simulationCalculator.calculateEstimatedSavings(energyGenerated);
+                double returnOnInvestment = simulationCalculator.calculateROI(dto.getBudget(), estimatedSavings);
 
-    @Override
-    public List<Simulation> getUserSimulations(String username) {
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado"));
-        return simulationRepository.findAllByUser(user);
-    }
+                return SimulationResponseDTO.builder()
+                                .simulationId(null)
+                                .energyGenerated(energyGenerated)
+                                .estimatedSavings(estimatedSavings)
+                                .returnOnInvestment(returnOnInvestment)
+                                .timestamp(LocalDateTime.now())
+                                .technologies(technologyDTOs)
+                                .recommendedTechnology(recommendedTechnology)
+                                .build();
+        }
 
-    @Override
-    public Simulation getSimulationById(Long simulationId) {
-        return simulationRepository.findById(simulationId)
-                .orElseThrow(() -> new IllegalArgumentException("Simulación no encontrada"));
-    }
+        @Override
+        public List<Simulation> getUserSimulations(String username) {
+                User user = userRepository.findByUsername(username)
+                                .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado"));
+                return simulationRepository.findAllByUser(user);
+        }
 
-    @Override
-    public List<SimulationHistoryDTO> getUserSimulationHistoryDTOs(String username) {
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado"));
+        @Override
+        public Simulation getSimulationById(Long simulationId) {
+                return simulationRepository.findById(simulationId)
+                                .orElseThrow(() -> new IllegalArgumentException("Simulación no encontrada"));
+        }
 
-        return simulationRepository.findAllByUser(user).stream()
-                .map(simulationMapper::toHistoryDTO)
-                .collect(Collectors.toList());
-    }
+        @Override
+        public List<SimulationHistoryDTO> getUserSimulationHistoryDTOs(String username) {
+                User user = userRepository.findByUsername(username)
+                                .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado"));
 
-    @Override
-    @Transactional
-    public void deleteSimulationsByUser(String username) {
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado"));
+                return simulationRepository.findAllByUser(user).stream()
+                                .map(simulationMapper::toHistoryDTO)
+                                .collect(Collectors.toList());
+        }
 
-        simulationRepository.deleteByUser(user);
-    }
+        @Override
+        @Transactional
+        public void deleteSimulationsByUser(String username) {
+                User user = userRepository.findByUsername(username)
+                                .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado"));
 
-    @Override
-    public NormalizationStatsDTO getCurrentNormalizationStats() {
-        List<TechnologyComparisonResponseDTO> techList = technologyComparisonRepository.findAll().stream()
-                .map(this::mapToDTO)
-                .collect(Collectors.toList());
+                simulationRepository.deleteByUser(user);
+        }
 
-        return calculateNormalizationStats(techList);
-    }
+        @Override
+        public void deleteSimulationById(Long id) {
+                if (!simulationRepository.existsById(id)) {
+                        throw new ResourceNotFoundException("Simulación no encontrada con ID: " + id);
+                }
+                simulationRepository.deleteById(id);
+        }
 
-    @Override
-    public List<TechnologyComparisonResponseDTO> getAllTechnologies() {
-        return technologyComparisonRepository.findAll().stream()
-                .map(this::mapToDTO)
-                .collect(Collectors.toList());
-    }
+        @Override
+        public NormalizationStatsDTO getCurrentNormalizationStats() {
+                List<TechnologyComparisonResponseDTO> techList = technologyComparisonRepository.findAll().stream()
+                                .map(this::mapToDTO)
+                                .collect(Collectors.toList());
 
-    private TechnologyComparisonResponseDTO mapToDTO(TechnologyComparison tech) {
-        return new TechnologyComparisonResponseDTO(
-                tech.getTechnologyName(),
-                tech.getEfficiency(),
-                tech.getInstallationCost(),
-                tech.getMaintenanceCost(),
-                tech.getEnvironmentalImpact(),
-                tech.getCo2Reduction(),
-                tech.getEnergyProduction(),
-                tech.getEnergyType());
-    }
+                return calculateNormalizationStats(techList);
+        }
+
+        @Override
+        public List<TechnologyComparisonResponseDTO> getAllTechnologies() {
+                return technologyComparisonRepository.findAll().stream()
+                                .map(this::mapToDTO)
+                                .collect(Collectors.toList());
+        }
+
+        private TechnologyComparisonResponseDTO mapToDTO(TechnologyComparison tech) {
+                return new TechnologyComparisonResponseDTO(
+                                tech.getTechnologyName(),
+                                tech.getEfficiency(),
+                                tech.getInstallationCost(),
+                                tech.getMaintenanceCost(),
+                                tech.getEnvironmentalImpact(),
+                                tech.getCo2Reduction(),
+                                tech.getEnergyProduction(),
+                                tech.getEnergyType());
+        }
 }
-

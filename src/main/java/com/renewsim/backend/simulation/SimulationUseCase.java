@@ -51,6 +51,13 @@ public class SimulationUseCase {
         simulationService.deleteSimulationsByUser(username);
     }
 
+    public void deleteSimulationById(Long id) {
+        simulationService.deleteSimulationById(id);
+
+    }
+
+ 
+
     public NormalizationStatsDTO getCurrentNormalizationStats() {
         return simulationService.getCurrentNormalizationStats();
     }
