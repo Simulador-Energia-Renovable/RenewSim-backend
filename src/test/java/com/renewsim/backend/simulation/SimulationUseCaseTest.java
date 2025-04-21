@@ -190,4 +190,14 @@ class SimulationUseCaseTest {
         assertThat(result).containsExactly(tech);
     }
 
+    @Test
+    @DisplayName("Should throw when simulation not found")
+    void shouldThrowIfSimulationNotFound() {
+        when(simulationService.getSimulationById(1L)).thenThrow(new RuntimeException("Not found"));
+
+        assertThatThrownBy(() -> simulationUseCase.getTechnologiesForSimulation(1L))
+                .isInstanceOf(RuntimeException.class)
+                .hasMessageContaining("Not found");
+    }
+
 }
