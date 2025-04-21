@@ -310,5 +310,16 @@ class SimulationServiceImplTest {
         verify(userRepository).findByUsername(username);
         verify(simulationRepository).deleteByUser(mockUser);
     }
+    @Test
+    @DisplayName("Should throw when user not found during deleteSimulationsByUser")
+    void testShouldThrowWhenUserNotFoundForDeleteSimulations() {
+
+        String username = "missinguser";
+        when(userRepository.findByUsername(username)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> simulationService.deleteSimulationsByUser(username))
+                .isInstanceOf(UsernameNotFoundException.class)
+                .hasMessageContaining("Usuario no encontrado");
+    }   
 
 }
