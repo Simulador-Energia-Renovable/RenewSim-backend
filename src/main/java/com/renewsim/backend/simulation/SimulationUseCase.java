@@ -54,9 +54,7 @@ public class SimulationUseCase {
     public void deleteSimulationById(Long id) {
         simulationService.deleteSimulationById(id);
 
-    }
-
- 
+    } 
 
     public NormalizationStatsDTO getCurrentNormalizationStats() {
         return simulationService.getCurrentNormalizationStats();
@@ -96,4 +94,5 @@ public class SimulationUseCase {
                 .score(score)
                 .build();
     }
+    
 }
