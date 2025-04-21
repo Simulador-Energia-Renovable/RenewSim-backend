@@ -226,4 +226,12 @@ class SimulationServiceImplTest {
         verify(technologyComparisonRepository).findAll();
     }
 
+    @Test
+    @DisplayName("Should return all technologies")
+    void testShouldReturnAllTechnologies() {
+        when(technologyComparisonRepository.findAll()).thenReturn(List.of());
+        simulationService.getAllTechnologies();
+        verify(technologyComparisonRepository).findAll();
+    }
+
 }
