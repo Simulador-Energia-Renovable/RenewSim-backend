@@ -45,10 +45,10 @@ public class SimulationCalculator {
             default -> 0.2;
         };
 
-        double monthlyEnergyPerKW = irradiance * efficiency * 30; // energía por kW al mes
+        double monthlyEnergyPerKW = irradiance * efficiency * 30; 
         double requiredKW = monthlyConsumptionKWh / monthlyEnergyPerKW;
 
-        return Math.round(requiredKW * 100.0) / 100.0; // redondeo a 2 decimales
+        return Math.round(requiredKW * 100.0) / 100.0;
     }
 
     private double getIrradiance(SimulationRequestDTO dto) {

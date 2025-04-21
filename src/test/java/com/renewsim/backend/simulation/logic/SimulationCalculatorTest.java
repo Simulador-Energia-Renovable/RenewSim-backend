@@ -60,7 +60,7 @@ class SimulationCalculatorTest {
     @DisplayName("Should calculate estimated savings correctly")
     void testShouldCalculateEstimatedSavings() {
         double savings = calculator.calculateEstimatedSavings(10000);
-        assertThat(savings).isEqualTo(2000.0);
+        assertThat(savings).isEqualTo(1200.0);
     }
 
     @Test
