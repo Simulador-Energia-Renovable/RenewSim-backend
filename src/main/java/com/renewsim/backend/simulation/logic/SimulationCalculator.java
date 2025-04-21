@@ -38,17 +38,17 @@ public class SimulationCalculator {
             default -> throw new IllegalArgumentException("Tipo de energía no reconocido.");
         };
 
-        double efficiency = switch (energyType.toLowerCase()) {
-            case "solar" -> 0.18;
-            case "wind" -> 0.4;
-            case "hydro" -> 0.5;
-            default -> 0.2;
-        };
+    double efficiency = switch (energyType.toLowerCase()) {
+        case "solar" -> 0.18;
+        case "wind" -> 0.4;
+        case "hydro" -> 0.5;
+        default -> throw new IllegalArgumentException("Tipo de energía no reconocido.");
+    };
 
-        double monthlyEnergyPerKW = irradiance * efficiency * 30; // energía por kW al mes
+        double monthlyEnergyPerKW = irradiance * efficiency * 30; 
         double requiredKW = monthlyConsumptionKWh / monthlyEnergyPerKW;
 
-        return Math.round(requiredKW * 100.0) / 100.0; // redondeo a 2 decimales
+        return Math.round(requiredKW * 100.0) / 100.0;
     }
 
     private double getIrradiance(SimulationRequestDTO dto) {
