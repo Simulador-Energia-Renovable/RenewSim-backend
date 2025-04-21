@@ -29,8 +29,9 @@ jobs:
       - name: Upload JaCoCo coverage report
         uses: actions/upload-artifact@v4
         with:
-        name: jacoco-report
-        path: target/site/jacoco
+          name: jacoco-report
+          path: target/site/jacoco
+
 
 
 
