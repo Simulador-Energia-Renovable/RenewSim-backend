@@ -296,4 +296,19 @@ class SimulationServiceImplTest {
         verify(simulationMapper).toHistoryDTO(simulation); 
     }
 
+    @Test
+    @DisplayName("Should delete simulations by user")
+    void testShouldDeleteSimulationsByUser() {
+
+        String username = "testuser";
+        User mockUser = new User();
+
+        when(userRepository.findByUsername(username)).thenReturn(Optional.of(mockUser));
+
+        simulationService.deleteSimulationsByUser(username);
+
+        verify(userRepository).findByUsername(username);
+        verify(simulationRepository).deleteByUser(mockUser);
+    }
+
 }
