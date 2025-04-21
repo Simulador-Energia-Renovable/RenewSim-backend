@@ -218,4 +218,12 @@ class SimulationServiceImplTest {
         assertThat(response.getRecommendedTechnology()).isEqualTo("Solar");
     }
 
+    @Test
+    @DisplayName("Should return normalization stats")
+    void testShouldReturnNormalizationStats() {
+        when(technologyComparisonRepository.findAll()).thenReturn(List.of());
+        simulationService.getCurrentNormalizationStats();
+        verify(technologyComparisonRepository).findAll();
+    }
+
 }
