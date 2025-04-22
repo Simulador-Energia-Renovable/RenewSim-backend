@@ -89,6 +89,7 @@ public class SimulationServiceImpl implements SimulationService {
                                 savedSimulation.getEstimatedSavings(),
                                 savedSimulation.getReturnOnInvestment(),
                                 savedSimulation.getProjectSize(),
+                                savedSimulation.getBudget(),
                                 savedSimulation.getTimestamp(),
                                 technologyDTOs,
                                 recommendedTechnology);
