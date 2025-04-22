@@ -3,8 +3,10 @@ package com.renewsim.backend.user;
 import com.renewsim.backend.role.dto.RoleDTO;
 import com.renewsim.backend.role.dto.UpdateRolesRequestDTO;
 import com.renewsim.backend.security.UserDetailsImpl;
+import com.renewsim.backend.user.dto.ChangePasswordDTO;
 import com.renewsim.backend.user.dto.UserResponseDTO;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
@@ -74,5 +76,27 @@ public class UserController {
     public ResponseEntity<UserResponseDTO> getCurrentUser(@AuthenticationPrincipal UserDetailsImpl userDetails) {
         return ResponseEntity.ok(userService.getCurrentUser(userDetails.getUser()));
     }
-}
 
+    @PutMapping("/change-password")
+    public ResponseEntity<String> changePassword(
+            @AuthenticationPrincipal Jwt jwt,
+            @RequestBody ChangePasswordDTO request) {
+        try {
+            System.out.println("🟢 Entrando a /change-password Controller");
+
+            String username = jwt.getSubject();
+
+            User user = userService.findByUsername(username); 
+            userUseCase.changePassword(user, request.getCurrentPassword(), request.getNewPassword());
+
+            return ResponseEntity.ok("Contraseña cambiada correctamente");
+        } catch (IllegalArgumentException e) {
+            System.out.println("❌ Error de validación: " + e.getMessage());
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500).body("Error al cambiar la contraseña");
+        }
+    }
+
+}
