@@ -30,5 +30,9 @@ public class UserUseCase {
     public void deleteUser(Long userId) {
         userService.deleteUser(userId);
     }
-}
 
+    public void changePassword(User user, String currentPassword, String newPassword) {
+        userService.changePassword(user, currentPassword, newPassword);
+    }
+
+}

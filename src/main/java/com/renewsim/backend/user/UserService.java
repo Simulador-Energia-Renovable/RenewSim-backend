@@ -26,6 +26,13 @@ public interface UserService {
     UserResponseDTO getCurrentUser(User user);
 
     List<UserResponseDTO> getUsersWithoutRoles();
+    
+    User findByUsername(String username);
+
+    void changePassword(User user, String currentPassword, String newPassword);
+
+
+
 
 }
 
