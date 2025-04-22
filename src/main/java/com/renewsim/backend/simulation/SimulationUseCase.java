@@ -1,10 +1,12 @@
 package com.renewsim.backend.simulation;
 
+import java.nio.file.AccessDeniedException;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Component;
 
+import com.renewsim.backend.exception.ResourceNotFoundException;
 import com.renewsim.backend.simulation.dto.*;
 import com.renewsim.backend.simulation.util.TechnologyScoringUtil;
 import com.renewsim.backend.technologyComparison.TechnologyComparisonMapper;
@@ -72,6 +74,18 @@ public class SimulationUseCase {
     public List<TechnologyComparisonResponseDTO> getAllTechnologies() {
         return simulationService.getAllTechnologies();
     }
+
+    public SimulationResponseDTO getSimulationById(Long id, String username) {
+        Simulation simulation = simulationService.getSimulationById(id);
+    
+        if (!simulation.getUser().getUsername().equals(username)) {
+            throw new ResourceNotFoundException("You are not authorized to access this simulation");
+        }
+    
+        return simulationMapper.toDTO(simulation);
+    }
+    
+
 
     private NormalizedTechnologyDTO mapToNormalizedDTO(TechnologyComparisonResponseDTO tech,
             NormalizationStatsDTO stats) {

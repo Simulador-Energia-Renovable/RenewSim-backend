@@ -95,6 +95,14 @@ public class SimulationController {
         return ResponseEntity.ok(simulationUseCase.getAllTechnologies());
     }
 
+    @GetMapping("/{id}")
+    @PreAuthorize("hasAuthority('SCOPE_read:simulations')")
+    public ResponseEntity<SimulationResponseDTO> getSimulationById(@PathVariable Long id) {
+        String username = getCurrentUsername();
+        SimulationResponseDTO simulation = simulationUseCase.getSimulationById(id, username);
+        return ResponseEntity.ok(simulation);
+    }
+
     private String getCurrentUsername() {
         return SecurityContextHolder.getContext().getAuthentication().getName();
     }

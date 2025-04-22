@@ -6,11 +6,12 @@ import org.springframework.stereotype.Component;
 @Component
 public class SimulationValidator {
 
-    public void validate(SimulationRequestDTO dto) {
-        if (dto.getProjectSize() <= 0 || dto.getProjectSize() > 500) {
-            throw new IllegalArgumentException("El tamaño del proyecto debe estar entre 1 y 500 kW.");
+    public void validate(SimulationRequestDTO dto) {       
+        
+        if (dto.getProjectSize() < 1 || dto.getProjectSize() > 1000) {
+            throw new IllegalArgumentException("El tamaño del proyecto debe estar entre 1 y 1000 kW.");
         }
-    
+        
         if (dto.getBudget() <= 0) {
             throw new IllegalArgumentException("El presupuesto debe ser mayor que cero.");
         }

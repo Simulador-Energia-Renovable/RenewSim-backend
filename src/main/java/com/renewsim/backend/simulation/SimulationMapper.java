@@ -1,11 +1,21 @@
 package com.renewsim.backend.simulation;
 
+import com.renewsim.backend.simulation.dto.SimulationHistoryDTO;
+import com.renewsim.backend.simulation.dto.SimulationResponseDTO;
+import com.renewsim.backend.technologyComparison.TechnologyComparisonMapper;
+import com.renewsim.backend.technologyComparison.dto.TechnologyComparisonResponseDTO;
 import org.springframework.stereotype.Component;
 
-import com.renewsim.backend.simulation.dto.SimulationHistoryDTO;
+import java.util.stream.Collectors;
 
 @Component
 public class SimulationMapper {
+
+    private final TechnologyComparisonMapper technologyComparisonMapper;
+
+    public SimulationMapper(TechnologyComparisonMapper technologyComparisonMapper) {
+        this.technologyComparisonMapper = technologyComparisonMapper;
+    }
 
     public SimulationHistoryDTO toHistoryDTO(Simulation simulation) {
         return SimulationHistoryDTO.builder()
@@ -18,6 +28,24 @@ public class SimulationMapper {
                 .timestamp(simulation.getTimestamp())
                 .build();
     }
-}  
+
+    public SimulationResponseDTO toDTO(Simulation simulation) {
+        return SimulationResponseDTO.builder()
+                .energyGenerated(simulation.getEnergyGenerated())
+                .estimatedSavings(simulation.getEstimatedSavings())
+                .returnOnInvestment(simulation.getReturnOnInvestment())
+                .projectSize(simulation.getProjectSize())
+                .budget(simulation.getBudget())
+                .timestamp(simulation.getTimestamp())
+                .technologies(
+                        simulation.getTechnologies().stream()
+                                .map(technologyComparisonMapper::toResponseDTO)
+                                .collect(Collectors.toList())
+                )
+                .build();
+    }
+    
+}
+ 
 
 
