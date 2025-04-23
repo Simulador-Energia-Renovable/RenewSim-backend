@@ -9,6 +9,7 @@ import com.renewsim.backend.user.dto.UserResponseDTO;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.List;
 import java.util.Optional;
@@ -24,12 +25,14 @@ class UserServiceImplTest {
     private UserRepository userRepository;
     private UserMapper userMapper;
     private UserServiceImpl userService;
+    private PasswordEncoder passwordEncoder;
 
     @BeforeEach
     void setUp() {
         userRepository = mock(UserRepository.class);
         userMapper = mock(UserMapper.class);
-        userService = new UserServiceImpl(userRepository, userMapper);
+        passwordEncoder = mock(PasswordEncoder.class);
+        userService = new UserServiceImpl(userRepository, userMapper, passwordEncoder);
     }
 
     @Test
@@ -170,4 +173,36 @@ class UserServiceImplTest {
         verify(userMapper).toResponseDto(user);
     }
 
+    @Test
+    @DisplayName("Should change password when current is correct")
+    void shouldChangePasswordSuccessfully() {
+        User user = new User();
+        user.setId(1L);
+        user.setPassword("encodedOldPassword");
+
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+        when(passwordEncoder.matches("oldPassword", "encodedOldPassword")).thenReturn(true);
+        when(passwordEncoder.encode("newPassword")).thenReturn("encodedNewPassword");
+
+        userService.changePassword(user, "oldPassword", "newPassword");
+
+        verify(userRepository).save(user);
+        assertThat(user.getPassword()).isEqualTo("encodedNewPassword");
+    }
+
+    @Test
+    @DisplayName("Should throw when current password is incorrect")
+    void shouldThrowWhenCurrentPasswordIncorrect() {
+        User user = new User();
+        user.setId(1L);
+        user.setPassword("encodedPassword");
+
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+        when(passwordEncoder.matches("wrongPassword", "encodedPassword")).thenReturn(false);
+
+        assertThrows(IllegalArgumentException.class, () -> userService.changePassword(user, "wrongPassword", "newPassword"));
+
+        verify(userRepository, never()).save(any());
+    }
 }
+

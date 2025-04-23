@@ -91,7 +91,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public void changePassword(User user, String currentPassword, String newPassword) {
 
-        // ⚠ Recarga el usuario completo desde la DB
+        // Recarga el usuario completo desde la DB
         User loadedUser = userRepository.findById(user.getId())
                 .orElseThrow(() -> new UserNotFoundException(user.getId()));
         System.out.println("➡ Contraseña en BD (hash): " + loadedUser.getPassword());

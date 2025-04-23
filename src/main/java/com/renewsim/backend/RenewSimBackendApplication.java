@@ -21,7 +21,7 @@ public class RenewSimBackendApplication {
     }
 
     @Bean
-    @Profile("!test") // ⬅️ Importante: se ejecuta solo fuera del perfil de test
+    @Profile("!test") // Importante: se ejecuta solo fuera del perfil de test
     CommandLineRunner checkDatabase(DataSource dataSource) {
         return args -> {
             try (Connection connection = dataSource.getConnection()) {

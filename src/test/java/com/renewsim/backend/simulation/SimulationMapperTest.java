@@ -1,9 +1,12 @@
 package com.renewsim.backend.simulation;
 
 import com.renewsim.backend.simulation.dto.SimulationHistoryDTO;
+import com.renewsim.backend.technologyComparison.TechnologyComparisonMapper;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
 
 import java.time.LocalDateTime;
 
@@ -14,10 +17,14 @@ class SimulationMapperTest {
 
     private SimulationMapper simulationMapper;
     private Simulation simulation;
+     @Mock
+    private TechnologyComparisonMapper technologyComparisonMapper;
+
+ 
 
     @BeforeEach
     void setUp() {
-        simulationMapper = new SimulationMapper();
+        simulationMapper = new SimulationMapper(technologyComparisonMapper); 
 
         simulation = new Simulation();
         simulation.setId(1L);
@@ -25,6 +32,8 @@ class SimulationMapperTest {
         simulation.setEnergyType("Solar");
         simulation.setEnergyGenerated(12000.0);
         simulation.setEstimatedSavings(5000.0);
+        simulation.setProjectSize(5.0);
+        simulation.setBudget(10000.0);
         simulation.setReturnOnInvestment(2.5);
         simulation.setTimestamp(LocalDateTime.of(2024, 4, 15, 12, 0));
     }
@@ -39,6 +48,7 @@ class SimulationMapperTest {
         assertThat(dto.getEnergyType()).isEqualTo("Solar");
         assertThat(dto.getEnergyGenerated()).isEqualTo(12000.0);
         assertThat(dto.getEstimatedSavings()).isEqualTo(5000.0);
+        
         assertThat(dto.getReturnOnInvestment()).isEqualTo(2.5);
         assertThat(dto.getTimestamp()).isEqualTo(LocalDateTime.of(2024, 4, 15, 12, 0));
     }
