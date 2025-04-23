@@ -15,6 +15,8 @@ import lombok.NoArgsConstructor;
 @Builder
 public class SimulationResponseDTO {
     private Long simulationId;
+    private String location;                  
+    private String energyType; 
     private double energyGenerated;
     private double estimatedSavings;
     private double returnOnInvestment;

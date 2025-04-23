@@ -1,6 +1,5 @@
 package com.renewsim.backend.simulation;
 
-import java.nio.file.AccessDeniedException;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -85,8 +84,6 @@ public class SimulationUseCase {
         return simulationMapper.toDTO(simulation);
     }
     
-
-
     private NormalizedTechnologyDTO mapToNormalizedDTO(TechnologyComparisonResponseDTO tech,
             NormalizationStatsDTO stats) {
         double normalizedCo2 = TechnologyScoringUtil.normalize(tech.getCo2Reduction(), stats.getMinCo2(),
