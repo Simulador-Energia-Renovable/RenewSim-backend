@@ -86,7 +86,7 @@ public class UserController {
 
             String username = jwt.getSubject();
 
-            User user = userService.findByUsername(username); 
+            User user = userService.findByUsername(username);
             userUseCase.changePassword(user, request.getCurrentPassword(), request.getNewPassword());
 
             return ResponseEntity.ok("Contraseña cambiada correctamente");

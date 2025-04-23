@@ -3,7 +3,6 @@ package com.renewsim.backend.simulation;
 import com.renewsim.backend.simulation.dto.SimulationHistoryDTO;
 import com.renewsim.backend.simulation.dto.SimulationResponseDTO;
 import com.renewsim.backend.technologyComparison.TechnologyComparisonMapper;
-import com.renewsim.backend.technologyComparison.dto.TechnologyComparisonResponseDTO;
 import org.springframework.stereotype.Component;
 
 import java.util.stream.Collectors;
