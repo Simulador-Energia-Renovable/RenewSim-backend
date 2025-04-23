@@ -30,9 +30,5 @@ public interface UserService {
     User findByUsername(String username);
 
     void changePassword(User user, String currentPassword, String newPassword);
-
-
-
-
 }
 
