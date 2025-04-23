@@ -51,17 +51,16 @@ public class Simulation {
     @Column(name = "energy_consumption")
     private double energyConsumption;
 
+    @Column(name = "recommended_technology")
+    private String recommendedTechnology;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     @JsonBackReference
     private User user;
 
-    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinTable(
-        name = "simulation_technologies",
-        joinColumns = @JoinColumn(name = "simulation_id"),
-        inverseJoinColumns = @JoinColumn(name = "technology_id")
-    )
+    @ManyToMany(cascade = { CascadeType.PERSIST, CascadeType.MERGE })
+    @JoinTable(name = "simulation_technologies", joinColumns = @JoinColumn(name = "simulation_id"), inverseJoinColumns = @JoinColumn(name = "technology_id"))
     @Builder.Default
     private List<TechnologyComparison> technologies = new ArrayList<>();
 

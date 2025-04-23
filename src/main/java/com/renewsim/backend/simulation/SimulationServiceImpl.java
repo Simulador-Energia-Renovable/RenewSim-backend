@@ -79,12 +79,15 @@ public class SimulationServiceImpl implements SimulationService {
                                 .returnOnInvestment(returnOnInvestment)
                                 .user(user)
                                 .technologies(selectedTechnologies)
+                                .recommendedTechnology(recommendedTechnology)
                                 .build();
 
                 Simulation savedSimulation = simulationRepository.save(simulation);
 
                 return new SimulationResponseDTO(
                                 savedSimulation.getId(),
+                                savedSimulation.getLocation(),
+                                savedSimulation.getEnergyType(),
                                 savedSimulation.getEnergyGenerated(),
                                 savedSimulation.getEstimatedSavings(),
                                 savedSimulation.getReturnOnInvestment(),

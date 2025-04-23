@@ -30,6 +30,8 @@ public class SimulationMapper {
 
     public SimulationResponseDTO toDTO(Simulation simulation) {
         return SimulationResponseDTO.builder()
+                .location(simulation.getLocation()) 
+                .energyType(simulation.getEnergyType())
                 .energyGenerated(simulation.getEnergyGenerated())
                 .estimatedSavings(simulation.getEstimatedSavings())
                 .returnOnInvestment(simulation.getReturnOnInvestment())
@@ -39,12 +41,9 @@ public class SimulationMapper {
                 .technologies(
                         simulation.getTechnologies().stream()
                                 .map(technologyComparisonMapper::toResponseDTO)
-                                .collect(Collectors.toList())
-                )
+                                .collect(Collectors.toList()))
+                .recommendedTechnology(simulation.getRecommendedTechnology())
                 .build();
     }
-    
+
 }
- 
-
-
