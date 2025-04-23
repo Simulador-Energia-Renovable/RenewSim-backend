@@ -43,7 +43,6 @@ public class User {
         this.roles = roles;
     }
 
-    // Simulaciones del usuario
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
     private List<Simulation> simulations = new ArrayList<>();
