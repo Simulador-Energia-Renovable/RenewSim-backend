@@ -55,7 +55,7 @@ public class SimulationUseCase {
     public void deleteSimulationById(Long id) {
         simulationService.deleteSimulationById(id);
 
-    } 
+    }
 
     public NormalizationStatsDTO getCurrentNormalizationStats() {
         return simulationService.getCurrentNormalizationStats();
@@ -76,14 +76,14 @@ public class SimulationUseCase {
 
     public SimulationResponseDTO getSimulationById(Long id, String username) {
         Simulation simulation = simulationService.getSimulationById(id);
-    
+
         if (!simulation.getUser().getUsername().equals(username)) {
             throw new ResourceNotFoundException("You are not authorized to access this simulation");
         }
-    
+
         return simulationMapper.toDTO(simulation);
     }
-    
+
     private NormalizedTechnologyDTO mapToNormalizedDTO(TechnologyComparisonResponseDTO tech,
             NormalizationStatsDTO stats) {
         double normalizedCo2 = TechnologyScoringUtil.normalize(tech.getCo2Reduction(), stats.getMinCo2(),
@@ -105,5 +105,5 @@ public class SimulationUseCase {
                 .score(score)
                 .build();
     }
-    
+
 }

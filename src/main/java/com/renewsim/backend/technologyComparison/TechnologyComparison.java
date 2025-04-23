@@ -42,11 +42,9 @@ public class TechnologyComparison {
     @ManyToMany(mappedBy = "technologies")
     private List<Simulation> simulations = new ArrayList<>();
 
-    // Constructor vacío
     public TechnologyComparison() {
     }
 
-    // Constructor sin la lista de simulaciones
     public TechnologyComparison(String technologyName, Double efficiency,
             Double installationCost, Double maintenanceCost,
             String environmentalImpact, Double co2Reduction,
@@ -60,9 +58,6 @@ public class TechnologyComparison {
         this.energyProduction = energyProduction;
         this.energyType = energyType;
     }
-
-    // Getters y Setters (incluyendo lista de simulaciones)
-
     public Long getId() {
         return id;
     }
