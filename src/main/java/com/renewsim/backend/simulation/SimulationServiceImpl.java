@@ -182,6 +182,7 @@ public class SimulationServiceImpl implements SimulationService {
         private TechnologyComparisonResponseDTO mapToDTO(TechnologyComparison tech) {
                 return new TechnologyComparisonResponseDTO(
                                 tech.getId(),
+                                false,                                
                                 tech.getTechnologyName(),
                                 tech.getEfficiency(),
                                 tech.getInstallationCost(),

@@ -12,6 +12,7 @@ import lombok.NoArgsConstructor;
 public class TechnologyComparisonResponseDTO {
    
     private Long id;
+    private boolean inUse;
     private String technologyName;
     private Double efficiency;
     private Double installationCost;
