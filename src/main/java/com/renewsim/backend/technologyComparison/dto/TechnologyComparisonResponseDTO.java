@@ -10,7 +10,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class TechnologyComparisonResponseDTO {
-
+   
+    private Long id;
+    private boolean inUse;
     private String technologyName;
     private Double efficiency;
     private Double installationCost;
@@ -18,6 +20,5 @@ public class TechnologyComparisonResponseDTO {
     private String environmentalImpact;
     private Double co2Reduction;
     private Double energyProduction;
-    private String energyType; 
+    private String energyType;
 }
-

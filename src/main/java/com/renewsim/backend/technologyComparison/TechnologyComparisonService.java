@@ -14,4 +14,7 @@ public interface TechnologyComparisonService {
     void deleteTechnology(Long id);
 
     List<TechnologyComparison> getTechnologiesByEnergyType(String energyType);
+
+    TechnologyComparison updateTechnology(Long id, TechnologyComparison updatedData);
+
 }

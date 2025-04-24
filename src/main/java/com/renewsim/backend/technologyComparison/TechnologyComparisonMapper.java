@@ -10,6 +10,8 @@ public class TechnologyComparisonMapper {
 
     public TechnologyComparisonResponseDTO toResponseDTO(TechnologyComparison entity) {
         return TechnologyComparisonResponseDTO.builder()
+                .id(entity.getId())
+                .inUse(!entity.getSimulations().isEmpty())
                 .technologyName(entity.getTechnologyName())
                 .efficiency(entity.getEfficiency())
                 .installationCost(entity.getInstallationCost())

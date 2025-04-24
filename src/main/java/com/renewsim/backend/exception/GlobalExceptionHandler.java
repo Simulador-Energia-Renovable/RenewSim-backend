@@ -100,4 +100,15 @@ public class GlobalExceptionHandler {
                 buildErrorResponse(HttpStatus.UNAUTHORIZED, ex.getMessage(), traceId, null),
                 HttpStatus.UNAUTHORIZED);
     }
+
+    @ExceptionHandler(IllegalStateException.class)
+    public ResponseEntity<ErrorResponse> handleIllegalStateException(IllegalStateException ex) {
+        String traceId = generateTraceId();
+        logger.warn("TraceId: {} - Estado no permitido: {}", traceId, ex.getMessage());
+
+        return new ResponseEntity<>(
+                buildErrorResponse(HttpStatus.BAD_REQUEST, ex.getMessage(), traceId, null),
+                HttpStatus.BAD_REQUEST);
+    }
+
 }

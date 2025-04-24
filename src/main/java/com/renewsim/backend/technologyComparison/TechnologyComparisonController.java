@@ -64,6 +64,7 @@ public class TechnologyComparisonController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteTechnology(@PathVariable Long id) {
         try {
             useCase.deleteTechnology(id);
@@ -72,7 +73,6 @@ public class TechnologyComparisonController {
             return ResponseEntity.notFound().build();
         }
     }
-
     @GetMapping("/simulation/{simulationId}")
     @PreAuthorize("hasAuthority('SCOPE_read:simulations')")
     public ResponseEntity<List<TechnologyComparisonResponseDTO>> getTechnologiesBySimulation(
@@ -83,4 +83,19 @@ public class TechnologyComparisonController {
                 .collect(Collectors.toList());
         return ResponseEntity.ok(dtos);
     }
+    @PutMapping("/{id}")
+@PreAuthorize("hasRole('ADMIN')")
+public ResponseEntity<TechnologyComparisonResponseDTO> updateTechnology(
+        @PathVariable Long id,
+        @Valid @RequestBody TechnologyComparisonRequestDTO requestDTO) {
+    try {
+        TechnologyComparisonResponseDTO updated = useCase.updateTechnology(id, requestDTO);
+        return ResponseEntity.ok(updated);
+    } catch (IllegalArgumentException e) {
+        return ResponseEntity.notFound().build();
+    } catch (Exception e) {
+        return ResponseEntity.internalServerError().build();
+    }
+}
+
 }
