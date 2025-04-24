@@ -13,6 +13,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 public class TechnologyComparisonRequestDTO {
+ 
 
     @NotBlank(message = "Technology name is required")
     private String technologyName;

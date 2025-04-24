@@ -64,6 +64,7 @@ public class TechnologyComparisonController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteTechnology(@PathVariable Long id) {
         try {
             useCase.deleteTechnology(id);
@@ -72,7 +73,6 @@ public class TechnologyComparisonController {
             return ResponseEntity.notFound().build();
         }
     }
-
     @GetMapping("/simulation/{simulationId}")
     @PreAuthorize("hasAuthority('SCOPE_read:simulations')")
     public ResponseEntity<List<TechnologyComparisonResponseDTO>> getTechnologiesBySimulation(

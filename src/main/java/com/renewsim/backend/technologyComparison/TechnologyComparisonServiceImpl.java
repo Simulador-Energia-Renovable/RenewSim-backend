@@ -4,6 +4,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class TechnologyComparisonServiceImpl implements TechnologyComparisonService {
@@ -33,12 +34,22 @@ public class TechnologyComparisonServiceImpl implements TechnologyComparisonServ
     }
 
     @Override
-    public void deleteTechnology(Long id) {
-        if (!repository.existsById(id)) {
-            throw new IllegalArgumentException("Technology with ID " + id + " does not exist.");
-        }
-        repository.deleteById(id);
+public void deleteTechnology(Long id) {
+    TechnologyComparison tech = repository.findById(id)
+        .orElseThrow(() -> new IllegalArgumentException("Technology not found"));
+
+    if (!tech.getSimulations().isEmpty()) {
+        String simulationsInfo = tech.getSimulations().stream()
+            .map(sim -> "ID: " + sim.getId() + " - " + sim.getLocation())
+            .collect(Collectors.joining("; "));
+
+        throw new IllegalStateException("Tecnología asociada a simulaciones: " + simulationsInfo);
     }
+
+    repository.deleteById(id);
+}
+
+    
 
     @Override
     public List<TechnologyComparison> getTechnologiesByEnergyType(String energyType) {
