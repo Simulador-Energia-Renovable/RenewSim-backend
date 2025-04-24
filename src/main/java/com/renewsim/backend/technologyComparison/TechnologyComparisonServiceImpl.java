@@ -34,22 +34,37 @@ public class TechnologyComparisonServiceImpl implements TechnologyComparisonServ
     }
 
     @Override
-public void deleteTechnology(Long id) {
-    TechnologyComparison tech = repository.findById(id)
-        .orElseThrow(() -> new IllegalArgumentException("Technology not found"));
+    public TechnologyComparison updateTechnology(Long id, TechnologyComparison updatedData) {
+        TechnologyComparison existing = repository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Tecnología no encontrada con ID: " + id));
 
-    if (!tech.getSimulations().isEmpty()) {
-        String simulationsInfo = tech.getSimulations().stream()
-            .map(sim -> "ID: " + sim.getId() + " - " + sim.getLocation())
-            .collect(Collectors.joining("; "));
+        existing.setTechnologyName(updatedData.getTechnologyName());
+        existing.setEnergyType(updatedData.getEnergyType());
+        existing.setEfficiency(updatedData.getEfficiency());
+        existing.setInstallationCost(updatedData.getInstallationCost());
+        existing.setMaintenanceCost(updatedData.getMaintenanceCost());
+        existing.setEnvironmentalImpact(updatedData.getEnvironmentalImpact());
+        existing.setCo2Reduction(updatedData.getCo2Reduction());
+        existing.setEnergyProduction(updatedData.getEnergyProduction());
 
-        throw new IllegalStateException("Tecnología asociada a simulaciones: " + simulationsInfo);
+        return repository.save(existing);
     }
 
-    repository.deleteById(id);
-}
+    @Override
+    public void deleteTechnology(Long id) {
+        TechnologyComparison tech = repository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Technology not found"));
 
-    
+        if (!tech.getSimulations().isEmpty()) {
+            String simulationsInfo = tech.getSimulations().stream()
+                    .map(sim -> "ID: " + sim.getId() + " - " + sim.getLocation())
+                    .collect(Collectors.joining("; "));
+
+            throw new IllegalStateException("Tecnología asociada a simulaciones: " + simulationsInfo);
+        }
+
+        repository.deleteById(id);
+    }
 
     @Override
     public List<TechnologyComparison> getTechnologiesByEnergyType(String energyType) {

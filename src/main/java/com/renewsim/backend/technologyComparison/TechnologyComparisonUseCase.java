@@ -14,7 +14,7 @@ public class TechnologyComparisonUseCase {
     private final TechnologyComparisonMapper mapper;
 
     public TechnologyComparisonUseCase(TechnologyComparisonService service,
-                                       TechnologyComparisonMapper mapper) {
+            TechnologyComparisonMapper mapper) {
         this.service = service;
         this.mapper = mapper;
     }
@@ -34,4 +34,10 @@ public class TechnologyComparisonUseCase {
                 .map(mapper::toResponseDTO)
                 .collect(Collectors.toList());
     }
+
+    public TechnologyComparisonResponseDTO updateTechnology(Long id, TechnologyComparisonRequestDTO dto) {
+        TechnologyComparison updatedEntity = service.updateTechnology(id, mapper.toEntity(dto));
+        return mapper.toResponseDTO(updatedEntity);
+    }
+
 }
