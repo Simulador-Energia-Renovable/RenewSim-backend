@@ -4,10 +4,13 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import org.junit.jupiter.api.DisplayName;
+
 class RoleTest {
 
     @Test
-    void shouldCreateRoleWithName() {
+    @DisplayName("Should create role with name")
+    void testShouldCreateRoleWithName() {
         Role role = new Role(RoleName.ADMIN);
 
         assertNotNull(role);
@@ -15,7 +18,8 @@ class RoleTest {
     }
 
     @Test
-    void shouldSetAndGetIdAndName() {
+    @DisplayName("Should set and get id and name")
+    void testShouldSetAndGetIdAndName() {
         Role role = new Role();
         role.setId(1L);
         role.setName(RoleName.USER);
@@ -25,7 +29,8 @@ class RoleTest {
     }
 
     @Test
-    void shouldVerifyEqualsAndHashCode() {
+    @DisplayName("Should verify equals and hashCode")
+    void testShouldVerifyEqualsAndHashCode() {
         Role role1 = new Role(RoleName.ADMIN);
         Role role2 = new Role(RoleName.ADMIN);
         Role role3 = new Role(RoleName.USER);
@@ -38,11 +43,19 @@ class RoleTest {
     }
 
     @Test
-    void shouldHaveToStringRepresentation() {
+    @DisplayName("Should have toString representation")
+    void testShouldHaveToStringRepresentation() {
         Role role = new Role(RoleName.USER);
         String toString = role.toString();
 
         assertTrue(toString.contains("Role{name=USER}"));
     }
-}
 
+    @Test
+    @DisplayName("Should return false when comparing Role with different object type")
+    void testShouldReturnFalseWhenComparingToDifferentType() {
+        Role role = new Role(RoleName.USER);
+        assertNotEquals(role, "not a role");
+    }
+
+}
