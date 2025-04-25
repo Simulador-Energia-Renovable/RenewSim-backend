@@ -22,7 +22,7 @@ class RoleRepositoryTest {
 
     @Test
     @DisplayName("Should find role by name")
-    void shouldFindRoleByName() {
+    void testShouldFindRoleByName() {
 
         Role role = new Role(RoleName.ADMIN);
         roleRepository.save(role);
@@ -35,7 +35,7 @@ class RoleRepositoryTest {
 
     @Test
     @DisplayName("Should return empty when role not found")
-    void shouldReturnEmptyWhenRoleNotFound() {
+    void testShouldReturnEmptyWhenRoleNotFound() {
 
         Optional<Role> foundRole = roleRepository.findByName(RoleName.USER);
 

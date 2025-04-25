@@ -7,7 +7,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class RoleDTOTest {
 
     @Test
-    void shouldCreateRoleDTOWithBuilder() {
+    void testShouldCreateRoleDTOWithBuilder() {
         RoleDTO roleDTO = RoleDTO.builder()
                 .id(1L)
                 .name("ADMIN")
@@ -19,7 +19,7 @@ class RoleDTOTest {
     }
 
     @Test
-    void shouldSetAndGetFields() {
+    void testShouldSetAndGetFields() {
         RoleDTO roleDTO = new RoleDTO();
         roleDTO.setId(2L);
         roleDTO.setName("USER");
@@ -29,7 +29,7 @@ class RoleDTOTest {
     }
 
     @Test
-    void shouldHaveToStringRepresentation() {
+    void testShouldHaveToStringRepresentation() {
         RoleDTO roleDTO = RoleDTO.builder()
                 .id(3L)
                 .name("MODERATOR")
