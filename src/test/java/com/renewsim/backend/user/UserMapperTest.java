@@ -24,7 +24,7 @@ class UserMapperTest {
 
     @Test
     @DisplayName("Should map UserRequestDTO to User entity")
-    void shouldMapUserRequestDTOToUserEntity() {
+    void testShouldMapUserRequestDTOToUserEntity() {
         UserRequestDTO dto = UserRequestDTO.builder()
                 .username("testuser")
                 .password("securepassword")
@@ -42,7 +42,7 @@ class UserMapperTest {
 
     @Test
     @DisplayName("Should map User entity to UserResponseDTO")
-    void shouldMapUserEntityToUserResponseDTO() {
+    void testShouldMapUserEntityToUserResponseDTO() {
         Role role = new Role();
         role.setId(1L);
         role.setName(RoleName.ADMIN);
@@ -62,7 +62,7 @@ class UserMapperTest {
 
     @Test
     @DisplayName("Should map roles to role names")
-    void shouldMapRolesToRoleNames() {
+    void testShouldMapRolesToRoleNames() {
         Role role = new Role();
         role.setName(RoleName.USER);
 
@@ -73,7 +73,7 @@ class UserMapperTest {
 
     @Test
     @DisplayName("Should map role names to roles")
-    void shouldMapRoleNamesToRoles() {
+    void testShouldMapRoleNamesToRoles() {
         Set<Role> roles = userMapper.mapRolesFromStrings(Set.of("ADMIN"));
 
         assertThat(roles).hasSize(1);

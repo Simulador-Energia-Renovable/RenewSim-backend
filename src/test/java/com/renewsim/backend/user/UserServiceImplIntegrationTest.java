@@ -62,7 +62,7 @@ class UserServiceImplIntegrationTest {
 
     @Test
     @DisplayName("Should get all users")
-    void shouldGetAllUsers() {
+    void testShouldGetAllUsers() {
         List<UserResponseDTO> users = userService.getAll();
 
         assertThat(users).isNotEmpty();
@@ -71,7 +71,7 @@ class UserServiceImplIntegrationTest {
 
     @Test
     @DisplayName("Should get user by ID")
-    void shouldGetUserById() {
+    void testShouldGetUserById() {
         UserResponseDTO user = userService.getById(testUser.getId());
 
         assertThat(user.getUsername()).isEqualTo("integrationUser");
@@ -79,7 +79,7 @@ class UserServiceImplIntegrationTest {
 
     @Test
     @DisplayName("Should get user by entity")
-    void shouldGetByIdEntity() {
+    void testShouldGetByIdEntity() {
         User user = userService.getByIdEntity(testUser.getId());
 
         assertThat(user.getUsername()).isEqualTo("integrationUser");
@@ -87,7 +87,7 @@ class UserServiceImplIntegrationTest {
 
     @Test
     @DisplayName("Should delete user")
-    void shouldDeleteUser() {
+    void testShouldDeleteUser() {
         userService.deleteUser(testUser.getId());
 
         Optional<User> deletedUser = userRepository.findById(testUser.getId());
@@ -96,7 +96,7 @@ class UserServiceImplIntegrationTest {
 
     @Test
     @DisplayName("Should get users without roles")
-    void shouldGetUsersWithoutRoles() {
+    void testShouldGetUsersWithoutRoles() {
         User userWithoutRoles = new User();
         userWithoutRoles.setUsername("noRoleUser");
         userWithoutRoles.setPassword("password");

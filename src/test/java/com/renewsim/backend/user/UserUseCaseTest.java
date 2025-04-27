@@ -16,6 +16,7 @@ import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 @DisplayName("UserUseCase Test")
@@ -34,7 +35,7 @@ class UserUseCaseTest {
 
     @Test
     @DisplayName("Should update user roles successfully")
-    void shouldUpdateUserRolesSuccessfully() {
+    void testShouldUpdateUserRolesSuccessfully() {
         Long userId = 1L;
         List<String> roleNames = List.of("ADMIN");
 
@@ -58,7 +59,7 @@ class UserUseCaseTest {
 
     @Test
     @DisplayName("Should throw exception when user not found in updateUserRoles")
-    void shouldThrowExceptionWhenUserNotFound() {
+    void testShouldThrowExceptionWhenUserNotFound() {
         Long userId = 99L;
         List<String> roleNames = List.of("ADMIN");
 
@@ -73,7 +74,7 @@ class UserUseCaseTest {
 
     @Test
     @DisplayName("Should throw exception when role not found in updateUserRoles")
-    void shouldThrowExceptionWhenRoleNotFound() {
+    void testShouldThrowExceptionWhenRoleNotFound() {
         Long userId = 1L;
         List<String> roleNames = List.of("NON_EXISTENT_ROLE");
 
@@ -93,7 +94,7 @@ class UserUseCaseTest {
 
     @Test
     @DisplayName("Should delete user successfully")
-    void shouldDeleteUserSuccessfully() {
+    void testShouldDeleteUserSuccessfully() {
         Long userId = 1L;
 
         userUseCase.deleteUser(userId);
@@ -103,14 +104,13 @@ class UserUseCaseTest {
 
     @Test
     @DisplayName("Should get users without roles")
-    void shouldGetUsersWithoutRoles() {
+    void testShouldGetUsersWithoutRoles() {
         List<UserResponseDTO> expectedUsers = List.of(
                 UserResponseDTO.builder()
                         .id(1L)
                         .username("user1")
                         .roles(Set.of())
-                        .build()
-        );
+                        .build());
 
         when(userService.getUsersWithoutRoles()).thenReturn(expectedUsers);
 
