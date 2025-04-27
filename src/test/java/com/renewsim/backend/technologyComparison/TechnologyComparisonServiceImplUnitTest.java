@@ -88,26 +88,28 @@ class TechnologyComparisonServiceImplUnitTest {
     }
 
     @Test
-    @DisplayName("Should delete existing technology")
-    void testShouldDeleteTechnology() {
-        when(repository.existsById(1L)).thenReturn(true);
+@DisplayName("Should delete existing technology")
+void testShouldDeleteTechnology() {
+    when(repository.findById(1L)).thenReturn(Optional.of(solar));
 
-        service.deleteTechnology(1L);
+    service.deleteTechnology(1L);
 
-        verify(repository).deleteById(1L);
-    }
+    verify(repository).deleteById(1L);
+}
+
 
     @Test
     @DisplayName("Should throw when deleting nonexistent technology")
     void testShouldThrowWhenDeletingNonexistent() {
-        when(repository.existsById(999L)).thenReturn(false);
-
+        when(repository.findById(999L)).thenReturn(Optional.empty());
+    
         assertThatThrownBy(() -> service.deleteTechnology(999L))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("Technology with ID 999 does not exist.");
-
+                .hasMessage("Technology not found");
+    
         verify(repository, never()).deleteById(any());
     }
+    
 
     @Test
     @DisplayName("Should filter technologies by energy type")
