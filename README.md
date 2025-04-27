@@ -1,4 +1,16 @@
-# RenewSim Backend ☀️💨🌊
+# RenewSim Backend ☀️🀈🌊
+
+# 📑 Tabla de Contenidos
+
+- [Descripción](#-descripción)
+- [Tecnologías utilizadas](#-tecnologías-utilizadas)
+- [Instalación y ejecución](#-instalación-y-ejecución)
+- [Testing](#-testing)
+- [Estructura del proyecto](#-estructura-del-proyecto)
+- [Endpoints principales](#-endpoints-principales)
+- [Autor](#-autor)
+- [Licencia](#-licencia)
+
 
 **RenewSim** es el backend de un simulador de energías renovables que permite calcular generación de energía, eficiencia, y retorno de inversión basado en fuentes solares, eólicas e hidroeléctricas.
 
@@ -10,7 +22,7 @@
 ## 🚀 Tecnologías utilizadas
 
 - Java 21
-- Spring Boot 
+- Spring Boot
 - Spring Security
 - Spring Data JPA
 - JWT Authentication
@@ -51,6 +63,66 @@
   ```
   El reporte se generará en:  
   `/target/site/jacoco/index.html`
+
+---
+
+## 🚀 CD - Build and Package Spring Boot App
+
+Este workflow se encarga de construir y empaquetar el backend de RenewSim automáticamente cuando se realiza un push a la rama `main`.
+
+### 📋 Descripción del flujo
+
+1. **Checkout del repositorio**: Clona el proyecto en el runner de GitHub Actions.
+2. **Configuración de Java**: Instala y configura Java 17 (usando Temurin).
+3. **Build del proyecto**: Ejecuta `mvn clean package -DskipTests` para empaquetar la aplicación en un archivo `.jar`.
+4. **Upload del artefacto**: Sube el archivo `.jar` generado al apartado de Artifacts en GitHub.
+
+### 🛠️ Tecnologías y herramientas
+
+- GitHub Actions
+- Java 17
+- Apache Maven
+- Spring Boot
+- Artifacts de GitHub
+
+### 📂 Archivo de configuración `.github/workflows/deploy.yml`
+
+```yaml
+name: 🚀 CD - Build and Package Spring Boot App
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v3
+
+      - name: ☕ Set up Java
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: 📦 Build with Maven
+        run: mvn clean package -DskipTests
+
+      - name: 📂 Upload JAR artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: renewsim-backend
+          path: target/*.jar
+```
+
+### ⚠️ Notas importantes
+
+- El despliegue se activa **solo cuando se hace `push` o `merge` a `main`**.
+- El archivo `.jar` generado estará disponible para descargar en la sección **Artifacts** de GitHub Actions.
+- Actualmente los tests **no se ejecutan** en este flujo para acelerar la construcción (`-DskipTests`).
 
 ---
 
