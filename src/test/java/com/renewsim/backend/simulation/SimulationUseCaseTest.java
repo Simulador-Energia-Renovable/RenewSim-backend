@@ -60,7 +60,7 @@ class SimulationUseCaseTest {
 
     @Test
     @DisplayName("Should simulate and save")
-    void shouldSimulateAndSave() {
+    void testShouldSimulateAndSave() {
         SimulationRequestDTO request = new SimulationRequestDTO();
         SimulationResponseDTO response = new SimulationResponseDTO();
 
@@ -74,7 +74,7 @@ class SimulationUseCaseTest {
 
     @Test
     @DisplayName("Should return user simulations")
-    void shouldReturnUserSimulations() {
+    void testShouldReturnUserSimulations() {
         List<Simulation> simulations = List.of(new Simulation());
         when(simulationService.getUserSimulations("user")).thenReturn(simulations);
 
@@ -85,7 +85,7 @@ class SimulationUseCaseTest {
 
     @Test
     @DisplayName("Should return simulation history DTOs")
-    void shouldReturnSimulationHistoryDTOs() {
+    void testShouldReturnSimulationHistoryDTOs() {
         Simulation sim = new Simulation();
         SimulationHistoryDTO dto = new SimulationHistoryDTO();
 
@@ -99,21 +99,21 @@ class SimulationUseCaseTest {
 
     @Test
     @DisplayName("Should delete all user simulations")
-    void shouldDeleteUserSimulations() {
+    void testShouldDeleteUserSimulations() {
         simulationUseCase.deleteUserSimulations("user");
         verify(simulationService).deleteSimulationsByUser("user");
     }
 
     @Test
     @DisplayName("Should delete simulation by ID")
-    void shouldDeleteSimulationById() {
+    void testShouldDeleteSimulationById() {
         simulationUseCase.deleteSimulationById(123L);
         verify(simulationService).deleteSimulationById(123L);
     }
 
     @Test
     @DisplayName("Should return normalization stats")
-    void shouldReturnNormalizationStats() {
+    void testShouldReturnNormalizationStats() {
         NormalizationStatsDTO stats = new NormalizationStatsDTO();
         when(simulationService.getCurrentNormalizationStats()).thenReturn(stats);
 
@@ -124,7 +124,7 @@ class SimulationUseCaseTest {
 
     @Test
     @DisplayName("Should return all technologies")
-    void shouldReturnAllTechnologies() {
+    void testShouldReturnAllTechnologies() {
         List<TechnologyComparisonResponseDTO> techList = List.of(new TechnologyComparisonResponseDTO());
         when(simulationService.getAllTechnologies()).thenReturn(techList);
 
@@ -135,7 +135,7 @@ class SimulationUseCaseTest {
 
     @Test
     @DisplayName("Should return normalized technologies")
-    void shouldReturnNormalizedTechnologies() {
+    void testShouldReturnNormalizedTechnologies() {
         when(simulationService.getAllTechnologies()).thenReturn(List.of(tech));
 
         try (MockedStatic<TechnologyScoringUtil> scoringUtilMock = mockStatic(TechnologyScoringUtil.class)) {
@@ -157,7 +157,7 @@ class SimulationUseCaseTest {
 
     @Test
     @DisplayName("Should return empty list when user has no simulations")
-    void shouldReturnEmptyHistoryIfNoSimulations() {
+    void testShouldReturnEmptyHistoryIfNoSimulations() {
         when(simulationService.getUserSimulations("user")).thenReturn(List.of());
 
         List<SimulationHistoryDTO> result = simulationUseCase.getUserSimulationHistoryDTOs("user");
@@ -167,7 +167,7 @@ class SimulationUseCaseTest {
 
     @Test
     @DisplayName("Should return empty normalized tech list when no techs available")
-    void shouldReturnEmptyNormalizedTechList() {
+    void testShouldReturnEmptyNormalizedTechList() {
         when(simulationService.getAllTechnologies()).thenReturn(List.of());
 
         try (MockedStatic<TechnologyScoringUtil> mocked = mockStatic(TechnologyScoringUtil.class)) {
@@ -180,7 +180,7 @@ class SimulationUseCaseTest {
 
     @Test
     @DisplayName("Should return technologies for a given simulation")
-    void shouldReturnTechnologiesForSimulation() {
+    void testShouldReturnTechnologiesForSimulation() {
         Simulation simulation = new Simulation();
         simulation.setTechnologies(List.of(new com.renewsim.backend.technologyComparison.TechnologyComparison()));
 
@@ -194,7 +194,7 @@ class SimulationUseCaseTest {
 
     @Test
     @DisplayName("Should throw when simulation not found")
-    void shouldThrowIfSimulationNotFound() {
+    void testShouldThrowIfSimulationNotFound() {
         when(simulationService.getSimulationById(1L)).thenThrow(new RuntimeException("Not found"));
 
         assertThatThrownBy(() -> simulationUseCase.getTechnologiesForSimulation(1L))
@@ -204,7 +204,7 @@ class SimulationUseCaseTest {
 
     @Test
     @DisplayName("Should throw when simulation request is null")
-    void shouldThrowWhenSimulationRequestIsNull() {
+    void testShouldThrowWhenSimulationRequestIsNull() {
         when(simulationService.simulateAndSave(null)).thenThrow(new IllegalArgumentException("Request cannot be null"));
 
         assertThatThrownBy(() -> simulationUseCase.simulateAndSave(null, "user"))
@@ -214,7 +214,7 @@ class SimulationUseCaseTest {
 
     @Test
     @DisplayName("Should return simulation if username matches")
-    void shouldReturnSimulationIfUsernameMatches() {
+    void testShouldReturnSimulationIfUsernameMatches() {
         Simulation simulation = createSimulationWithUsername("user");
         SimulationResponseDTO responseDTO = new SimulationResponseDTO();
 
@@ -228,7 +228,7 @@ class SimulationUseCaseTest {
 
     @Test
     @DisplayName("Should throw exception if username does not match")
-    void shouldThrowIfUsernameDoesNotMatch() {
+    void testShouldThrowIfUsernameDoesNotMatch() {
         Simulation simulation = createSimulationWithUsername("otherUser");
 
         when(simulationService.getSimulationById(1L)).thenReturn(simulation);
