@@ -9,5 +9,6 @@ public class ClimateData {
     private double irradiance;
     private double wind;
     private double hydrology;
+    
 }
 
