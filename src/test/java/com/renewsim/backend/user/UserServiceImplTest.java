@@ -17,6 +17,7 @@ import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 @DisplayName("UserServiceImpl Test")
@@ -37,7 +38,7 @@ class UserServiceImplTest {
 
     @Test
     @DisplayName("Should get all users")
-    void shouldGetAllUsers() {
+    void testShouldGetAllUsers() {
         User user = new User();
         List<User> users = List.of(user);
         when(userRepository.findAll()).thenReturn(users);
@@ -52,7 +53,7 @@ class UserServiceImplTest {
 
     @Test
     @DisplayName("Should get user by ID")
-    void shouldGetUserById() {
+    void testShouldGetUserById() {
         Long userId = 1L;
         User user = new User();
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
@@ -67,7 +68,7 @@ class UserServiceImplTest {
 
     @Test
     @DisplayName("Should throw exception when user not found by ID")
-    void shouldThrowExceptionWhenUserNotFoundById() {
+    void testShouldThrowExceptionWhenUserNotFoundById() {
         Long userId = 99L;
         when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
@@ -79,7 +80,7 @@ class UserServiceImplTest {
 
     @Test
     @DisplayName("Should save user")
-    void shouldSaveUser() {
+    void testShouldSaveUser() {
         UserRequestDTO dto = UserRequestDTO.builder()
                 .username("testuser")
                 .password("testpass")
@@ -103,7 +104,7 @@ class UserServiceImplTest {
 
     @Test
     @DisplayName("Should delete user by ID")
-    void shouldDeleteUserById() {
+    void testShouldDeleteUserById() {
         Long userId = 1L;
 
         userService.deleteUser(userId);
@@ -113,7 +114,7 @@ class UserServiceImplTest {
 
     @Test
     @DisplayName("Should get roles by user ID")
-    void shouldGetRolesByUserId() {
+    void testShouldGetRolesByUserId() {
         Long userId = 1L;
         Role role = new Role();
         role.setName(RoleName.ADMIN);
@@ -133,7 +134,7 @@ class UserServiceImplTest {
 
     @Test
     @DisplayName("Should return user when roles are empty")
-    void shouldReturnUserWithEmptyRoles() {
+    void testShouldReturnUserWithEmptyRoles() {
         User user = new User();
         user.setRoles(Set.of());
 
@@ -147,7 +148,7 @@ class UserServiceImplTest {
 
     @Test
     @DisplayName("Should return user when roles are null")
-    void shouldReturnUserWithNullRoles() {
+    void testShouldReturnUserWithNullRoles() {
         User user = new User();
         user.setRoles(null);
 
@@ -161,7 +162,7 @@ class UserServiceImplTest {
 
     @Test
     @DisplayName("Should get current user")
-    void shouldGetCurrentUser() {
+    void testShouldGetCurrentUser() {
         User user = new User();
         UserResponseDTO responseDTO = new UserResponseDTO();
 
@@ -175,7 +176,7 @@ class UserServiceImplTest {
 
     @Test
     @DisplayName("Should change password when current is correct")
-    void shouldChangePasswordSuccessfully() {
+    void testShouldChangePasswordSuccessfully() {
         User user = new User();
         user.setId(1L);
         user.setPassword("encodedOldPassword");
@@ -192,7 +193,7 @@ class UserServiceImplTest {
 
     @Test
     @DisplayName("Should throw when current password is incorrect")
-    void shouldThrowWhenCurrentPasswordIncorrect() {
+    void testShouldThrowWhenCurrentPasswordIncorrect() {
         User user = new User();
         user.setId(1L);
         user.setPassword("encodedPassword");

@@ -7,6 +7,9 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import java.lang.reflect.Field;
+
+import java.util.List;
 
 @DisplayName("Unit tests for TechnologyComparisonMapper")
 class TechnologyComparisonMapperTest {
@@ -38,7 +41,7 @@ class TechnologyComparisonMapperTest {
 
     @Test
     @DisplayName("Should map TechnologyComparisonRequestDTO to TechnologyComparison entity")
-    void shouldMapRequestDtoToEntity() {
+    void testShouldMapRequestDtoToEntity() {
         TechnologyComparison mappedEntity = mapper.toEntity(requestDTO);
 
         assertThat(mappedEntity.getTechnologyName()).isEqualTo(requestDTO.getTechnologyName());
@@ -53,9 +56,17 @@ class TechnologyComparisonMapperTest {
 
     @Test
     @DisplayName("Should map TechnologyComparison entity to TechnologyComparisonResponseDTO")
-    void shouldMapEntityToResponseDto() {
+    void testShouldMapEntityToResponseDto() throws NoSuchFieldException, IllegalAccessException {
+
+        Field idField = TechnologyComparison.class.getDeclaredField("id");
+        idField.setAccessible(true);
+        idField.set(entity, 1L);
+    
+        entity.setSimulations(List.of());
+
         TechnologyComparisonResponseDTO dto = mapper.toResponseDTO(entity);
 
+        assertThat(dto.getId()).isEqualTo(1L);
         assertThat(dto.getTechnologyName()).isEqualTo(entity.getTechnologyName());
         assertThat(dto.getEfficiency()).isEqualTo(entity.getEfficiency());
         assertThat(dto.getInstallationCost()).isEqualTo(entity.getInstallationCost());
@@ -64,7 +75,9 @@ class TechnologyComparisonMapperTest {
         assertThat(dto.getCo2Reduction()).isEqualTo(entity.getCo2Reduction());
         assertThat(dto.getEnergyProduction()).isEqualTo(entity.getEnergyProduction());
         assertThat(dto.getEnergyType()).isEqualTo(entity.getEnergyType());
+        assertThat(dto.isInUse()).isFalse(); 
     }
 }
+
 
 

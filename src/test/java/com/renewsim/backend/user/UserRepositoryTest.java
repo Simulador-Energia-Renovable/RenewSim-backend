@@ -29,7 +29,7 @@ class UserRepositoryTest {
 
     @BeforeEach
     void setUp() {
-        // Preparamos el Role USER una sola vez por test
+   
         Role role = new Role();
         role.setName(RoleName.USER);
         savedRole = roleRepository.save(role);
@@ -44,7 +44,7 @@ class UserRepositoryTest {
 
     @Test
     @DisplayName("Should save and find user by username")
-    void shouldSaveAndFindByUsername() {
+    void testShouldSaveAndFindByUsername() {
    
         User user = createUser("testuser1");
 
@@ -56,7 +56,7 @@ class UserRepositoryTest {
 
     @Test
     @DisplayName("Should return true if username exists")
-    void shouldReturnTrueIfUsernameExists() {
+    void testShouldReturnTrueIfUsernameExists() {
 
         createUser("existinguser");
 
@@ -67,7 +67,7 @@ class UserRepositoryTest {
 
     @Test
     @DisplayName("Should return false if username does not exist")
-    void shouldReturnFalseIfUsernameDoesNotExist() {
+    void testShouldReturnFalseIfUsernameDoesNotExist() {
 
         boolean exists = userRepository.existsByUsername("nonexistentuser");
 

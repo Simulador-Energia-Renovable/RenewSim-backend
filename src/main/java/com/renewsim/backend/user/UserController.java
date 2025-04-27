@@ -81,8 +81,7 @@ public class UserController {
     public ResponseEntity<String> changePassword(
             @AuthenticationPrincipal Jwt jwt,
             @RequestBody ChangePasswordDTO request) {
-        try {
-            System.out.println("🟢 Entrando a /change-password Controller");
+        try {           
 
             String username = jwt.getSubject();
 
@@ -91,7 +90,7 @@ public class UserController {
 
             return ResponseEntity.ok("Contraseña cambiada correctamente");
         } catch (IllegalArgumentException e) {
-            System.out.println("❌ Error de validación: " + e.getMessage());
+                        
             return ResponseEntity.badRequest().body(e.getMessage());
         } catch (Exception e) {
             e.printStackTrace();

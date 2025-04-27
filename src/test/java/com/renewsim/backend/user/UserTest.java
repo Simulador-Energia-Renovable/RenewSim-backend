@@ -37,7 +37,7 @@ class UserTest {
 
     @Test
     @DisplayName("Should create User using constructor")
-    void shouldCreateUserUsingConstructor() {
+    void testShouldCreateUserUsingConstructor() {
         User user = new User(username, password, roles);
 
         assertThat(user.getUsername()).isEqualTo(username);
@@ -47,7 +47,7 @@ class UserTest {
 
     @Test
     @DisplayName("Should set and get properties via setters and getters")
-    void shouldSetAndGetProperties() {
+    void testShouldSetAndGetProperties() {
         User user = new User();
         user.setId(userId);
         user.setUsername(username);
@@ -64,7 +64,7 @@ class UserTest {
 
     @Test
     @DisplayName("Should manage simulations correctly")
-    void shouldManageSimulationsCorrectly() {
+    void testShouldManageSimulationsCorrectly() {
         User user = new User();
         user.setSimulations(new ArrayList<>());
 
@@ -74,4 +74,3 @@ class UserTest {
         assertThat(user.getSimulations()).contains(simulation);
     }
 }
-
