@@ -9,7 +9,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class UpdateRolesRequestDTOTest {
 
     @Test
-    void shouldCreateUpdateRolesRequestDTOWithBuilder() {
+    void testShouldCreateUpdateRolesRequestDTOWithBuilder() {
         UpdateRolesRequestDTO dto = UpdateRolesRequestDTO.builder()
                 .roles(List.of("ADMIN", "USER"))
                 .build();
@@ -21,7 +21,7 @@ class UpdateRolesRequestDTOTest {
     }
 
     @Test
-    void shouldSetAndGetRoles() {
+    void testShouldSetAndGetRoles() {
         UpdateRolesRequestDTO dto = new UpdateRolesRequestDTO();
         dto.setRoles(List.of("USER"));
 
@@ -30,7 +30,7 @@ class UpdateRolesRequestDTOTest {
     }
 
     @Test
-    void shouldHaveToStringRepresentation() {
+    void testShouldHaveToStringRepresentation() {
         UpdateRolesRequestDTO dto = UpdateRolesRequestDTO.builder()
                 .roles(List.of("ADMIN"))
                 .build();

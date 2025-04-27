@@ -1,6 +1,7 @@
 package com.renewsim.backend.role;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -28,7 +29,8 @@ class RoleServiceImplTest {
     }
 
     @Test
-    void shouldReturnRoleWhenRoleExists() {
+    @DisplayName("Should return role when role exists")
+    void testShouldReturnRoleWhenRoleExists() {
         Role role = new Role(RoleName.ADMIN);
         when(roleRepository.findByName(RoleName.ADMIN)).thenReturn(Optional.of(role));
 
@@ -40,7 +42,8 @@ class RoleServiceImplTest {
     }
 
     @Test
-    void shouldThrowExceptionWhenRoleDoesNotExist() {
+    @DisplayName("Should throw exception when role does not exist")
+    void testShouldThrowExceptionWhenRoleDoesNotExist() {
         when(roleRepository.findByName(RoleName.ADMIN)).thenReturn(Optional.empty());
 
         ResponseStatusException exception = assertThrows(ResponseStatusException.class,
@@ -51,7 +54,8 @@ class RoleServiceImplTest {
     }
 
     @Test
-    void shouldReturnRolesFromStringsSuccessfully() {
+    @DisplayName("Should return roles from strings successfully")
+    void testShouldReturnRolesFromStringsSuccessfully() {
         Role role = new Role(RoleName.USER);
         when(roleRepository.findByName(RoleName.USER)).thenReturn(Optional.of(role));
 
@@ -63,7 +67,8 @@ class RoleServiceImplTest {
     }
 
     @Test
-    void shouldThrowExceptionForInvalidRoleString() {
+    @DisplayName("Should throw exception for invalid role string")
+    void testShouldThrowExceptionForInvalidRoleString() {
         ResponseStatusException exception = assertThrows(ResponseStatusException.class,
                 () -> roleService.getRolesFromStrings(Set.of("INVALID_ROLE")));
 
@@ -71,7 +76,8 @@ class RoleServiceImplTest {
     }
 
     @Test
-    void shouldReturnRolesByNamesSuccessfully() {
+    @DisplayName("Should return roles by names successfully")
+    void testShouldReturnRolesByNamesSuccessfully() {
         Role role = new Role(RoleName.USER);
         when(roleRepository.findByName(RoleName.USER)).thenReturn(Optional.of(role));
 
@@ -83,7 +89,8 @@ class RoleServiceImplTest {
     }
 
     @Test
-    void shouldThrowRuntimeExceptionWhenRoleNotFoundByName() {
+    @DisplayName("Should throw runtime exception when role not found by name")
+    void testShouldThrowRuntimeExceptionWhenRoleNotFoundByName() {
         when(roleRepository.findByName(RoleName.USER)).thenReturn(Optional.empty());
 
         RuntimeException exception = assertThrows(RuntimeException.class,
@@ -92,4 +99,3 @@ class RoleServiceImplTest {
         assertTrue(exception.getMessage().contains("Role not found: USER"));
     }
 }
-

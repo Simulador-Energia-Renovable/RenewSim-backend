@@ -17,6 +17,8 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
+import java.util.Collections;
+
 @DisplayName("JwtAuthenticationFilter Tests")
 class JwtAuthenticationFilterTest {
 
@@ -117,7 +119,7 @@ class JwtAuthenticationFilterTest {
         when(jwtUtils.validateToken(anyString())).thenReturn(true);
         when(jwtUtils.extractUsername(anyString())).thenReturn(TEST_USERNAME);
         when(userDetailsService.loadUserByUsername(TEST_USERNAME)).thenReturn(userDetails);
-        when(userDetails.getAuthorities()).thenReturn(null);
+        when(userDetails.getAuthorities()).thenReturn(Collections.emptyList());
         when(userDetails.getUsername()).thenReturn(TEST_USERNAME);
     }
 

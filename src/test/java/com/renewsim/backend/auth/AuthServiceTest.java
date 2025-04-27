@@ -19,6 +19,7 @@ import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 @DisplayName("AuthService Unit Tests")
@@ -120,6 +121,21 @@ class AuthServiceTest {
                 .extracting("statusCode")
                 .isEqualTo(HttpStatus.UNAUTHORIZED);
     }
+
+    @Test
+    @DisplayName("Should authenticate user with ADMIN role and generate full scope token")
+    void testShouldAuthenticateAdminUser() {
+        when(mockRole.getName()).thenReturn(RoleName.ADMIN);
+        when(mockUser.getRoles()).thenReturn(Set.of(mockRole));
+        when(userRepository.findByUsername(username)).thenReturn(Optional.of(mockUser));
+        when(passwordEncoder.matches(password, encodedPassword)).thenReturn(true);
+        when(jwtUtils.generateToken(eq(username), anySet(),
+                argThat(scopes -> scopes.contains("manage:users") && scopes.contains("export:simulations"))))
+                .thenReturn(token);
+
+        String resultToken = authService.authenticate(username, password);
+
+        assertThat(resultToken).isEqualTo(token);
+    }
+
 }
-
-
