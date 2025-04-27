@@ -1,9 +1,11 @@
 package com.renewsim.backend.simulation;
 
+import com.renewsim.backend.exception.ResourceNotFoundException;
 import com.renewsim.backend.simulation.dto.*;
 import com.renewsim.backend.simulation.util.TechnologyScoringUtil;
 import com.renewsim.backend.technologyComparison.TechnologyComparisonMapper;
 import com.renewsim.backend.technologyComparison.dto.TechnologyComparisonResponseDTO;
+import com.renewsim.backend.user.User;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -210,4 +212,38 @@ class SimulationUseCaseTest {
                 .hasMessageContaining("Request cannot be null");
     }
 
+    @Test
+    @DisplayName("Should return simulation if username matches")
+    void shouldReturnSimulationIfUsernameMatches() {
+        Simulation simulation = createSimulationWithUsername("user");
+        SimulationResponseDTO responseDTO = new SimulationResponseDTO();
+
+        when(simulationService.getSimulationById(1L)).thenReturn(simulation);
+        when(simulationMapper.toDTO(simulation)).thenReturn(responseDTO);
+
+        SimulationResponseDTO result = simulationUseCase.getSimulationById(1L, "user");
+
+        assertThat(result).isEqualTo(responseDTO);
+    }
+
+    @Test
+    @DisplayName("Should throw exception if username does not match")
+    void shouldThrowIfUsernameDoesNotMatch() {
+        Simulation simulation = createSimulationWithUsername("otherUser");
+
+        when(simulationService.getSimulationById(1L)).thenReturn(simulation);
+
+        assertThatThrownBy(() -> simulationUseCase.getSimulationById(1L, "user"))
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessageContaining("You are not authorized to access this simulation");
+    }
+ 
+    private Simulation createSimulationWithUsername(String username) {
+        Simulation simulation = new Simulation();
+        User user = new User();
+        user.setUsername(username);
+        simulation.setUser(user);
+        return simulation;
+    }
 }
+

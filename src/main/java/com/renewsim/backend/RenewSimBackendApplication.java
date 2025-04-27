@@ -14,14 +14,14 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Profile;
 
 @SpringBootApplication
-@EnableCaching // Habilita la caché en toda la aplicación
+@EnableCaching 
 public class RenewSimBackendApplication {
     public static void main(String[] args) {
         SpringApplication.run(RenewSimBackendApplication.class, args);
     }
 
     @Bean
-    @Profile("!test") // Importante: se ejecuta solo fuera del perfil de test
+    @Profile("!test") 
     CommandLineRunner checkDatabase(DataSource dataSource) {
         return args -> {
             try (Connection connection = dataSource.getConnection()) {
