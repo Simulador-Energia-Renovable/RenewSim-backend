@@ -52,3 +52,5 @@ nbproject/private/
 # 🖼️ Ignorar archivos del sistema (Mac y Windows)
 Thumbs.db
 .DS_Store
+# 🚀 EXCEPCIÓN para workflows de GitHub
+!.github/workflows/*.yml
