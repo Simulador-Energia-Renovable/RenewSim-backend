@@ -7,8 +7,9 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: renewsim
-      MYSQL_USER: renewsim_user
-      MYSQL_PASSWORD: renewsim_password
+      # Estas 2 líneas se eliminan si no quieres usuario adicional
+      # MYSQL_USER: renewsim_user
+      # MYSQL_PASSWORD: renewsim_password
     ports:
       - "3306:3306"
     networks:
@@ -21,8 +22,8 @@ services:
       - "8080:8080"
     environment:
       SPRING_DATASOURCE_URL: jdbc:mysql://mysql-db:3306/renewsim
-      SPRING_DATASOURCE_USERNAME: renewsim_user
-      SPRING_DATASOURCE_PASSWORD: renewsim_password
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
     depends_on:
       - mysql
     networks:
@@ -30,3 +31,6 @@ services:
 
 networks:
   renewsim-net:
+
+
+
