@@ -1,6 +1,5 @@
-# Ignorar archivos y carpetas innecesarias
-*.md
-*.log
 target/
-.dockerignore
-Dockerfile
+.git
+.gitignore
+README.md
+
