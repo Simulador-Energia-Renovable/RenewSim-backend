@@ -1,0 +1,32 @@
+version: "3.9"
+
+services:
+  mysql:
+    image: mysql:8
+    container_name: mysql-db
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: renewsim
+      MYSQL_USER: renewsim_user
+      MYSQL_PASSWORD: renewsim_password
+    ports:
+      - "3306:3306"
+    networks:
+      - renewsim-net
+
+  renewsim-backend:
+    image: lannyrivero/renewsim-backend:latest
+    container_name: renewsim-backend
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-db:3306/renewsim
+      SPRING_DATASOURCE_USERNAME: renewsim_user
+      SPRING_DATASOURCE_PASSWORD: renewsim_password
+    depends_on:
+      - mysql
+    networks:
+      - renewsim-net
+
+networks:
+  renewsim-net:

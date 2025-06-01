@@ -54,3 +54,4 @@ Thumbs.db
 .DS_Store
 # 🚀 EXCEPCIÓN para workflows de GitHub
 !.github/workflows/*.yml
+!docker-compose.yml
