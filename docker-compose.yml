@@ -7,11 +7,10 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: renewsim
-      # Estas 2 líneas se eliminan si no quieres usuario adicional
-      # MYSQL_USER: renewsim_user
-      # MYSQL_PASSWORD: renewsim_password
     ports:
       - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
     networks:
       - renewsim-net
 
@@ -31,6 +30,10 @@ services:
 
 networks:
   renewsim-net:
+
+volumes:
+  mysql-data:
+
 
 
 
