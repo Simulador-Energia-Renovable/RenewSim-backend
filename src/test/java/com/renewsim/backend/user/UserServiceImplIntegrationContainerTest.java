@@ -13,8 +13,12 @@ import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
+import org.testcontainers.containers.MySQLContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.util.List;
 import java.util.Optional;
@@ -23,15 +27,29 @@ import java.util.Set;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
-@ActiveProfiles("test")
+@ActiveProfiles("testcontainer")
 @Import(UserServiceImplIntegrationContainerTest.TestConfig.class)
-@DisplayName("Integration Test - UserServiceImpl")
+@Testcontainers
+@DisplayName("Integration Test - UserServiceImpl with MySQLContainer (Real context, real DB)")
 class UserServiceImplIntegrationContainerTest {
 
     private static final String TEST_USERNAME = "integrationUser";
     private static final String TEST_PASSWORD = "securepassword";
     private static final String USER_WITHOUT_ROLE = "noRoleUser";
     private static final String PASSWORD_NO_ROLE = "password";
+
+    @Container
+    static MySQLContainer<?> mysqlContainer = new MySQLContainer<>("mysql:8.0")
+            .withDatabaseName("testdb")
+            .withUsername("testuser")
+            .withPassword("testpass");
+
+    @DynamicPropertySource
+    static void configureDatasourceProperties(DynamicPropertyRegistry registry) {
+        registry.add("spring.datasource.url", mysqlContainer::getJdbcUrl);
+        registry.add("spring.datasource.username", mysqlContainer::getUsername);
+        registry.add("spring.datasource.password", mysqlContainer::getPassword);
+    }
 
     @Autowired
     private UserService userService;
@@ -116,12 +134,8 @@ class UserServiceImplIntegrationContainerTest {
         @Bean
         public UserMapper userMapper() {
             return new UserMapperImpl();
-        }
-
-        @Bean
-        public PasswordEncoder passwordEncoder() {
-            return new BCryptPasswordEncoder();
-        }
+        }       
     }
 }
+
 
