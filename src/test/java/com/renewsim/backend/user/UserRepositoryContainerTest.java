@@ -22,6 +22,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 @DisplayName("Integration Test - UserRepository with MySQLContainer")
 class UserRepositoryContainerTest {
 
+    private static final String TEST_USER_1 = "testuser1";
+    private static final String EXISTING_USER = "existinguser";
+    private static final String NON_EXISTENT_USER = "nonexistentuser";
+
+
     @Container
     static MySQLContainer<?> mysqlContainer = new MySQLContainer<>("mysql:8.0")
             .withDatabaseName("testdb")
@@ -58,20 +63,20 @@ class UserRepositoryContainerTest {
     @Test
     @DisplayName("Should save and find user by username")
     void testShouldSaveAndFindByUsername() {
-        User user = createUser("testuser1");
+        User user = createUser(TEST_USER_1);
 
-        Optional<User> found = userRepository.findByUsername("testuser1");
+        Optional<User> found = userRepository.findByUsername(TEST_USER_1);
 
         assertThat(found).isPresent();
-        assertThat(found.get().getUsername()).isEqualTo("testuser1");
+        assertThat(found.get().getUsername()).isEqualTo(TEST_USER_1);
     }
 
     @Test
     @DisplayName("Should return true if username exists")
     void testShouldReturnTrueIfUsernameExists() {
-        createUser("existinguser");
+        createUser(EXISTING_USER);
 
-        boolean exists = userRepository.existsByUsername("existinguser");
+        boolean exists = userRepository.existsByUsername(EXISTING_USER);
 
         assertThat(exists).isTrue();
     }
@@ -79,7 +84,7 @@ class UserRepositoryContainerTest {
     @Test
     @DisplayName("Should return false if username does not exist")
     void testShouldReturnFalseIfUsernameDoesNotExist() {
-        boolean exists = userRepository.existsByUsername("nonexistentuser");
+        boolean exists = userRepository.existsByUsername(NON_EXISTENT_USER);
 
         assertThat(exists).isFalse();
     }
@@ -88,3 +93,4 @@ class UserRepositoryContainerTest {
         return userRepository.save(TestDataFactory.createUser(username, savedRole));
     }
 }
+
