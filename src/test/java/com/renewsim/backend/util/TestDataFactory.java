@@ -21,5 +21,21 @@ public class TestDataFactory {
         user.setRoles(Set.of(role));
         return user;
     }
+
+    public static User createUser(String username, String password, Set<Role> roles) {
+        User user = new User();
+        user.setUsername(username);
+        user.setPassword(password);
+        user.setRoles(roles);
+        return user;
+    }
+
+    public static User createUserWithoutRoles(String username, String password) {
+        User user = new User();
+        user.setUsername(username);
+        user.setPassword(password);
+        user.setRoles(Set.of());
+        return user;
+    }
 }
 
