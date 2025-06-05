@@ -29,14 +29,6 @@ services:
     networks:
       - renewsim-net
 
-  cypress:
-    build:
-      context: .
-      dockerfile: cypress.Dockerfile
-    depends_on:
-      - renewsim-backend
-    networks:
-      - renewsim-net
 networks:
   renewsim-net:
 
