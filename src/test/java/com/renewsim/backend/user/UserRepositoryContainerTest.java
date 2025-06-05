@@ -3,6 +3,7 @@ package com.renewsim.backend.user;
 import com.renewsim.backend.role.Role;
 import com.renewsim.backend.role.RoleName;
 import com.renewsim.backend.role.RoleRepository;
+import com.renewsim.backend.util.TestDataFactory;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -13,7 +14,6 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.util.Optional;
-import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -46,11 +46,7 @@ class UserRepositoryContainerTest {
     @BeforeEach
     void setUp() {
         savedRole = roleRepository.findByName(RoleName.USER)
-                .orElseGet(() -> {
-                    Role role = new Role();
-                    role.setName(RoleName.USER);
-                    return roleRepository.save(role);
-                });
+                .orElseGet(() -> roleRepository.save(TestDataFactory.createRole(RoleName.USER)));
     }
 
     @AfterEach
@@ -89,11 +85,6 @@ class UserRepositoryContainerTest {
     }
 
     private User createUser(String username) {
-        User user = new User();
-        user.setUsername(username);
-        user.setPassword("securepassword");
-        user.setRoles(Set.of(savedRole));
-
-        return userRepository.save(user);
+        return userRepository.save(TestDataFactory.createUser(username, savedRole));
     }
 }
