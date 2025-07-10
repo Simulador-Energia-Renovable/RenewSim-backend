@@ -2,9 +2,9 @@ name: CI - Build, Test and Coverage Report
 
 on:
   push:
-    branches: [ dev ]
+    branches: [ dev/v1.2.0 ]
   pull_request:
-    branches: [ dev ]
+    branches: [ dev/v1.2.0 ]
 
 jobs:
   build:
