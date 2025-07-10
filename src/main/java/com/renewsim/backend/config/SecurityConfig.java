@@ -39,11 +39,12 @@ public class SecurityConfig {
                 })
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/v1/auth/**").permitAll()
+                        .requestMatchers("/", "/api/v1/auth/**", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/simulation/**").hasAuthority("SCOPE_read:simulations")
                         .requestMatchers(HttpMethod.POST, "/api/v1/simulation").hasAuthority("SCOPE_write:simulations")
                         .requestMatchers("/api/v1/admin/**").hasAuthority("SCOPE_manage:users")
                         .anyRequest().authenticated())
+
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .oauth2ResourceServer(oauth2 -> oauth2
                         .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter())));
