@@ -1,18 +1,22 @@
 # RenewSim Backend ☀️🀈🌊
 
-# 📑 Tabla de Contenidos
+## 📑 Tabla de Contenidos
 
 - [Descripción](#-descripción)
 - [Tecnologías utilizadas](#-tecnologías-utilizadas)
 - [Instalación y ejecución](#-instalación-y-ejecución)
 - [Testing](#-testing)
+- [CD con GitHub Actions](#-cd-con-github-actions)
 - [Estructura del proyecto](#-estructura-del-proyecto)
 - [Endpoints principales](#-endpoints-principales)
 - [Autor](#-autor)
 - [Licencia](#-licencia)
 
+---
 
-**RenewSim** es el backend de un simulador de energías renovables que permite calcular generación de energía, eficiencia, y retorno de inversión basado en fuentes solares, eólicas e hidroeléctricas.
+## 🧾 Descripción
+
+**RenewSim** es el backend de un simulador de energías renovables que permite calcular generación, eficiencia y retorno de inversión de proyectos basados en energía solar, eólica e hidroeléctrica. Desarrollado en Java 17 + Spring Boot, el proyecto cuenta con autenticación segura, arquitectura limpia, cobertura de pruebas y despliegue automático.
 
 [![Build Status](https://github.com/Simulador-Energia-Renovable/RenewSim-backend/actions/workflows/build.yml/badge.svg)](https://github.com/Simulador-Energia-Renovable/RenewSim-backend/actions)
 [![Coverage](https://img.shields.io/badge/Coverage-94%25-brightgreen)](https://github.com/Simulador-Energia-Renovable/RenewSim-backend)
@@ -21,29 +25,33 @@
 
 ## 🚀 Tecnologías utilizadas
 
-- Java 21
-- Spring Boot
-- Spring Security
-- Spring Data JPA
-- JWT Authentication
-- H2 Database (test)
-- MySQL (producción)
-- JaCoCo (Coverage)
-- Maven
+- Java 17 / Java 21
+- Spring Boot · Spring Security · Spring Data JPA
+- JWT Authentication con Keycloak
+- MySQL (producción) · H2 (test)
+- JaCoCo (coverage) · Maven
+- GitHub Actions (CI/CD)
+
+### 🧪 Testing QA
+
+- **JUnit 5** + **Mockito** para unit testing
+- **Testcontainers** para tests de integración con MySQL real en Docker
+- **Postman** para validación de endpoints REST
+- **Selenium (Java)** para pruebas E2E desde frontend conectando a esta API
 
 ---
 
 ## 📦 Instalación y ejecución
 
-1. Clona el repositorio:
-   ```bash
-   git clone https://github.com/Simulador-Energia-Renovable/RenewSim-backend.git
-   cd RenewSim-backend
-   ```
+```bash
+git clone https://github.com/Simulador-Energia-Renovable/RenewSim-backend.git
+cd RenewSim-backend
+```
 
 2. Configura tu base de datos en el archivo `.env` o `application.properties`.
+  Edita src/main/resources/application.properties o utiliza un archivo .env.
 
-3. Levanta la aplicación:
+4. Levanta la aplicación:
    ```bash
    ./mvnw spring-boot:run
    ```
@@ -56,6 +64,14 @@
   ```bash
   ./mvnw test
   ```
+  
+▶️ Tests con Testcontainers:
+
+  ```bash
+  ./mvnw verify -Dspring.profiles.active=testcontainers
+
+  ```
+Requiere Docker corriendo.
 
 - Para generar el reporte de cobertura de código con JaCoCo:
   ```bash
@@ -63,6 +79,13 @@
   ```
   El reporte se generará en:  
   `/target/site/jacoco/index.html`
+
+  🧪 Selenium
+Pruebas E2E automatizadas con Selenium (Java)
+
+Scripts disponibles en /docs/selenium/
+
+Ejecutan flujos de login → simulación → validación
 
 ---
 
