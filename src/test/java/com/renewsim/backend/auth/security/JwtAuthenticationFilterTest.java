@@ -1,0 +1,153 @@
+package com.renewsim.backend.auth.security;
+
+import com.renewsim.backend.auth.application.port.out.TokenProvider;
+import com.renewsim.backend.auth.domain.AuthenticatedUser;
+import com.renewsim.backend.auth.infrastructure.security.JwtAuthenticationFilter;
+import com.renewsim.backend.testutil.UnitTestBase;
+
+import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.*;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
+
+import jakarta.servlet.FilterChain;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.*;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+
+@ExtendWith(MockitoExtension.class)
+class JwtAuthenticationFilterTest extends UnitTestBase{
+
+    @Mock
+    private TokenProvider tokenProvider;
+    @Mock
+    private FilterChain chain;
+
+    @InjectMocks
+    private JwtAuthenticationFilter filter;
+
+    private MockHttpServletRequest req;
+    private MockHttpServletResponse res;
+
+    @BeforeEach
+    void setUp() {
+       
+        req = new MockHttpServletRequest();
+        res = new MockHttpServletResponse();
+    }   
+
+    @Test
+    @DisplayName("Should populate SecurityContext when Bearer token is valid")
+    void testShouldPopulateContext_WhenBearerValid() throws Exception {
+        req.addHeader("Authorization", "Bearer valid-token");
+
+        var user = new AuthenticatedUser(
+                "john",
+                Set.of("USER"),
+                Set.of("read"));
+
+        when(tokenProvider.validate("valid-token")).thenReturn(Optional.of(user));
+
+        filter.doFilter(req, res, chain);
+
+        var auth = SecurityContextHolder.getContext().getAuthentication();
+        assertThat(auth).isNotNull();
+        assertThat(auth.getName()).isEqualTo("john");
+        assertThat(auth.getAuthorities().stream().map(Object::toString))
+                .containsExactlyInAnyOrder("ROLE_USER", "SCOPE_read");
+
+        verify(chain).doFilter(req, res);
+    }
+
+    @Test
+    @DisplayName("Should not populate SecurityContext when Authorization header is missing")
+    void testShouldNotPopulateContext_WhenNoAuthorizationHeader() throws Exception {
+        filter.doFilter(req, res, chain);
+        assertThat(SecurityContextHolder.getContext().getAuthentication()).isNull();
+        verify(chain).doFilter(req, res);
+    }
+
+    @Test
+    @DisplayName("Should not populate SecurityContext when token is invalid")
+    void testShouldNotPopulateContext_WhenTokenInvalid() throws Exception {
+        req.addHeader("Authorization", "Bearer invalid");
+        when(tokenProvider.validate("invalid")).thenReturn(Optional.empty());
+
+        filter.doFilter(req, res, chain);
+
+        assertThat(SecurityContextHolder.getContext().getAuthentication()).isNull();
+        verify(chain).doFilter(req, res);
+    }
+
+    @Test
+    @DisplayName("Should skip filter when authentication already exists in SecurityContext")
+    void testShouldSkipFilter_WhenAuthenticationAlreadyPresent() throws Exception {
+        var preAuth = new UsernamePasswordAuthenticationToken("already", null, List.of());
+        SecurityContextHolder.getContext().setAuthentication(preAuth);
+
+        req.addHeader("Authorization", "Bearer any-token");
+
+        filter.doFilter(req, res, chain);
+
+        assertThat(SecurityContextHolder.getContext().getAuthentication()).isSameAs(preAuth);
+        verifyNoInteractions(tokenProvider);
+        verify(chain).doFilter(req, res);
+    }
+
+    @Test
+     @DisplayName("Should not validate token when Authorization header does not start with Bearer")
+    void testShouldNotValidate_WhenHeaderWithoutBearerPrefix() throws Exception {
+        req.addHeader("Authorization", "Token abc"); 
+        filter.doFilter(req, res, chain);
+        assertThat(SecurityContextHolder.getContext().getAuthentication()).isNull();
+        verifyNoInteractions(tokenProvider);
+        verify(chain).doFilter(req, res);
+    }
+
+    @Test
+     @DisplayName("Should continue filter chain when TokenProvider throws an exception")
+    void testShouldContinueChain_WhenTokenProviderThrows() throws Exception {
+        req.addHeader("Authorization", "Bearer boom");
+        when(tokenProvider.validate("boom")).thenThrow(new RuntimeException("parse error"));
+        filter.doFilter(req, res, chain);
+        assertThat(SecurityContextHolder.getContext().getAuthentication()).isNull();
+        verify(tokenProvider).validate("boom");
+        verify(chain).doFilter(req, res);
+    }
+
+    @Test
+    @DisplayName("Should populate only role authorities when scopes are null")
+    void testShouldPopulateOnlyRoleAuthorities_WhenScopesAreNull() throws Exception {
+        req.addHeader("Authorization", "Bearer t");
+        var user = new AuthenticatedUser("john", Set.of("USER", "ADMIN"), null);
+        when(tokenProvider.validate("t")).thenReturn(Optional.of(user));
+        filter.doFilter(req, res, chain);
+        var auth = SecurityContextHolder.getContext().getAuthentication();
+        assertThat(auth).isNotNull();
+        assertThat(auth.getAuthorities().stream().map(Object::toString))
+                .containsExactlyInAnyOrder("ROLE_USER", "ROLE_ADMIN");
+        verify(chain).doFilter(req, res);
+    }
+
+    @Test
+    @DisplayName("Should set WebAuthenticationDetails on authentication")
+    void testShouldSetWebAuthenticationDetails_OnAuthentication() throws Exception {
+        req.setRemoteAddr("127.0.0.1");
+        req.addHeader("Authorization", "Bearer ok");
+        var user = new AuthenticatedUser("john", Set.of("USER"), Set.of("read"));
+        when(tokenProvider.validate("ok")).thenReturn(Optional.of(user));
+        filter.doFilter(req, res, chain);
+        var details = SecurityContextHolder.getContext().getAuthentication().getDetails();
+        assertThat(details)
+                .isInstanceOf(org.springframework.security.web.authentication.WebAuthenticationDetails.class);
+        verify(chain).doFilter(req, res);
+    }
+}

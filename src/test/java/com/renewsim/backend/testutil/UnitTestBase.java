@@ -10,13 +10,12 @@ public abstract class UnitTestBase {
     protected final ObjectMapper objectMapper = new ObjectMapper();
 
     @BeforeEach
-    void baseSetUp() {
-        // Put here common in-memory fixtures if needed
+    protected void baseSetUp() {
         SecurityContextHolder.clearContext();
     }
 
     @AfterEach
-    void baseTearDown() {
+    protected void baseTearDown() {
         SecurityContextHolder.clearContext();
     }
 
@@ -25,3 +24,4 @@ public abstract class UnitTestBase {
         catch (Exception e) { throw new RuntimeException(e); }
     }
 }
+
