@@ -36,7 +36,7 @@ public class JwtTokenProvider implements TokenProvider {
         } catch (IllegalArgumentException ex) {
             raw = secret.getBytes(StandardCharsets.UTF_8);
         }
-        if (raw.length < 32) throw new IllegalStateException("JWT secret too short (min 256-bit).");
+        if (raw.length < 32) throw new IllegalStateException("JWT secret too short (min 32 bytes / 256 bits).");
         key = Keys.hmacShaKeyFor(raw);
     }
 
