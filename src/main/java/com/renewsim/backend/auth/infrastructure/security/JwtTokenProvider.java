@@ -36,15 +36,20 @@ public class JwtTokenProvider implements TokenProvider {
         } catch (IllegalArgumentException ex) {
             raw = secret.getBytes(StandardCharsets.UTF_8);
         }
-        if (raw.length < 32) throw new IllegalStateException("JWT secret too short (min 32 bytes / 256 bits).");
+        if (raw.length < 32) {
+            throw new IllegalStateException(
+                    "JWT secret too short: got " + raw.length + " bytes, expected at least 32 bytes (256 bits).");
+        }
         key = Keys.hmacShaKeyFor(raw);
     }
 
     @Override
     public String generate(AuthenticatedUser user) {
         Map<String, Object> claims = new HashMap<>();
-        if (user.roles() != null && !user.roles().isEmpty()) claims.put("roles", user.roles());
-        if (user.scopes() != null && !user.scopes().isEmpty()) claims.put("scopes", user.scopes());
+        if (user.roles() != null && !user.roles().isEmpty())
+            claims.put("roles", user.roles());
+        if (user.scopes() != null && !user.scopes().isEmpty())
+            claims.put("scopes", user.scopes());
 
         Date now = Date.from(clock.instant());
         Date exp = Date.from(clock.instant().plusSeconds(expirationSeconds));
@@ -86,7 +91,8 @@ public class JwtTokenProvider implements TokenProvider {
     private static Set<String> toStringSet(Object obj) {
         if (obj instanceof Collection<?> col) {
             Set<String> out = new HashSet<>();
-            for (Object o : col) out.add(String.valueOf(o));
+            for (Object o : col)
+                out.add(String.valueOf(o));
             return out;
         }
         return Set.of();
