@@ -1,4 +1,4 @@
-package com.renewsim.backend.config;
+package com.renewsim.backend.shared.util;
 
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;

@@ -1,10 +1,11 @@
 package com.renewsim.backend.auth;
 
-import com.renewsim.backend.config.SpringContext;
 import com.renewsim.backend.exception.UnauthorizedException;
 import com.renewsim.backend.role.Role;
 import com.renewsim.backend.role.RoleName;
 import com.renewsim.backend.security.UserDetailsImpl;
+import com.renewsim.backend.shared.util.AuthUtils;
+import com.renewsim.backend.shared.util.SpringContext;
 import com.renewsim.backend.user.User;
 import com.renewsim.backend.user.UserRepository;
 import org.junit.jupiter.api.AfterEach;

@@ -1,6 +1,5 @@
-package com.renewsim.backend.auth;
+package com.renewsim.backend.shared.util;
 
-import com.renewsim.backend.config.SpringContext;
 import com.renewsim.backend.exception.UnauthorizedException;
 import com.renewsim.backend.security.UserDetailsImpl;
 import com.renewsim.backend.user.User;
@@ -35,8 +34,12 @@ public final class AuthUtils {
             return userDetails.getUser();
         } else if (principal instanceof Jwt jwt) {
             String username = jwt.getClaimAsString("sub");
-            logger.debug("Current user retrieved from JWT: {}", username);
+            if (username == null || username.isBlank()) {
+                logger.warn("JWT token missing 'sub' claim");
+                throw new UnauthorizedException("Invalid JWT token: missing subject");
+            }
 
+            logger.debug("Current user retrieved from JWT subject: {}", username);
             return SpringContext.getBean(UserRepository.class)
                     .findByUsername(username)
                     .orElseThrow(() -> new UnauthorizedException("User not found"));
@@ -46,5 +49,3 @@ public final class AuthUtils {
         }
     }
 }
-
-    
