@@ -1,7 +1,9 @@
 package com.renewsim.backend.auth;
 
-import com.renewsim.backend.auth.dto.AuthRequestDTO;
-import com.renewsim.backend.auth.dto.AuthResponseDTO;
+import com.renewsim.backend.auth.application.service.AuthServiceImpl;
+import com.renewsim.backend.auth.web.controller.AuthController;
+import com.renewsim.backend.auth.web.dto.AuthRequestDTO;
+import com.renewsim.backend.auth.web.dto.AuthResponseDTO;
 import com.renewsim.backend.user.User;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -17,13 +19,13 @@ import static org.mockito.Mockito.*;
 @DisplayName("AuthController Unit Tests")
 class AuthControllerUnitTest {
 
-    private AuthService authService;
+    private AuthServiceImpl authService;
     private AuthController authController;
     private AuthRequestDTO requestDTO;
 
     @BeforeEach
     void setUp() {
-        authService = mock(AuthService.class);
+        authService = mock(AuthServiceImpl.class);
         authController = new AuthController(authService, null);
         requestDTO = new AuthRequestDTO("testuser", "password123");
     }
@@ -97,7 +99,7 @@ class AuthControllerUnitTest {
         var exception = org.junit.jupiter.api.Assertions.assertThrows(
                 org.springframework.web.server.ResponseStatusException.class,
                 () -> authController.login(
-                        new com.renewsim.backend.auth.dto.AuthRequestDTO("nonexistentuser", "password123"),
+                        new com.renewsim.backend.auth.web.dto.AuthRequestDTO("nonexistentuser", "password123"),
                         mockResponse));
 
         assertThat(exception.getStatusCode().value()).isEqualTo(404);
