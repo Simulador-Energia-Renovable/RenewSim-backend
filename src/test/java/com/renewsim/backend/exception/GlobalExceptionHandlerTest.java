@@ -1,11 +1,12 @@
 package com.renewsim.backend.exception;
 
-import com.renewsim.backend.auth.AuthService;
-import com.renewsim.backend.config.SpringContext;
+import com.renewsim.backend.auth.application.service.AuthServiceImpl;
+import com.renewsim.backend.auth.infrastructure.security.JwtUtils;
 import com.renewsim.backend.dto.ErrorResponse;
 import com.renewsim.backend.role.Role;
 import com.renewsim.backend.role.RoleName;
-import com.renewsim.backend.security.JwtUtils;
+import com.renewsim.backend.shared.exception.GlobalExceptionHandler;
+import com.renewsim.backend.shared.util.SpringContext;
 import com.renewsim.backend.user.User;
 
 import org.springframework.context.ApplicationContext;
@@ -32,7 +33,7 @@ class GlobalExceptionHandlerTest {
     private final PasswordEncoder passwordEncoder = mock(PasswordEncoder.class);
 
     private final GlobalExceptionHandler exceptionHandler = new GlobalExceptionHandler();
-    private final AuthService authService = mock(AuthService.class);
+    private final AuthServiceImpl authService = mock(AuthServiceImpl.class);
 
     @Test
     @DisplayName("Should handle generic exception")
