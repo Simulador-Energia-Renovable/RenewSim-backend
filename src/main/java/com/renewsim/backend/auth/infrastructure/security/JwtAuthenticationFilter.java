@@ -34,6 +34,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                     FilterChain chain) throws ServletException, IOException {
         try {
             if (SecurityContextHolder.getContext().getAuthentication() != null) {
+                log.debug("Authentication already exists in SecurityContext. Skipping JWT filter for this request.");
                 return;
             }
 
