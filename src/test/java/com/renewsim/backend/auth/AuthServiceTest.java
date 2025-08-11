@@ -1,7 +1,7 @@
 package com.renewsim.backend.auth;
 
 import com.renewsim.backend.auth.application.service.AuthServiceImpl;
-import com.renewsim.backend.auth.infrastructure.security.JwtUtils;
+import com.renewsim.backend.auth.config.security.JwtUtils;
 import com.renewsim.backend.auth.web.dto.AuthResponseDTO;
 import com.renewsim.backend.role.Role;
 import com.renewsim.backend.role.RoleName;
