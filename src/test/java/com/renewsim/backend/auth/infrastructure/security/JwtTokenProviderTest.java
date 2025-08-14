@@ -1,36 +1,35 @@
 package com.renewsim.backend.auth.infrastructure.security;
 
 import com.renewsim.backend.auth.domain.AuthenticatedUser;
-import org.junit.jupiter.api.*;
-import java.lang.reflect.Field;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+
 import java.lang.reflect.Method;
 import java.security.SecureRandom;
+import java.time.Clock;
+import java.time.Instant;
+import java.time.ZoneOffset;
 import java.util.*;
 
 import static org.assertj.core.api.Assertions.*;
 
 class JwtTokenProviderTest {
 
-    private JwtTokenProvider provider;
-
-    @BeforeEach
-    void setUp() throws Exception {
-        provider = new JwtTokenProvider();
-
-        byte[] keyBytes = new byte[32];
+    private static String randomBase64Key() {
+        byte[] keyBytes = new byte[32]; // 256 bits
         new SecureRandom().nextBytes(keyBytes);
-        String base64Key = Base64.getEncoder().encodeToString(keyBytes);
-
-        setField(provider, "secret", base64Key);
-        setField(provider, "expirationSeconds", 3600L);
-        setField(provider, "clockSkewSeconds", 60L);
-
-        provider.init();
+        return Base64.getEncoder().encodeToString(keyBytes);
     }
 
     @Test
     @DisplayName("generate/validate → token válido con roles y scopes")
     void generateAndValidate_ShouldWorkCorrectly() {
+        String base64Key = randomBase64Key();
+        Instant base = Instant.parse("2025-01-01T10:00:00Z");
+        Clock clock = Clock.fixed(base, ZoneOffset.UTC);
+
+        JwtTokenProvider provider = new JwtTokenProvider(base64Key, 3600L, 60L, clock);
+
         var user = new AuthenticatedUser("john", Set.of("USER"), Set.of("read"));
         String token = provider.generate(user);
 
@@ -45,31 +44,34 @@ class JwtTokenProviderTest {
     @Test
     @DisplayName("validate → vacío para token inválido")
     void validate_ShouldReturnEmptyForInvalidToken() {
+        String base64Key = randomBase64Key();
+        Clock clock = Clock.fixed(Instant.parse("2025-01-01T10:00:00Z"), ZoneOffset.UTC);
+        JwtTokenProvider provider = new JwtTokenProvider(base64Key, 3600L, 60L, clock);
+
         assertThat(provider.validate("not.a.jwt")).isEmpty();
     }
 
     @Test
-    @DisplayName("init → lanza si el secreto es corto (<32 bytes)")
-    void init_ShouldThrowIfSecretTooShort() throws Exception {
-        var p = new JwtTokenProvider();
-        setField(p, "secret", "short-key");
-        setField(p, "expirationSeconds", 3600L);
-        setField(p, "clockSkewSeconds", 60L);
-
-        assertThatThrownBy(p::init)
+    @DisplayName("constructor/init → lanza si el secreto es corto (<32 bytes)")
+    void constructor_ShouldThrowIfSecretTooShort() {
+        Clock clock = Clock.fixed(Instant.parse("2025-01-01T10:00:00Z"), ZoneOffset.UTC);
+        assertThatThrownBy(() -> new JwtTokenProvider("short-key", 3600L, 60L, clock))
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessageContaining("JWT secret too short");
     }
 
     @Test
     @DisplayName("expiresInSeconds → devuelve el valor configurado")
-    void expiresInSeconds_ShouldReturnConfiguredValue() throws Exception {
-        setField(provider, "expirationSeconds", 1234L);
+    void expiresInSeconds_ShouldReturnConfiguredValue() {
+        String base64Key = randomBase64Key();
+        Clock clock = Clock.fixed(Instant.parse("2025-01-01T10:00:00Z"), ZoneOffset.UTC);
+        JwtTokenProvider provider = new JwtTokenProvider(base64Key, 1234L, 60L, clock);
+
         assertThat(provider.expiresInSeconds()).isEqualTo(1234L);
     }
 
     @Test
-    @DisplayName("toStringSet → convierte Collection a Set<String>")
+    @DisplayName("toStringSet (privado) → convierte Collection a Set<String>")
     @SuppressWarnings("unchecked")
     void toStringSet_ShouldConvertCollectionToSet() throws Exception {
         Method m = JwtTokenProvider.class.getDeclaredMethod("toStringSet", Object.class);
@@ -80,45 +82,43 @@ class JwtTokenProviderTest {
     }
 
     @Test
-    @DisplayName("toStringSet → Set vacío cuando no es Collection")
+    @DisplayName("toStringSet (privado) → devuelve singleton cuando claim es escalar (no colección)")
     @SuppressWarnings("unchecked")
-    void toStringSet_ShouldReturnEmptySet_WhenNotCollection() throws Exception {
+    void toStringSet_ShouldReturnSingleton_WhenNotCollection() throws Exception {
         Method m = JwtTokenProvider.class.getDeclaredMethod("toStringSet", Object.class);
         m.setAccessible(true);
 
         Set<String> result = (Set<String>) m.invoke(null, "not-a-collection");
-        assertThat(result).isEmpty();
+        assertThat(result).containsExactly("not-a-collection");
     }
 
     @Test
-    @DisplayName("init → usa UTF-8 cuando el secret NO es Base64 (pero suficientemente largo)")
-    void init_ShouldDecodeSecretAsUtf8_WhenBase64Invalid() throws Exception {
-        var p = new JwtTokenProvider();
-        setField(p, "secret", "this-is-not-base64-but-is-long-enough-32-bytes!!");
-        setField(p, "expirationSeconds", 3600L);
-        setField(p, "clockSkewSeconds", 60L);
+    @DisplayName("constructor/init → usa UTF-8 cuando el secret NO es Base64 (pero suficientemente largo)")
+    void constructor_ShouldDecodeSecretAsUtf8_WhenBase64Invalid() {
+        String longUtf8 = "this-is-not-base64-but-it-is-long-enough-32+bytes-string!!!";
+        Clock clock = Clock.fixed(Instant.parse("2025-01-01T10:00:00Z"), ZoneOffset.UTC);
 
-        p.init();
+        new JwtTokenProvider(longUtf8, 3600L, 60L, clock);
     }
 
     @Test
-    @DisplayName("init → acepta exactamente 32 bytes")
-    void init_ShouldAcceptSecretWithExactly32Bytes() throws Exception {
-        var p = new JwtTokenProvider();
+    @DisplayName("constructor/init → acepta exactamente 32 bytes")
+    void constructor_ShouldAcceptSecretWithExactly32Bytes() {
         byte[] exactly32 = new byte[32];
-        Arrays.fill(exactly32, (byte) 65); 
+        Arrays.fill(exactly32, (byte) 65); // 'A'
         String base64 = Base64.getEncoder().encodeToString(exactly32);
+        Clock clock = Clock.fixed(Instant.parse("2025-01-01T10:00:00Z"), ZoneOffset.UTC);
 
-        setField(p, "secret", base64);
-        setField(p, "expirationSeconds", 3600L);
-        setField(p, "clockSkewSeconds", 60L);
-
-        p.init();
+        new JwtTokenProvider(base64, 3600L, 60L, clock);
     }
 
     @Test
-    @DisplayName("generate → funciona sin roles ni scopes (no añade claims opcionales)")
+    @DisplayName("generate → funciona sin roles ni scopes (subject-only)")
     void generate_ShouldWorkWithoutRolesOrScopes() {
+        String base64Key = randomBase64Key();
+        Clock clock = Clock.fixed(Instant.parse("2025-01-01T10:00:00Z"), ZoneOffset.UTC);
+        JwtTokenProvider provider = new JwtTokenProvider(base64Key, 3600L, 60L, clock);
+
         var user = new AuthenticatedUser("no-claims", Set.of(), Set.of());
         String token = provider.generate(user);
         assertThat(token).isNotBlank();
@@ -133,6 +133,10 @@ class JwtTokenProviderTest {
     @Test
     @DisplayName("generate → funciona cuando roles es null y scopes tiene datos")
     void generate_ShouldWork_WhenRolesNullAndScopesPresent() {
+        String base64Key = randomBase64Key();
+        Clock clock = Clock.fixed(Instant.parse("2025-01-01T10:00:00Z"), ZoneOffset.UTC);
+        JwtTokenProvider provider = new JwtTokenProvider(base64Key, 3600L, 60L, clock);
+
         var user = new AuthenticatedUser("null-roles", null, Set.of("read"));
         String token = provider.generate(user);
 
@@ -146,6 +150,10 @@ class JwtTokenProviderTest {
     @Test
     @DisplayName("generate → funciona cuando scopes es null y roles tiene datos")
     void generate_ShouldWork_WhenScopesNullAndRolesPresent() {
+        String base64Key = randomBase64Key();
+        Clock clock = Clock.fixed(Instant.parse("2025-01-01T10:00:00Z"), ZoneOffset.UTC);
+        JwtTokenProvider provider = new JwtTokenProvider(base64Key, 3600L, 60L, clock);
+
         var user = new AuthenticatedUser("null-scopes", Set.of("USER"), null);
         String token = provider.generate(user);
 
@@ -156,9 +164,44 @@ class JwtTokenProviderTest {
         assertThat(parsed.get().scopes()).isEmpty();
     }
 
-    private static void setField(Object target, String name, Object value) throws Exception {
-        Field f = target.getClass().getDeclaredField(name);
-        f.setAccessible(true);
-        f.set(target, value);
+    @Test
+    @DisplayName("validate → OK dentro del allowed clock skew tras la expiración")
+    void validate_ok_withinSkew() {
+        String base64Key = randomBase64Key();
+        Instant base = Instant.parse("2025-01-01T10:00:00Z");
+
+        long expSeconds = 30;
+        long skewSeconds = 20;
+
+        JwtTokenProvider signer = new JwtTokenProvider(base64Key, expSeconds, skewSeconds,
+                Clock.fixed(base, ZoneOffset.UTC));
+
+        String token = signer.generate(new AuthenticatedUser("john", Set.of("USER"), Set.of("read")));
+
+        JwtTokenProvider validatorWithinSkew = new JwtTokenProvider(base64Key, expSeconds, skewSeconds,
+                Clock.fixed(base.plusSeconds(45), ZoneOffset.UTC));
+
+        assertThat(validatorWithinSkew.validate(token)).isPresent();
+    }
+
+    @Test
+    @DisplayName("validate → vacío cuando expira fuera del allowed clock skew")
+    void validate_empty_outsideSkew() {
+        String base64Key = randomBase64Key();
+        Instant base = Instant.parse("2025-01-01T10:00:00Z");
+
+        long expSeconds = 30;
+        long skewSeconds = 20;
+
+        JwtTokenProvider signer = new JwtTokenProvider(base64Key, expSeconds, skewSeconds,
+                Clock.fixed(base, ZoneOffset.UTC));
+
+        String token = signer.generate(new AuthenticatedUser("john", Set.of("USER"), Set.of("read")));
+
+        JwtTokenProvider validatorOutsideSkew = new JwtTokenProvider(base64Key, expSeconds, skewSeconds,
+                Clock.fixed(base.plusSeconds(60), ZoneOffset.UTC));
+
+        assertThat(validatorOutsideSkew.validate(token)).isEmpty();
     }
 }
+

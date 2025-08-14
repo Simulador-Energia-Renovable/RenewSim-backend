@@ -2,7 +2,10 @@ package com.renewsim.backend.auth.infrastructure.security;
 
 import com.renewsim.backend.auth.application.port.out.TokenProvider;
 import com.renewsim.backend.auth.domain.AuthenticatedUser;
-import io.jsonwebtoken.*;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.JwtException;
+import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
@@ -11,7 +14,14 @@ import org.springframework.stereotype.Component;
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.time.Clock;
-import java.util.*;
+import java.util.Base64;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.HashMap;
+import java.util.Optional;
+import java.util.Set;
 
 @Component
 public class JwtTokenProvider implements TokenProvider {
@@ -26,7 +36,19 @@ public class JwtTokenProvider implements TokenProvider {
     private long clockSkewSeconds;
 
     private Key key;
-    private final Clock clock = Clock.systemUTC();
+
+    private Clock clock = Clock.systemUTC();
+
+    private io.jsonwebtoken.Clock jjwtClock = () -> Date.from(clock.instant());
+
+    JwtTokenProvider(String secret, long expirationSeconds, long clockSkewSeconds, Clock clock) {
+        this.secret = secret;
+        this.expirationSeconds = expirationSeconds;
+        this.clockSkewSeconds = clockSkewSeconds;
+        this.clock = (clock != null) ? clock : Clock.systemUTC();
+        this.jjwtClock = () -> Date.from(this.clock.instant());
+        init(); 
+    }
 
     @PostConstruct
     void init() {
@@ -38,42 +60,50 @@ public class JwtTokenProvider implements TokenProvider {
         }
         if (raw.length < 32) {
             throw new IllegalStateException(
-                    "JWT secret too short: got " + raw.length + " bytes, expected at least 32 bytes (256 bits).");
+                "JWT secret too short: got " + raw.length + " bytes, expected at least 32 bytes (256 bits)."
+            );
         }
-        key = Keys.hmacShaKeyFor(raw);
+        this.key = Keys.hmacShaKeyFor(raw);
     }
 
     @Override
     public String generate(AuthenticatedUser user) {
-        Map<String, Object> claims = new HashMap<>();
-        if (user.roles() != null && !user.roles().isEmpty())
+        var claims = new HashMap<String, Object>(4);
+        if (user.roles() != null && !user.roles().isEmpty()) {
             claims.put("roles", user.roles());
-        if (user.scopes() != null && !user.scopes().isEmpty())
+        }
+        if (user.scopes() != null && !user.scopes().isEmpty()) {
             claims.put("scopes", user.scopes());
+        }
 
         Date now = Date.from(clock.instant());
         Date exp = Date.from(clock.instant().plusSeconds(expirationSeconds));
 
         return Jwts.builder()
-                .setSubject(user.username())
-                .setIssuedAt(now)
-                .setExpiration(exp)
-                .addClaims(claims)
-                .signWith(key, SignatureAlgorithm.HS256)
-                .compact();
+            .setSubject(user.username())
+            .setIssuedAt(now)
+            .setExpiration(exp)
+            .addClaims(claims)
+            .signWith(key, SignatureAlgorithm.HS256)
+            .compact();
     }
 
     @Override
     public Optional<AuthenticatedUser> validate(String token) {
         try {
             var jws = Jwts.parserBuilder()
-                    .setAllowedClockSkewSeconds(clockSkewSeconds)
-                    .setSigningKey(key)
-                    .build()
-                    .parseClaimsJws(token);
+                .setSigningKey(key)
+                .setAllowedClockSkewSeconds(clockSkewSeconds)
+                .setClock(jjwtClock) 
+                .build()
+                .parseClaimsJws(token);
 
             Claims c = jws.getBody();
             String subject = c.getSubject();
+            if (subject == null || subject.isBlank()) {
+                return Optional.empty();
+            }
+
             Set<String> roles = toStringSet(c.get("roles"));
             Set<String> scopes = toStringSet(c.get("scopes"));
 
@@ -88,13 +118,15 @@ public class JwtTokenProvider implements TokenProvider {
         return expirationSeconds;
     }
 
-    private static Set<String> toStringSet(Object obj) {
-        if (obj instanceof Collection<?> col) {
+    private static Set<String> toStringSet(Object claim) {
+        if (claim == null) return Collections.emptySet();
+        if (claim instanceof Collection<?> col) {
             Set<String> out = new HashSet<>();
-            for (Object o : col)
-                out.add(String.valueOf(o));
+            for (Object o : col) {
+                if (o != null) out.add(String.valueOf(o));
+            }
             return out;
         }
-        return Set.of();
+        return Set.of(String.valueOf(claim));
     }
 }
