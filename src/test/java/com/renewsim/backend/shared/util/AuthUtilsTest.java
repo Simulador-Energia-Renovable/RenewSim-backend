@@ -1,11 +1,9 @@
-package com.renewsim.backend.auth;
+package com.renewsim.backend.shared.util;
 
 import com.renewsim.backend.exception.UnauthorizedException;
 import com.renewsim.backend.role.Role;
 import com.renewsim.backend.role.RoleName;
 import com.renewsim.backend.security.UserDetailsImpl;
-import com.renewsim.backend.shared.util.AuthUtils;
-import com.renewsim.backend.shared.util.SpringContext;
 import com.renewsim.backend.user.User;
 import com.renewsim.backend.user.UserRepository;
 import org.junit.jupiter.api.AfterEach;
@@ -143,6 +141,33 @@ class AuthUtilsTest {
         assertEquals("Utility class should not be instantiated", cause.getMessage());
     }
 
+    @Test
+    @DisplayName("should throw when JWT has no 'sub' claim")
+    void shouldThrowWhenJwtMissingSubject() {
+        Jwt jwt = mock(Jwt.class);
+        when(jwt.getClaimAsString("sub")).thenReturn(null);
+        authenticate(jwt);
+
+        UnauthorizedException ex = assertThrows(
+                UnauthorizedException.class,
+                AuthUtils::getCurrentUser);
+
+        assertEquals("Invalid JWT token: missing subject", ex.getMessage());
+    }
+
+    @Test
+    @DisplayName("should throw when JWT subject is blank")
+    void shouldThrowWhenJwtSubjectBlank() {
+        Jwt jwt = mock(Jwt.class);
+        when(jwt.getClaimAsString("sub")).thenReturn("   ");
+        authenticate(jwt);
+
+        UnauthorizedException ex = assertThrows(
+                UnauthorizedException.class,
+                AuthUtils::getCurrentUser);
+
+        assertEquals("Invalid JWT token: missing subject", ex.getMessage());
+    }
 
     private void authenticate(Object principal) {
         Authentication auth = new UsernamePasswordAuthenticationToken(principal, null, Set.of());

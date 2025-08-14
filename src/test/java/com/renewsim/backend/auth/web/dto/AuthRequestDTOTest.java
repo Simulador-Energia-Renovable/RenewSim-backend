@@ -1,4 +1,4 @@
-package com.renewsim.backend.auth.dto;
+package com.renewsim.backend.auth.web.dto;
 
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
@@ -7,8 +7,6 @@ import jakarta.validation.ValidatorFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
-import com.renewsim.backend.auth.web.dto.AuthRequestDTO;
 
 import java.util.Set;
 
@@ -49,6 +47,4 @@ class AuthRequestDTOTest {
         assertThat(violations).isEmpty();
     }
 
-   
 }
-
