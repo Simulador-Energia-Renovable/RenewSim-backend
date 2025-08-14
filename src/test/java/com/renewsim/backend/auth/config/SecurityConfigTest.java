@@ -73,7 +73,8 @@ class SecurityConfigTest {
                                 .content(body))
                                 .andExpect(status().isOk())
                                 .andExpect(header().string(HttpHeaders.CACHE_CONTROL, containsString("no-store")))
-                                .andExpect(header().string(HttpHeaders.PRAGMA, containsString("no-cache")));
+                                .andExpect(header().string(HttpHeaders.PRAGMA, containsString("no-cache")))
+                                .andExpect(header().exists("Expires"));
         }
 
         @Test
@@ -105,6 +106,22 @@ class SecurityConfigTest {
                 mvc.perform(get("/error").secure(true)
                                 .header("X-Forwarded-Proto", "https"))
                                 .andExpect(header().string("Strict-Transport-Security", containsString("max-age")));
+        }
+
+         @Test
+        @DisplayName("Register should also return strict no-cache headers")
+        void register_should_return_no_cache_headers() throws Exception {
+                String body = """
+                                {"username":"jane","password":"secret"}
+                                """;
+
+                mvc.perform(post("/api/v1/auth/register")
+                                .contentType("application/json")
+                                .content(body))
+                                .andExpect(status().isOk()) 
+                                .andExpect(header().string(HttpHeaders.CACHE_CONTROL, containsString("no-store")))
+                                .andExpect(header().string(HttpHeaders.PRAGMA, containsString("no-cache")))
+                                .andExpect(header().exists("Expires"));
         }
 
 }

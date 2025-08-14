@@ -1,6 +1,7 @@
 package com.renewsim.backend.auth.config;
 
 import com.renewsim.backend.auth.infrastructure.security.JwtAuthenticationFilter;
+import com.renewsim.backend.auth.infrastructure.AuthNoCacheFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -66,11 +67,15 @@ public class SecurityConfig {
                                 .maxAgeInSeconds(Duration.ofDays(365).toSeconds())))
 
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterAfter(new AuthNoCacheFilter(), UsernamePasswordAuthenticationFilter.class)
 
                 .exceptionHandling(ex -> ex
                         .authenticationEntryPoint((req, res, e) -> {
                             res.setStatus(401);
                             res.setContentType("application/json");
+                            res.setHeader("Cache-Control", "no-store");
+                            res.setHeader("Pragma", "no-cache");
+                            res.setDateHeader("Expires", 0L);
                             res.getWriter().write("""
                                     {"status":401,"error":"Unauthorized","message":"Authentication required"}
                                     """);
@@ -78,6 +83,9 @@ public class SecurityConfig {
                         .accessDeniedHandler((req, res, e) -> {
                             res.setStatus(403);
                             res.setContentType("application/json");
+                            res.setHeader("Cache-Control", "no-store");
+                            res.setHeader("Pragma", "no-cache");
+                            res.setDateHeader("Expires", 0L);
                             res.getWriter().write("""
                                     {"status":403,"error":"Forbidden","message":"Insufficient permissions"}
                                     """);
@@ -99,7 +107,6 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         var cfg = new CorsConfiguration();
-
         cfg.setAllowedOrigins(List.of(allowedOrigins.split("\\s*,\\s*")));
         cfg.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         cfg.setAllowedHeaders(List.of("*"));
