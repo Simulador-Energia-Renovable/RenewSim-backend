@@ -15,6 +15,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.*;
+import org.springframework.web.filter.ForwardedHeaderFilter;
 
 import java.time.Duration;
 import java.util.List;
@@ -111,7 +112,7 @@ public class SecurityConfig {
     }
 
     @Bean
-    org.springframework.web.filter.ForwardedHeaderFilter forwardedHeaderFilter() {
-        return new org.springframework.web.filter.ForwardedHeaderFilter();
+    public ForwardedHeaderFilter forwardedHeaderFilter() {
+        return new ForwardedHeaderFilter();
     }
 }

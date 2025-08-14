@@ -30,7 +30,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @ActiveProfiles("test")
 @TestPropertySource(properties = {
-                "cors.allowed-origins=http://localhost:3000"
+                "cors.allowed-origins=http://localhost:3000",
+                "server.forward-headers-strategy=framework"
 })
 @AutoConfigureMockMvc
 class SecurityConfigTest {
@@ -95,6 +96,14 @@ class SecurityConfigTest {
                                 .andExpect(header().string("X-Frame-Options", "DENY"))
                                 .andExpect(header().string("Referrer-Policy", "strict-origin-when-cross-origin"))
                                 .andExpect(header().string("Content-Security-Policy", containsString("default-src")))
+                                .andExpect(header().string("Strict-Transport-Security", containsString("max-age")));
+        }
+
+        @Test
+        @DisplayName("HSTS se envía cuando X-Forwarded-Proto=https (detrás de proxy TLS)")
+        void hsts_with_forwarded_proto_https() throws Exception {
+                mvc.perform(get("/error").secure(true)
+                                .header("X-Forwarded-Proto", "https"))
                                 .andExpect(header().string("Strict-Transport-Security", containsString("max-age")));
         }
 
