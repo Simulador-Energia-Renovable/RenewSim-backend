@@ -173,7 +173,7 @@ class JwtTokenProviderTest {
     }
 
     @Test
-    @DisplayName("toStringSet → devuelve vacío cuando claim no es colección")
+    @DisplayName("toStringSet → returns empty when claim is not a collection")
     void toStringSet_ShouldReturnEmpty_WhenClaimNotCollection() throws Exception {
         Method m = JwtTokenProvider.class.getDeclaredMethod("toStringSet", Object.class);
         m.setAccessible(true);
