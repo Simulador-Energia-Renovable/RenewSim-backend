@@ -1,7 +1,5 @@
-package com.renewsim.backend.auth.config;
+package com.renewsim.backend.auth_service.config;
 
-import com.renewsim.backend.auth.infrastructure.security.JwtAuthenticationFilter;
-import com.renewsim.backend.auth.infrastructure.AuthNoCacheFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -17,6 +15,9 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.*;
 import org.springframework.web.filter.ForwardedHeaderFilter;
+
+import com.renewsim.backend.auth_service.infrastructure.AuthNoCacheFilter;
+import com.renewsim.backend.auth_service.infrastructure.security.JwtAuthenticationFilter;
 
 import java.time.Duration;
 import java.util.List;

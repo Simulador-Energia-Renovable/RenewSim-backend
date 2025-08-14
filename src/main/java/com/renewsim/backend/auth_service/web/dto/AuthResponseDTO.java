@@ -1,4 +1,4 @@
-package com.renewsim.backend.auth.web.dto;
+package com.renewsim.backend.auth_service.web.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;

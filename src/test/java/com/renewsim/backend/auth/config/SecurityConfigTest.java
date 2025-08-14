@@ -1,9 +1,10 @@
 package com.renewsim.backend.auth.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.renewsim.backend.auth.application.port.in.AuthUseCase;
-import com.renewsim.backend.auth.infrastructure.security.JwtAuthenticationFilter;
-import com.renewsim.backend.auth.web.dto.AuthResponseDTO;
+import com.renewsim.backend.auth_service.application.port.in.AuthUseCase;
+import com.renewsim.backend.auth_service.infrastructure.security.JwtAuthenticationFilter;
+import com.renewsim.backend.auth_service.web.dto.AuthResponseDTO;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

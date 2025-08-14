@@ -1,8 +1,4 @@
-package com.renewsim.backend.auth.web.controller;
-
-import com.renewsim.backend.auth.application.port.in.AuthUseCase;
-import com.renewsim.backend.auth.web.dto.AuthRequestDTO;
-import com.renewsim.backend.auth.web.dto.AuthResponseDTO;
+package com.renewsim.backend.auth_service.web.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -11,6 +7,10 @@ import org.springframework.http.CacheControl;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import com.renewsim.backend.auth_service.application.port.in.AuthUseCase;
+import com.renewsim.backend.auth_service.web.dto.AuthRequestDTO;
+import com.renewsim.backend.auth_service.web.dto.AuthResponseDTO;
 
 @RestController
 @RequestMapping("/api/v1/auth")

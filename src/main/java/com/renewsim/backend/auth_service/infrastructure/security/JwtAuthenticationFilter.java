@@ -1,7 +1,5 @@
-package com.renewsim.backend.auth.infrastructure.security;
+package com.renewsim.backend.auth_service.infrastructure.security;
 
-import com.renewsim.backend.auth.application.port.out.TokenProvider;
-import com.renewsim.backend.auth.domain.AuthenticatedUser;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -15,6 +13,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
+
+import com.renewsim.backend.auth_service.application.port.out.TokenProvider;
+import com.renewsim.backend.auth_service.domain.AuthenticatedUser;
 
 import java.io.IOException;
 import java.util.*;

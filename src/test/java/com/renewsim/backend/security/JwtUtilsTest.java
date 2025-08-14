@@ -5,7 +5,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import com.renewsim.backend.auth.config.security.JwtUtils;
+import com.renewsim.backend.auth_service.config.security.JwtUtils;
 
 import java.util.Optional;
 import java.util.Set;

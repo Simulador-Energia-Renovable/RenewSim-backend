@@ -1,4 +1,4 @@
-package com.renewsim.backend.auth.web.dto;
+package com.renewsim.backend.auth_service.web.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;

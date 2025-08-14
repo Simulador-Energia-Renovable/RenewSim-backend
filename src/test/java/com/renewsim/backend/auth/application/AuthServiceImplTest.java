@@ -1,15 +1,14 @@
 package com.renewsim.backend.auth.application;
 
-import com.renewsim.backend.auth.application.port.out.RoleProvider;
-import com.renewsim.backend.auth.application.port.out.ScopePolicy;
-import com.renewsim.backend.auth.application.port.out.TokenProvider;
-import com.renewsim.backend.auth.application.port.out.UserAccountGateway;
-import com.renewsim.backend.auth.application.port.out.UserAccountGateway.UserSnapshot;
-import com.renewsim.backend.auth.application.service.AuthServiceImpl;
-import com.renewsim.backend.auth.domain.AuthenticatedUser;
-
-import com.renewsim.backend.auth.web.dto.AuthRequestDTO;
-import com.renewsim.backend.auth.web.dto.AuthResponseDTO;
+import com.renewsim.backend.auth_service.application.port.out.RoleProvider;
+import com.renewsim.backend.auth_service.application.port.out.ScopePolicy;
+import com.renewsim.backend.auth_service.application.port.out.TokenProvider;
+import com.renewsim.backend.auth_service.application.port.out.UserAccountGateway;
+import com.renewsim.backend.auth_service.application.port.out.UserAccountGateway.UserSnapshot;
+import com.renewsim.backend.auth_service.application.service.AuthServiceImpl;
+import com.renewsim.backend.auth_service.domain.AuthenticatedUser;
+import com.renewsim.backend.auth_service.web.dto.AuthRequestDTO;
+import com.renewsim.backend.auth_service.web.dto.AuthResponseDTO;
 import com.renewsim.backend.role.RoleName;
 import com.renewsim.backend.shared.exception.ResourceConflictException;
 import com.renewsim.backend.shared.exception.AuthenticationException;

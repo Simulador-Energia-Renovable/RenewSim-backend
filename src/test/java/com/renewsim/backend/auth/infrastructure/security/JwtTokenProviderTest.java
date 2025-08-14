@@ -1,11 +1,12 @@
-package com.renewsim.backend.auth.infrastructure.security;
+package com.renewsim.backend.auth_service.infrastructure.security;
 
-import com.renewsim.backend.auth.domain.AuthenticatedUser;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+
+import com.renewsim.backend.auth_service.domain.AuthenticatedUser;
 
 import java.lang.reflect.Method;
 import java.security.Key;

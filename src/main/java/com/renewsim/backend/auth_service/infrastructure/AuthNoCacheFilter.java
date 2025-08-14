@@ -1,4 +1,4 @@
-package com.renewsim.backend.auth.infrastructure;
+package com.renewsim.backend.auth_service.infrastructure;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

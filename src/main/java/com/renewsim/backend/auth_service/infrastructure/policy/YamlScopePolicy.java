@@ -1,6 +1,6 @@
-package com.renewsim.backend.auth.infrastructure.policy;
+package com.renewsim.backend.auth_service.infrastructure.policy;
 
-import com.renewsim.backend.auth.application.port.out.ScopePolicy;
+import com.renewsim.backend.auth_service.application.port.out.ScopePolicy;
 import com.renewsim.backend.role.RoleName;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;

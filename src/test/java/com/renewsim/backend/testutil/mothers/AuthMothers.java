@@ -1,9 +1,9 @@
 package com.renewsim.backend.testutil.mothers;
 
-import com.renewsim.backend.auth.domain.AuthenticatedUser;
-import com.renewsim.backend.auth.web.dto.AuthRequestDTO;
-
 import java.util.Set;
+
+import com.renewsim.backend.auth_service.domain.AuthenticatedUser;
+import com.renewsim.backend.auth_service.web.dto.AuthRequestDTO;
 
 public final class AuthMothers {
     private AuthMothers() {

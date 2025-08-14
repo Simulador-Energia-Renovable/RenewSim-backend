@@ -1,6 +1,6 @@
-package com.renewsim.backend.auth.infrastructure.persistence;
+package com.renewsim.backend.auth_service.infrastructure.persistence;
 
-import com.renewsim.backend.auth.application.port.out.UserAccountGateway;
+import com.renewsim.backend.auth_service.application.port.out.UserAccountGateway;
 import com.renewsim.backend.role.Role;
 import com.renewsim.backend.role.RoleName;
 import com.renewsim.backend.role.RoleRepository;

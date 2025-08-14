@@ -1,5 +1,6 @@
 package com.renewsim.backend.auth.infrastructure.persistence;
-import com.renewsim.backend.auth.application.port.out.UserAccountGateway.UserSnapshot;
+import com.renewsim.backend.auth_service.application.port.out.UserAccountGateway.UserSnapshot;
+import com.renewsim.backend.auth_service.infrastructure.persistence.JpaUserAccountGateway;
 import com.renewsim.backend.role.Role;
 import com.renewsim.backend.role.RoleName;
 import com.renewsim.backend.role.RoleRepository;

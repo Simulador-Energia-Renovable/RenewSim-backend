@@ -1,7 +1,7 @@
 package com.renewsim.backend.exception;
 
-import com.renewsim.backend.auth.application.service.AuthServiceImpl;
-import com.renewsim.backend.auth.config.security.JwtUtils;
+import com.renewsim.backend.auth_service.application.service.AuthServiceImpl;
+import com.renewsim.backend.auth_service.config.security.JwtUtils;
 import com.renewsim.backend.dto.ErrorResponse;
 import com.renewsim.backend.role.Role;
 import com.renewsim.backend.role.RoleName;

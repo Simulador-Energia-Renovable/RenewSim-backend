@@ -1,7 +1,5 @@
-package com.renewsim.backend.auth.infrastructure.security;
+package com.renewsim.backend.auth_service.infrastructure.security;
 
-import com.renewsim.backend.auth.application.port.out.TokenProvider;
-import com.renewsim.backend.auth.domain.AuthenticatedUser;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.JwsHeader;
@@ -12,6 +10,9 @@ import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+
+import com.renewsim.backend.auth_service.application.port.out.TokenProvider;
+import com.renewsim.backend.auth_service.domain.AuthenticatedUser;
 
 import java.nio.charset.StandardCharsets;
 import java.security.Key;

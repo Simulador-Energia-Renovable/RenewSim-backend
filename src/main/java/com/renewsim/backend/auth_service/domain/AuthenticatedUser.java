@@ -1,4 +1,4 @@
-package com.renewsim.backend.auth.domain;
+package com.renewsim.backend.auth_service.domain;
 
 import java.util.Set;
 
