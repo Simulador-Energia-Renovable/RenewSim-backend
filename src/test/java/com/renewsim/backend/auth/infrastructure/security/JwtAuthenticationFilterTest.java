@@ -23,7 +23,7 @@ import java.util.Optional;
 import java.util.Set;
 
 @ExtendWith(MockitoExtension.class)
-class JwtAuthenticationFilterTest extends UnitTestBase{
+class JwtAuthenticationFilterTest extends UnitTestBase {
 
     @Mock
     private TokenProvider tokenProvider;
@@ -38,10 +38,10 @@ class JwtAuthenticationFilterTest extends UnitTestBase{
 
     @BeforeEach
     void setUp() {
-       
+        SecurityContextHolder.clearContext();
         req = new MockHttpServletRequest();
         res = new MockHttpServletResponse();
-    }   
+    }
 
     @Test
     @DisplayName("Should populate SecurityContext when Bearer token is valid")
@@ -102,9 +102,9 @@ class JwtAuthenticationFilterTest extends UnitTestBase{
     }
 
     @Test
-     @DisplayName("Should not validate token when Authorization header does not start with Bearer")
+    @DisplayName("Should not validate token when Authorization header does not start with Bearer")
     void testShouldNotValidate_WhenHeaderWithoutBearerPrefix() throws Exception {
-        req.addHeader("Authorization", "Token abc"); 
+        req.addHeader("Authorization", "Token abc");
         filter.doFilter(req, res, chain);
         assertThat(SecurityContextHolder.getContext().getAuthentication()).isNull();
         verifyNoInteractions(tokenProvider);
@@ -112,7 +112,7 @@ class JwtAuthenticationFilterTest extends UnitTestBase{
     }
 
     @Test
-     @DisplayName("Should continue filter chain when TokenProvider throws an exception")
+    @DisplayName("Should continue filter chain when TokenProvider throws an exception")
     void testShouldContinueChain_WhenTokenProviderThrows() throws Exception {
         req.addHeader("Authorization", "Bearer boom");
         when(tokenProvider.validate("boom")).thenThrow(new RuntimeException("parse error"));
@@ -149,4 +149,72 @@ class JwtAuthenticationFilterTest extends UnitTestBase{
                 .isInstanceOf(org.springframework.security.web.authentication.WebAuthenticationDetails.class);
         verify(chain).doFilter(req, res);
     }
+
+    @Test
+    @DisplayName("Should accept case-insensitive 'bearer' and trim token and header spaces")
+    void testShouldAcceptCaseInsensitiveBearerAndTrim() throws Exception {
+        req.addHeader("Authorization", "   bEaReR    ok   ");
+        when(tokenProvider.validate("ok")).thenReturn(Optional.of(
+                new AuthenticatedUser("john", Set.of("USER"), Set.of("read"))));
+
+        filter.doFilter(req, res, chain);
+
+        var auth = SecurityContextHolder.getContext().getAuthentication();
+        assertThat(auth).isInstanceOf(UsernamePasswordAuthenticationToken.class);
+        assertThat(auth.getName()).isEqualTo("john");
+        verify(chain).doFilter(req, res);
+    }
+
+    @Test
+    @DisplayName("Should NOT authenticate when provider throws on expired token")
+    void testShouldNotAuthenticate_WhenProviderThrowsExpired() throws Exception {
+        req.addHeader("Authorization", "Bearer expired");
+        when(tokenProvider.validate("expired")).thenThrow(new RuntimeException("Expired"));
+
+        filter.doFilter(req, res, chain);
+
+        assertThat(SecurityContextHolder.getContext().getAuthentication()).isNull();
+        verify(chain).doFilter(req, res);
+    }
+
+    @Test
+    @DisplayName("Should authenticate with empty authorities when token has only subject (no roles/scopes)")
+    void testShouldAuthenticate_WithSubjectOnly() throws Exception {
+        req.addHeader("Authorization", "Bearer subject-only");
+        when(tokenProvider.validate("subject-only"))
+                .thenReturn(Optional.of(new AuthenticatedUser("john", null, null)));
+
+        filter.doFilter(req, res, chain);
+
+        var auth = SecurityContextHolder.getContext().getAuthentication();
+        assertThat(auth).isInstanceOf(UsernamePasswordAuthenticationToken.class);
+        assertThat(auth.getName()).isEqualTo("john");
+        assertThat(auth.getAuthorities()).isEmpty();
+        verify(chain).doFilter(req, res);
+    }
+
+    @Test
+    @DisplayName("Should not validate when 'Bearer' has no token or only spaces")
+    void testShouldNotValidate_WhenBearerWithoutToken() throws Exception {
+        req.addHeader("Authorization", "Bearer    ");
+
+        filter.doFilter(req, res, chain);
+
+        assertThat(SecurityContextHolder.getContext().getAuthentication()).isNull();
+        verifyNoInteractions(tokenProvider);
+        verify(chain).doFilter(req, res);
+    }
+
+    @Test
+    @DisplayName("Should ignore header not matching Bearer scheme even if it contains the word 'Bearer'")
+    void testShouldIgnoreHeader_ContainingBearerWordButWrongScheme() throws Exception {
+        req.addHeader("Authorization", "Token Bearer abc"); 
+
+        filter.doFilter(req, res, chain);
+
+        assertThat(SecurityContextHolder.getContext().getAuthentication()).isNull();
+        verifyNoInteractions(tokenProvider);
+        verify(chain).doFilter(req, res);
+    }
+
 }
