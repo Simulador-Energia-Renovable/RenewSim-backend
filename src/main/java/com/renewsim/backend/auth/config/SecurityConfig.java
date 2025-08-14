@@ -2,7 +2,6 @@ package com.renewsim.backend.auth.config;
 
 import com.renewsim.backend.auth.infrastructure.security.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
-
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -17,6 +16,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.*;
 
+import java.time.Duration;
 import java.util.List;
 
 @Configuration
@@ -34,26 +34,51 @@ public class SecurityConfig {
                 .cors(c -> c.configurationSource(corsConfigurationSource()))
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/auth/login").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/auth/register").permitAll()
                         .requestMatchers("/actuator/health", "/error").permitAll()
                         .anyRequest().authenticated())
+
+                .headers(h -> h
+                        .contentSecurityPolicy(csp -> csp.policyDirectives(
+                                "default-src 'none'; " +
+                                        "frame-ancestors 'none'; " +
+                                        "base-uri 'self'; " +
+                                        "form-action 'self'; " +
+                                        "img-src 'self' data:; " +
+                                        "style-src 'self'; " +
+                                        "font-src 'self' data:; " +
+                                        "script-src 'self'; " +
+                                        "connect-src 'self'; " +
+                                        "block-all-mixed-content; " +
+                                        "upgrade-insecure-requests"))
+                        .frameOptions(frame -> frame.deny())
+                        .referrerPolicy(ref -> ref.policy(
+                                org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter.ReferrerPolicy.STRICT_ORIGIN_WHEN_CROSS_ORIGIN))
+                        .httpStrictTransportSecurity(hsts -> hsts
+                                .includeSubDomains(true)
+                                .preload(true)
+                                .maxAgeInSeconds(Duration.ofDays(365).toSeconds())))
+
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+
                 .exceptionHandling(ex -> ex
                         .authenticationEntryPoint((req, res, e) -> {
                             res.setStatus(401);
                             res.setContentType("application/json");
                             res.getWriter().write("""
-                                        {"status":401,"error":"Unauthorized","message":"Authentication required"}
+                                    {"status":401,"error":"Unauthorized","message":"Authentication required"}
                                     """);
                         })
                         .accessDeniedHandler((req, res, e) -> {
                             res.setStatus(403);
                             res.setContentType("application/json");
                             res.getWriter().write("""
-                                        {"status":403,"error":"Forbidden","message":"Insufficient permissions"}
+                                    {"status":403,"error":"Forbidden","message":"Insufficient permissions"}
                                     """);
                         }));
 
@@ -72,13 +97,21 @@ public class SecurityConfig {
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
-        var config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of(allowedOrigins.split("\\s*,\\s*")));
-        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
-        config.setAllowedHeaders(List.of("*"));
-        config.setAllowCredentials(true);
+        var cfg = new CorsConfiguration();
+
+        cfg.setAllowedOrigins(List.of(allowedOrigins.split("\\s*,\\s*")));
+        cfg.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
+        cfg.setAllowedHeaders(List.of("*"));
+        cfg.setAllowCredentials(true);
+        cfg.setMaxAge(3600L);
+
         var source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", config);
+        source.registerCorsConfiguration("/**", cfg);
         return source;
+    }
+
+    @Bean
+    org.springframework.web.filter.ForwardedHeaderFilter forwardedHeaderFilter() {
+        return new org.springframework.web.filter.ForwardedHeaderFilter();
     }
 }
