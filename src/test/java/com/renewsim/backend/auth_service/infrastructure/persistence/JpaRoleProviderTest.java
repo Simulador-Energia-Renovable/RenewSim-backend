@@ -1,8 +1,7 @@
 
-package com.renewsim.backend.auth.infrastructure.persistence;
+package com.renewsim.backend.auth_service.infrastructure.persistence;
 
 import com.renewsim.backend.auth_service.application.port.out.RoleProvider;
-import com.renewsim.backend.auth_service.infrastructure.persistence.JpaRoleProvider;
 import com.renewsim.backend.role.RoleName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;

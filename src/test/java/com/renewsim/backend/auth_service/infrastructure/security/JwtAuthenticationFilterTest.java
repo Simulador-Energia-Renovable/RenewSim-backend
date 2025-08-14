@@ -1,8 +1,7 @@
-package com.renewsim.backend.auth.infrastructure.security;
+package com.renewsim.backend.auth_service.infrastructure.security;
 
 import com.renewsim.backend.auth_service.application.port.out.TokenProvider;
 import com.renewsim.backend.auth_service.domain.AuthenticatedUser;
-import com.renewsim.backend.auth_service.infrastructure.security.JwtAuthenticationFilter;
 import com.renewsim.backend.testutil.UnitTestBase;
 
 import org.junit.jupiter.api.*;

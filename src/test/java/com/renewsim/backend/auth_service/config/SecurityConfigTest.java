@@ -1,4 +1,4 @@
-package com.renewsim.backend.auth.config;
+package com.renewsim.backend.auth_service.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.renewsim.backend.auth_service.application.port.in.AuthUseCase;

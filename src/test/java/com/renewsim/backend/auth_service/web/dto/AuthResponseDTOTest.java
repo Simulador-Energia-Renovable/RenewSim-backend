@@ -1,9 +1,7 @@
-package com.renewsim.backend.auth.web.dto;
+package com.renewsim.backend.auth_service.web.dto;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
-import com.renewsim.backend.auth_service.web.dto.AuthResponseDTO;
 
 import java.util.Set;
 

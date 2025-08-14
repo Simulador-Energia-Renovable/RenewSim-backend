@@ -1,4 +1,4 @@
-package com.renewsim.backend.auth.application;
+package com.renewsim.backend.auth_service.application;
 
 import com.renewsim.backend.auth_service.application.port.out.RoleProvider;
 import com.renewsim.backend.auth_service.application.port.out.ScopePolicy;
