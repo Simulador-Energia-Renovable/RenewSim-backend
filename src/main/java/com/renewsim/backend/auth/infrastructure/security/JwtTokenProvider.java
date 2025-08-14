@@ -3,8 +3,10 @@ package com.renewsim.backend.auth.infrastructure.security;
 import com.renewsim.backend.auth.application.port.out.TokenProvider;
 import com.renewsim.backend.auth.domain.AuthenticatedUser;
 import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.Jws;
+import io.jsonwebtoken.JwsHeader;
 import io.jsonwebtoken.JwtException;
+import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
@@ -50,6 +52,9 @@ public class JwtTokenProvider implements TokenProvider {
         init(); 
     }
 
+    public JwtTokenProvider() {
+    }
+
     @PostConstruct
     void init() {
         byte[] raw;
@@ -91,12 +96,17 @@ public class JwtTokenProvider implements TokenProvider {
     @Override
     public Optional<AuthenticatedUser> validate(String token) {
         try {
-            var jws = Jwts.parserBuilder()
+            Jws<Claims> jws = Jwts.parserBuilder()
                 .setSigningKey(key)
                 .setAllowedClockSkewSeconds(clockSkewSeconds)
-                .setClock(jjwtClock) 
+                .setClock(jjwtClock)
                 .build()
                 .parseClaimsJws(token);
+
+            JwsHeader<?> header = jws.getHeader();
+            if (!SignatureAlgorithm.HS256.getValue().equals(header.getAlgorithm())) {
+                return Optional.empty();
+            }
 
             Claims c = jws.getBody();
             String subject = c.getSubject();
@@ -130,3 +140,4 @@ public class JwtTokenProvider implements TokenProvider {
         return Set.of(String.valueOf(claim));
     }
 }
+
