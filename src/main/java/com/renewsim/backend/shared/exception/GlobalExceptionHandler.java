@@ -41,8 +41,7 @@ public class GlobalExceptionHandler {
                 status.value(),
                 status.getReasonPhrase(),
                 message,
-                payload
-        );
+                payload);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -52,9 +51,8 @@ public class GlobalExceptionHandler {
                 .collect(Collectors.toMap(
                         fe -> fe.getField(),
                         fe -> Optional.ofNullable(fe.getDefaultMessage()).orElse("Invalid value"),
-                        (a, b) -> a, 
-                        LinkedHashMap::new
-                ));
+                        (a, b) -> a,
+                        LinkedHashMap::new));
         log.warn("TraceId={} - Validation error: {}", traceId, errors);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(build(HttpStatus.BAD_REQUEST, "One or more fields are invalid.", traceId, errors));
@@ -68,8 +66,7 @@ public class GlobalExceptionHandler {
                         cv -> pathOf(cv),
                         ConstraintViolation::getMessage,
                         (a, b) -> a,
-                        LinkedHashMap::new
-                ));
+                        LinkedHashMap::new));
         log.warn("TraceId={} - Constraint violation: {}", traceId, errors);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(build(HttpStatus.BAD_REQUEST, "One or more constraints were violated.", traceId, errors));
@@ -89,7 +86,8 @@ public class GlobalExceptionHandler {
         String traceId = newTraceId();
         log.warn("TraceId={} - Method not supported: {}", traceId, ex.getMethod());
         return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED)
-                .body(build(HttpStatus.METHOD_NOT_ALLOWED, "HTTP method not allowed for this endpoint.", traceId, null));
+                .body(build(HttpStatus.METHOD_NOT_ALLOWED, "HTTP method not allowed for this endpoint.", traceId,
+                        null));
     }
 
     @ExceptionHandler(HttpMediaTypeNotSupportedException.class)
@@ -160,4 +158,21 @@ public class GlobalExceptionHandler {
         String path = cv.getPropertyPath() == null ? "" : cv.getPropertyPath().toString();
         return path.isBlank() ? "parameter" : path;
     }
+
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<ErrorResponse> handleAuthentication(AuthenticationException ex) {
+        String traceId = newTraceId();
+        log.warn("TraceId={} - Unauthorized (auth failure): {}", traceId, ex.getMessage());
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(build(HttpStatus.UNAUTHORIZED, ex.getMessage(), traceId, null));
+    }
+
+    @ExceptionHandler(ResourceConflictException.class)
+    public ResponseEntity<ErrorResponse> handleConflict(ResourceConflictException ex) {
+        String traceId = newTraceId();
+        log.warn("TraceId={} - Conflict: {}", traceId, ex.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(build(HttpStatus.CONFLICT, ex.getMessage(), traceId, null));
+    }
+
 }

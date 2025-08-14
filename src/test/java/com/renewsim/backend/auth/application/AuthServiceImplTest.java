@@ -11,6 +11,8 @@ import com.renewsim.backend.auth.domain.AuthenticatedUser;
 import com.renewsim.backend.auth.web.dto.AuthRequestDTO;
 import com.renewsim.backend.auth.web.dto.AuthResponseDTO;
 import com.renewsim.backend.role.RoleName;
+import com.renewsim.backend.shared.exception.ResourceConflictException;
+import com.renewsim.backend.shared.exception.AuthenticationException;
 import com.renewsim.backend.testutil.UnitTestBase;
 
 import org.junit.jupiter.api.AfterEach;
@@ -102,7 +104,7 @@ class AuthServiceImplTest extends UnitTestBase {
         when(passwordEncoder.matches("bad", "$2a$10$abcdefgHashed")).thenReturn(false);
 
         assertThatThrownBy(() -> authService.login(new AuthRequestDTO("john", "bad")))
-                .isInstanceOf(IllegalArgumentException.class)
+                .isInstanceOf(AuthenticationException.class)
                 .hasMessageContaining("Invalid username or password");
 
         verify(userAccountGateway).findByUsername("john");
@@ -116,7 +118,7 @@ class AuthServiceImplTest extends UnitTestBase {
         when(userAccountGateway.existsByUsername("john")).thenReturn(true);
 
         assertThatThrownBy(() -> authService.register(new AuthRequestDTO("john", "secret")))
-                .isInstanceOf(IllegalStateException.class)
+                .isInstanceOf(ResourceConflictException.class)
                 .hasMessageContaining("Username already exists");
 
         verify(userAccountGateway).existsByUsername("john");
@@ -153,5 +155,7 @@ class AuthServiceImplTest extends UnitTestBase {
         verify(tokenProvider).generate(any(AuthenticatedUser.class));
         verify(tokenProvider).expiresInSeconds();
     }
+
+    
 
 }
