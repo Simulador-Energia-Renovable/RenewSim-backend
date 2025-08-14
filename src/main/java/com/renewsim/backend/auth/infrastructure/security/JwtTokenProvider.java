@@ -21,9 +21,11 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.HashMap;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Component
 public class JwtTokenProvider implements TokenProvider {
@@ -52,7 +54,7 @@ public class JwtTokenProvider implements TokenProvider {
         init(); 
     }
 
-    public JwtTokenProvider() {
+    private JwtTokenProvider() {
     }
 
     @PostConstruct
@@ -128,16 +130,14 @@ public class JwtTokenProvider implements TokenProvider {
         return expirationSeconds;
     }
 
-    private static Set<String> toStringSet(Object claim) {
-        if (claim == null) return Collections.emptySet();
-        if (claim instanceof Collection<?> col) {
-            Set<String> out = new HashSet<>();
-            for (Object o : col) {
-                if (o != null) out.add(String.valueOf(o));
-            }
-            return out;
+     private static Set<String> toStringSet(Object claim) {
+        if (claim instanceof Collection<?> collection) {
+            return collection.stream()
+                    .filter(Objects::nonNull)
+                    .map(Object::toString)
+                    .collect(Collectors.toSet());
         }
-        return Set.of(String.valueOf(claim));
+        return Collections.emptySet();
     }
 }
 

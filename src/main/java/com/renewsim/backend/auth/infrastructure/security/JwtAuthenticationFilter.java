@@ -33,8 +33,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
-                                    HttpServletResponse response,
-                                    FilterChain chain) throws ServletException, IOException {
+            HttpServletResponse response,
+            FilterChain chain) throws ServletException, IOException {
 
         try {
             if (SecurityContextHolder.getContext().getAuthentication() != null) {
@@ -50,14 +50,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             String token = extractBearerToken(header);
             if (token == null || token.isBlank()) {
-                return; 
+                return;
             }
             token = token.trim();
 
-            tokenProvider.validate(token).ifPresentOrElse(
-                user -> setAuthentication(user, request),
-                () -> log.warn("JWT validation failed: token is invalid or expired")
-            );
+            Optional<AuthenticatedUser> validatedUser = tokenProvider.validate(token);
+            validatedUser.ifPresent(user -> setAuthentication(user, request));
+            if (validatedUser.isEmpty()) {
+                log.warn("JWT validation failed: token is invalid or expired");
+            }
 
         } catch (Exception e) {
             log.warn("JWT parsing/validation error: {}", e.getMessage());

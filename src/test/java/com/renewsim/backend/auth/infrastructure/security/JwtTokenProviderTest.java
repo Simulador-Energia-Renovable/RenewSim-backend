@@ -7,6 +7,7 @@ import io.jsonwebtoken.security.Keys;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.lang.reflect.Method;
 import java.security.Key;
 import java.security.SecureRandom;
 import java.sql.Date;
@@ -169,6 +170,17 @@ class JwtTokenProviderTest {
                 .signWith(hs384Key, SignatureAlgorithm.HS384)
                 .compact();
         assertThat(validator.validate(hs384Token)).isEmpty();
+    }
+
+    @Test
+    @DisplayName("toStringSet → devuelve vacío cuando claim no es colección")
+    void toStringSet_ShouldReturnEmpty_WhenClaimNotCollection() throws Exception {
+        Method m = JwtTokenProvider.class.getDeclaredMethod("toStringSet", Object.class);
+        m.setAccessible(true);
+
+        @SuppressWarnings("unchecked")
+        Set<String> result = (Set<String>) m.invoke(null, "single-role");
+        assertThat(result).isEmpty();
     }
 
 }
