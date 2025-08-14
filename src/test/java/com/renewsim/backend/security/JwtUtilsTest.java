@@ -1,10 +1,11 @@
 package com.renewsim.backend.security;
 
-import com.renewsim.backend.auth.infrastructure.security.JwtUtils;
 import io.jsonwebtoken.Claims;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.util.ReflectionTestUtils;
+
+import com.renewsim.backend.auth.config.security.JwtUtils;
 
 import java.util.Optional;
 import java.util.Set;

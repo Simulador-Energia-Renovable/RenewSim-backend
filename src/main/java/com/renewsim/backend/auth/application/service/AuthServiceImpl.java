@@ -10,6 +10,9 @@ import com.renewsim.backend.auth.domain.AuthenticatedUser;
 import com.renewsim.backend.auth.web.dto.AuthRequestDTO;
 import com.renewsim.backend.auth.web.dto.AuthResponseDTO;
 import com.renewsim.backend.role.RoleName;
+import com.renewsim.backend.shared.exception.AuthenticationException;
+import com.renewsim.backend.shared.exception.ResourceConflictException;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -45,7 +48,7 @@ public class AuthServiceImpl implements AuthUseCase {
 
         if (!passwordEncoder.matches(request.getPassword(), user.passwordHash())) {
             log.warn("Login failed: bad credentials for username [{}]", request.getUsername());
-            throw new IllegalArgumentException(invalidMsg);
+            throw new AuthenticationException(invalidMsg);
         }
 
         Set<String> roleNames = user.roles().stream().map(Enum::name).collect(Collectors.toSet());
@@ -71,7 +74,7 @@ public class AuthServiceImpl implements AuthUseCase {
 
         if (userGateway.existsByUsername(username)) {
             log.warn("Register failed: username already exists [{}]", username);
-            throw new IllegalStateException("Username already exists");
+            throw new ResourceConflictException("Username already exists");
         }
 
         RoleName defaultRole = roleProvider.defaultRole();
