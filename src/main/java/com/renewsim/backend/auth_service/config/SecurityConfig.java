@@ -1,5 +1,7 @@
 package com.renewsim.backend.auth_service.config;
 
+import com.renewsim.backend.auth_service.infrastructure.AuthNoCacheFilter;
+import com.renewsim.backend.auth_service.infrastructure.security.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -13,14 +15,15 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.web.cors.*;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.ForwardedHeaderFilter;
-
-import com.renewsim.backend.auth_service.infrastructure.AuthNoCacheFilter;
-import com.renewsim.backend.auth_service.infrastructure.security.JwtAuthenticationFilter;
 
 import java.time.Duration;
 import java.util.List;
+
+import static org.springframework.security.config.Customizer.withDefaults;
 
 @Configuration
 @RequiredArgsConstructor
@@ -65,10 +68,13 @@ public class SecurityConfig {
                         .httpStrictTransportSecurity(hsts -> hsts
                                 .includeSubDomains(true)
                                 .preload(true)
-                                .maxAgeInSeconds(Duration.ofDays(365).toSeconds())))
+                                .maxAgeInSeconds(Duration.ofDays(365).toSeconds()))
+                        .contentTypeOptions(withDefaults())
+                        .addHeaderWriter((req, res) -> res.setHeader("Permissions-Policy",
+                                "geolocation=(), microphone=(), camera=()")))
 
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
-                .addFilterAfter(new AuthNoCacheFilter(), UsernamePasswordAuthenticationFilter.class)
+                .addFilterAfter(authNoCacheFilter(), UsernamePasswordAuthenticationFilter.class)
 
                 .exceptionHandling(ex -> ex
                         .authenticationEntryPoint((req, res, e) -> {
@@ -93,6 +99,11 @@ public class SecurityConfig {
                         }));
 
         return http.build();
+    }
+
+    @Bean
+    public AuthNoCacheFilter authNoCacheFilter() {
+        return new AuthNoCacheFilter();
     }
 
     @Bean
