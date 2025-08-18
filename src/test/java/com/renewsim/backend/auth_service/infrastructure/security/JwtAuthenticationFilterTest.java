@@ -208,12 +208,53 @@ class JwtAuthenticationFilterTest extends UnitTestBase {
     @Test
     @DisplayName("Should ignore header not matching Bearer scheme even if it contains the word 'Bearer'")
     void testShouldIgnoreHeader_ContainingBearerWordButWrongScheme() throws Exception {
-        req.addHeader("Authorization", "Token Bearer abc"); 
+        req.addHeader("Authorization", "Token Bearer abc");
 
         filter.doFilter(req, res, chain);
 
         assertThat(SecurityContextHolder.getContext().getAuthentication()).isNull();
         verifyNoInteractions(tokenProvider);
+        verify(chain).doFilter(req, res);
+    }
+
+    @Test
+    @DisplayName("ShouldNotFilter: skip JWT validation on public endpoints (e.g., /auth/login)")
+    void shouldSkipOnPublicEndpoints() throws Exception {
+        req.setRequestURI("/auth/login");
+        req.addHeader("Authorization", "Bearer whatever");
+
+        filter.doFilter(req, res, chain);
+
+        assertThat(SecurityContextHolder.getContext().getAuthentication()).isNull();
+        verifyNoInteractions(tokenProvider);
+        verify(chain).doFilter(req, res);
+    }
+
+    @Test
+    @DisplayName("Should not validate when 'Bearer' prefix is glued to token (missing space)")
+    void shouldNotValidate_WhenBearerPrefixWithoutSpace() throws Exception {
+        req.addHeader("Authorization", "BearerX abc.def.ghi");
+        filter.doFilter(req, res, chain);
+
+        assertThat(SecurityContextHolder.getContext().getAuthentication()).isNull();
+        verifyNoInteractions(tokenProvider);
+        verify(chain).doFilter(req, res);
+    }
+
+    @Test
+    @DisplayName("Should accept odd spacing around Bearer and still extract token")
+    void shouldHandleOddSpacingAroundBearer() throws Exception {
+        req.addHeader("Authorization", "\tBearer\t\tok\t");
+        when(tokenProvider.validate("ok"))
+                .thenReturn(Optional.of(new AuthenticatedUser("john", Set.of("USER"), Set.of("read"))));
+
+        filter.doFilter(req, res, chain);
+
+        var auth = SecurityContextHolder.getContext().getAuthentication();
+        assertThat(auth).isNotNull();
+        assertThat(auth.getName()).isEqualTo("john");
+        assertThat(auth.getAuthorities().stream().map(Object::toString))
+                .containsExactlyInAnyOrder("ROLE_USER", "SCOPE_read");
         verify(chain).doFilter(req, res);
     }
 
