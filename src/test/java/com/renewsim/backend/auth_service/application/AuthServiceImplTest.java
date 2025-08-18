@@ -14,50 +14,56 @@ import com.renewsim.backend.shared.exception.ResourceConflictException;
 import com.renewsim.backend.shared.exception.AuthenticationException;
 import com.renewsim.backend.testutil.UnitTestBase;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
+import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.time.Clock;
 import java.time.Instant;
+import java.time.ZoneOffset;
 import java.util.Optional;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class AuthServiceImplTest extends UnitTestBase {
 
-    @Mock
-    private UserAccountGateway userAccountGateway;
-    @Mock
-    private TokenProvider tokenProvider;
-    @Mock
-    private RoleProvider roleProvider;
+    @Mock private UserAccountGateway userAccountGateway;
+    @Mock private TokenProvider tokenProvider;
+    @Mock private RoleProvider roleProvider;
+    @Mock private ScopePolicy scopePolicy;
+    @Mock private PasswordEncoder passwordEncoder;
 
-    @Mock
-    private ScopePolicy scopePolicy;
-    @Mock
-    private PasswordEncoder passwordEncoder;
-
-    @InjectMocks
     private AuthServiceImpl authService;
+
+    private Clock fixedClock;
+    private Instant baseInstant;
 
     private AuthRequestDTO loginReq;
     private AuthenticatedUser john;
-
     private UserSnapshot snapshot;
 
     @BeforeEach
     void setUp() {
+        baseInstant = Instant.parse("2025-01-01T00:00:00Z");
+        fixedClock = Clock.fixed(baseInstant, ZoneOffset.UTC);
+
+        authService = new AuthServiceImpl(
+                userAccountGateway,
+                roleProvider,
+                scopePolicy,
+                passwordEncoder,
+                tokenProvider,
+                fixedClock
+        );
+
         loginReq = new AuthRequestDTO("john", "secret");
         john = new AuthenticatedUser("john", Set.of("USER"), Set.of("simulation:read"));
         snapshot = new UserSnapshot("john", "$2a$10$abcdefgHashed", Set.of(RoleName.USER));
@@ -71,7 +77,6 @@ class AuthServiceImplTest extends UnitTestBase {
     @Test
     @DisplayName("login → returns AuthResponseDTO with token when credentials are valid")
     void login_ok() {
-
         when(userAccountGateway.findByUsername("john")).thenReturn(Optional.of(snapshot));
         when(passwordEncoder.matches("secret", "$2a$10$abcdefgHashed")).thenReturn(true);
         when(scopePolicy.scopesFor(RoleName.USER)).thenReturn(Set.of("read"));
@@ -84,16 +89,17 @@ class AuthServiceImplTest extends UnitTestBase {
         assertThat(res.getToken()).isEqualTo("jwt-token");
         assertThat(res.getRoles()).containsExactlyInAnyOrder("USER");
         assertThat(res.getScopes()).containsExactlyInAnyOrder("read");
+        // Determinista con Clock.fixed:
+        assertThat(res.getExpiresAt()).isEqualTo(baseInstant.plusSeconds(3600));
 
         verify(userAccountGateway).findByUsername("john");
         verify(passwordEncoder).matches("secret", "$2a$10$abcdefgHashed");
         verify(scopePolicy).scopesFor(RoleName.USER);
-        verify(tokenProvider).generate(argThat(au -> au.username().equals("john") &&
+        verify(tokenProvider).generate(argThat(au ->
+                au.username().equals("john") &&
                 au.roles().contains("USER") &&
                 au.scopes().contains("read")));
         verify(tokenProvider).expiresInSeconds();
-
-        verifyNoMoreInteractions(roleProvider);
     }
 
     @Test
@@ -108,7 +114,7 @@ class AuthServiceImplTest extends UnitTestBase {
 
         verify(userAccountGateway).findByUsername("john");
         verify(passwordEncoder).matches("bad", "$2a$10$abcdefgHashed");
-        verifyNoInteractions(scopePolicy, tokenProvider);
+        verifyNoInteractions(scopePolicy, tokenProvider, roleProvider);
     }
 
     @Test
@@ -125,7 +131,7 @@ class AuthServiceImplTest extends UnitTestBase {
     }
 
     @Test
-    @DisplayName("register → creates user with default role, builds token and scopes")
+    @DisplayName("register → creates user with default role, builds token and scopes deterministically")
     void register_ok() {
         when(userAccountGateway.existsByUsername("john")).thenReturn(false);
         when(roleProvider.defaultRole()).thenReturn(RoleName.USER);
@@ -134,17 +140,13 @@ class AuthServiceImplTest extends UnitTestBase {
         when(tokenProvider.generate(any(AuthenticatedUser.class))).thenReturn("jwt-token");
         when(tokenProvider.expiresInSeconds()).thenReturn(3600L);
 
-        Instant before = Instant.now();
-
         var res = authService.register(new AuthRequestDTO("john", "secret"));
-
-        Instant after = Instant.now();
 
         assertThat(res.getUsername()).isEqualTo("john");
         assertThat(res.getToken()).isEqualTo("jwt-token");
         assertThat(res.getRoles()).containsExactly("USER");
         assertThat(res.getScopes()).containsExactly("simulation:read");
-        assertThat(res.getExpiresAt()).isAfterOrEqualTo(before).isBeforeOrEqualTo(after.plusSeconds(3600));
+        assertThat(res.getExpiresAt()).isEqualTo(baseInstant.plusSeconds(3600));
 
         verify(userAccountGateway).existsByUsername("john");
         verify(roleProvider).defaultRole();
@@ -154,7 +156,4 @@ class AuthServiceImplTest extends UnitTestBase {
         verify(tokenProvider).generate(any(AuthenticatedUser.class));
         verify(tokenProvider).expiresInSeconds();
     }
-
-    
-
 }
