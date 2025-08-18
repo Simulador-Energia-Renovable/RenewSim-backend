@@ -12,8 +12,10 @@ import org.springframework.boot.CommandLineRunner;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Profile;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 
 @SpringBootApplication
+@EnableMethodSecurity
 @EnableCaching 
 public class RenewSimBackendApplication {
     public static void main(String[] args) {

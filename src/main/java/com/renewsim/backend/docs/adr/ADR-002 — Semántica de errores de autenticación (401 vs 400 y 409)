@@ -1,0 +1,94 @@
+# 📝 ADR-0002 — Semántica de errores de autenticación (401 vs 400 y 409)
+
+**ID:** ADR-0002  
+**Date:** 14-08-2025  
+**Status:**  Accepted 
+**Version:** v1.0
+
+---
+
+## 1. Title  
+Semántica de errores de autenticación (401 vs 400 y 409).
+
+---
+
+## 2. Context  
+En la implementación original de `AuthServiceImpl.login()` se lanzaba:
+
+```java
+throw new IllegalArgumentException("Invalid username or password");
+```
+Esto provocaba que el controlador devolviera un HTTP 400 Bad Request en casos de credenciales inválidas, lo cual no es correcto según la semántica HTTP.
+De forma similar, en el registro (register) cuando un usuario ya existía, se lanzaba una excepción genérica que también resultaba en un 400.
+
+Problemas detectados:
+
+Respuestas HTTP no alineadas con la semántica de autenticación/autorización.
+
+Riesgo de user enumeration si se daban mensajes demasiado específicos.
+
+Falta de uniformidad en el manejo de errores de autenticación y registro.
+
+---
+
+## 3. Decision  
+Se introdujeron excepciones específicas y un @ControllerAdvice para mapearlas a los códigos HTTP correctos:
+
+401 Unauthorized → para credenciales inválidas (AuthenticationException).
+
+409 Conflict → para usuario ya existente (UserAlreadyExistsException).
+
+El @ControllerAdvice maneja estas excepciones devolviendo un cuerpo uniforme, con mensaje genérico para evitar user enumeration:
+
+```java
+@ResponseStatus(HttpStatus.UNAUTHORIZED)
+@ExceptionHandler(AuthenticationException.class)
+public ErrorResponse handleAuthException(AuthenticationException ex) {
+    return new ErrorResponse("Invalid username or password");
+}
+
+@ResponseStatus(HttpStatus.CONFLICT)
+@ExceptionHandler(UserAlreadyExistsException.class)
+public ErrorResponse handleUserExists(UserAlreadyExistsException ex) {
+    return new ErrorResponse("User already exists");
+}
+
+```
+
+---
+
+## 4. Rationale  
+Justifica **por qué** esta fue la mejor opción:  
+- Comparar con alternativas descartadas.  
+- Beneficios de la solución elegida.  
+- Impacto esperado en el proyecto.
+
+---
+
+## 5. Consequences  
+Consecuencias
+
+Positivas:
+
+Semántica HTTP correcta para autenticación y registro.
+
+Mayor claridad para clientes API.
+
+Seguridad reforzada contra user enumeration.
+
+Código más mantenible al centralizar manejo de excepciones.
+
+Negativas:
+
+Se añadieron nuevas clases de excepción y controlador de errores.
+
+Se tuvo que actualizar la suite de tests para validar nuevos códigos HTTP.
+
+---
+
+## 7. References  
+RFC 7235: Hypertext Transfer Protocol (HTTP/1.1): Authentication
+
+RFC 9110: HTTP Semantics
+
+---
