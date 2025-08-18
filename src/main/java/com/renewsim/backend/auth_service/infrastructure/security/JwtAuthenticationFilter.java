@@ -33,32 +33,41 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final TokenProvider tokenProvider;
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request,
-            HttpServletResponse response,
-            FilterChain chain) throws ServletException, IOException {
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        String path = request.getRequestURI();
+        return path.startsWith("/auth/login")
+            || path.startsWith("/auth/register")
+            || path.startsWith("/actuator/health")
+            || path.startsWith("/actuator/info");
+    }
 
+    @Override
+    protected void doFilterInternal(HttpServletRequest request,
+                                    HttpServletResponse response,
+                                    FilterChain chain) throws ServletException, IOException {
         try {
             if (SecurityContextHolder.getContext().getAuthentication() != null) {
-                log.debug("Authentication already exists in SecurityContext. Skipping JWT filter.");
+                log.debug("Authentication already present, skipping JWT validation.");
                 return;
             }
 
             final String rawHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
             if (rawHeader == null || rawHeader.isBlank()) {
+                log.debug("No Authorization header present.");
                 return;
             }
-            final String header = rawHeader.trim();
 
-            String token = extractBearerToken(header);
+            String token = extractBearerToken(rawHeader.trim());
             if (token == null || token.isBlank()) {
+                log.debug("Authorization header is not a Bearer token.");
                 return;
             }
-            token = token.trim();
 
             Optional<AuthenticatedUser> validatedUser = tokenProvider.validate(token);
-            validatedUser.ifPresent(user -> setAuthentication(user, request));
-            if (validatedUser.isEmpty()) {
-                log.warn("JWT validation failed: token is invalid or expired");
+            if (validatedUser.isPresent()) {
+                setAuthentication(validatedUser.get(), request);
+            } else {
+                log.warn("JWT validation failed: token is invalid, expired, or has incorrect claims.");
             }
 
         } catch (Exception e) {
@@ -81,15 +90,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private void setAuthentication(AuthenticatedUser user, HttpServletRequest request) {
         Collection<SimpleGrantedAuthority> authorities = new ArrayList<>();
-        for (String r : Optional.ofNullable(user.roles()).orElse(Collections.emptySet())) {
-            authorities.add(new SimpleGrantedAuthority("ROLE_" + r));
-        }
-        for (String s : Optional.ofNullable(user.scopes()).orElse(Collections.emptySet())) {
-            authorities.add(new SimpleGrantedAuthority("SCOPE_" + s));
-        }
+
+        Optional.ofNullable(user.roles()).orElse(Collections.emptySet())
+                .forEach(r -> authorities.add(new SimpleGrantedAuthority("ROLE_" + r)));
+
+        Optional.ofNullable(user.scopes()).orElse(Collections.emptySet())
+                .forEach(s -> authorities.add(new SimpleGrantedAuthority("SCOPE_" + s)));
 
         var authentication = new UsernamePasswordAuthenticationToken(user.username(), null, authorities);
+
         authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
         SecurityContextHolder.getContext().setAuthentication(authentication);
     }
 }
+

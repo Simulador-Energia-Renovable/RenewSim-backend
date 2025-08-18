@@ -19,6 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.Clock;
 import java.time.Instant;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -28,27 +29,26 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class AuthServiceImpl implements AuthUseCase {
 
+    private static final String INVALID_MSG = "Invalid username or password";
+
     private final UserAccountGateway userGateway;
     private final RoleProvider roleProvider;
     private final ScopePolicy scopePolicy;
     private final PasswordEncoder passwordEncoder;
     private final TokenProvider tokenProvider;
+    private final Clock clock;
 
     @Override
     public AuthResponseDTO login(AuthRequestDTO request) {
-
-        final String invalidMsg = "Invalid username or password";
-
         UserSnapshot user = userGateway.findByUsername(request.getUsername())
                 .orElseThrow(() -> {
-
-                    log.warn("Login failed: username not found [{}]", request.getUsername());
-                    return new IllegalArgumentException(invalidMsg);
+                    log.warn("Login failed: bad credentials for username [{}]", request.getUsername());
+                    return new AuthenticationException(INVALID_MSG);
                 });
 
         if (!passwordEncoder.matches(request.getPassword(), user.passwordHash())) {
             log.warn("Login failed: bad credentials for username [{}]", request.getUsername());
-            throw new AuthenticationException(invalidMsg);
+            throw new AuthenticationException(INVALID_MSG);
         }
 
         Set<String> roleNames = user.roles().stream().map(Enum::name).collect(Collectors.toSet());
@@ -58,14 +58,8 @@ public class AuthServiceImpl implements AuthUseCase {
 
         String token = tokenProvider.generate(new AuthenticatedUser(user.username(), roleNames, scopes));
         log.info("Login success for username [{}]", request.getUsername());
-        return AuthResponseDTO.builder()
-                .token(token)
-                .tokenType("Bearer")
-                .expiresAt(Instant.now().plusSeconds(tokenProvider.expiresInSeconds()))
-                .username(user.username())
-                .roles(roleNames)
-                .scopes(scopes)
-                .build();
+
+        return buildResponse(token, user.username(), roleNames, scopes);
     }
 
     @Override
@@ -85,14 +79,23 @@ public class AuthServiceImpl implements AuthUseCase {
 
         Set<String> roleNames = roles.stream().map(Enum::name).collect(Collectors.toSet());
         Set<String> scopes = scopePolicy.scopesFor(defaultRole);
+
         String token = tokenProvider.generate(new AuthenticatedUser(username, roleNames, scopes));
         log.info("Register success for username [{}] with default role [{}]", username, defaultRole.name());
+
+        return buildResponse(token, username, roleNames, scopes);
+    }
+
+    private AuthResponseDTO buildResponse(String token, String username, Set<String> roles, Set<String> scopes) {
+        Instant now = Instant.now(clock);
+        long expiresIn = tokenProvider.expiresInSeconds();
+
         return AuthResponseDTO.builder()
                 .token(token)
                 .tokenType("Bearer")
-                .expiresAt(Instant.now().plusSeconds(tokenProvider.expiresInSeconds()))
+                .expiresAt(now.plusSeconds(expiresIn))
                 .username(username)
-                .roles(roleNames)
+                .roles(roles)
                 .scopes(scopes)
                 .build();
     }
