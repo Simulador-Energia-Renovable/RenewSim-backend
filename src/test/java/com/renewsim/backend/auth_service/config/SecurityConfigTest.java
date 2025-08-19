@@ -96,7 +96,7 @@ class SecurityConfigTest {
                 mvc.perform(get("/error").secure(true))
                                 .andExpect(header().string("X-Content-Type-Options", "nosniff"))
                                 .andExpect(header().string("X-Frame-Options", "DENY"))
-                                .andExpect(header().string("Referrer-Policy", "strict-origin-when-cross-origin"))
+                                .andExpect(header().string("Referrer-Policy", "no-referrer"))
                                 .andExpect(header().string("Content-Security-Policy", containsString("default-src")))
                                 .andExpect(header().string("Strict-Transport-Security", containsString("max-age")));
         }
