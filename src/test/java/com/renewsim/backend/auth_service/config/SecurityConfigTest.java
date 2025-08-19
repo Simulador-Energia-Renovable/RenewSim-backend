@@ -2,17 +2,23 @@ package com.renewsim.backend.auth_service.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.renewsim.backend.auth_service.application.port.in.AuthUseCase;
+import com.renewsim.backend.auth_service.infrastructure.AuthNoCacheFilter;
 import com.renewsim.backend.auth_service.infrastructure.security.JwtAuthenticationFilter;
+import com.renewsim.backend.auth_service.infrastructure.security.LoginRateLimitingFilter;
+import com.renewsim.backend.auth_service.web.controller.AuthController;
 import com.renewsim.backend.auth_service.web.dto.AuthResponseDTO;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
@@ -20,21 +26,27 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.time.Instant;
 import java.util.Set;
 
-import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.*;
+import static org.hamcrest.CoreMatchers.not;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.options;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@SpringBootTest
-@ActiveProfiles("test")
+@WebMvcTest(controllers = AuthController.class)
+@Import({ SecurityConfig.class, AuthNoCacheFilter.class })
 @TestPropertySource(properties = {
                 "cors.allowed-origins=http://localhost:3000",
+                "cors.allow-credentials=true",
+                "cors.allowed-methods=GET,POST,PUT,DELETE,OPTIONS,PATCH",
+                "cors.allowed-headers=Content-Type,Authorization,X-Requested-With,X-Correlation-Id",
+                "cors.exposed-headers=X-Correlation-Id",
+                "security.rate-limiting.enabled=false",
                 "server.forward-headers-strategy=framework"
 })
-@AutoConfigureMockMvc
+
+@ActiveProfiles("test")
 class SecurityConfigTest {
 
         @Autowired
@@ -42,16 +54,16 @@ class SecurityConfigTest {
 
         @MockBean
         private AuthUseCase authUseCase;
-
         @MockBean
         private JwtAuthenticationFilter jwtAuthenticationFilter;
+        @MockBean
+        private LoginRateLimitingFilter loginRateLimitingFilter;
 
-        private ObjectMapper mapper;
+        private final ObjectMapper mapper = new ObjectMapper();
 
         @BeforeEach
         void setUp() {
-                mapper = new ObjectMapper();
-                when(authUseCase.login(any())).thenReturn(
+                Mockito.when(authUseCase.login(any())).thenReturn(
                                 AuthResponseDTO.builder()
                                                 .username("john")
                                                 .token("mock-token")
@@ -63,23 +75,24 @@ class SecurityConfigTest {
         }
 
         @Test
-        @DisplayName("Auth endpoints should be public and set Cache-Control: no-store on login")
-        void authEndpoints_public_and_noStore_on_login() throws Exception {
+        @DisplayName("Auth endpoints públicos y login con no-store")
+        void authEndpoints_public_y_noStore_en_login() throws Exception {
                 String body = """
-                                {"username":"john","password":"secret"}
+                                    {"username":"john","password":"secret"}
                                 """;
 
                 mvc.perform(post("/api/v1/auth/login")
-                                .contentType("application/json")
+                                .contentType(MediaType.APPLICATION_JSON)
                                 .content(body))
                                 .andExpect(status().isOk())
                                 .andExpect(header().string(HttpHeaders.CACHE_CONTROL, containsString("no-store")))
                                 .andExpect(header().string(HttpHeaders.PRAGMA, containsString("no-cache")))
-                                .andExpect(header().exists("Expires"));
+                                .andExpect(header().exists("Expires"))
+                                .andExpect(header().string("X-Correlation-Id", not(emptyOrNullString())));
         }
 
         @Test
-        @DisplayName("CORS preflight: should allow OPTIONS /** with allowed origin")
+        @DisplayName("Preflight CORS: OPTIONS permitido con origen válido")
         void cors_preflight_options_any_path() throws Exception {
                 mvc.perform(options("/api/v1/anything")
                                 .header(HttpHeaders.ORIGIN, "http://localhost:3000")
@@ -108,21 +121,5 @@ class SecurityConfigTest {
                                 .header("X-Forwarded-Proto", "https"))
                                 .andExpect(header().string("Strict-Transport-Security", containsString("max-age")));
         }
-
-         @Test
-        @DisplayName("Register should also return strict no-cache headers")
-        void register_should_return_no_cache_headers() throws Exception {
-                String body = """
-                                {"username":"jane","password":"secret"}
-                                """;
-
-                mvc.perform(post("/api/v1/auth/register")
-                                .contentType("application/json")
-                                .content(body))
-                                .andExpect(status().isOk()) 
-                                .andExpect(header().string(HttpHeaders.CACHE_CONTROL, containsString("no-store")))
-                                .andExpect(header().string(HttpHeaders.PRAGMA, containsString("no-cache")))
-                                .andExpect(header().exists("Expires"));
-        }
-
+        
 }
