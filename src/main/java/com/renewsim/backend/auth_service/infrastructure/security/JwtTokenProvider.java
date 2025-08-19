@@ -16,16 +16,16 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
-public class JwtTokenProvider implements TokenProvider {
+public final class JwtTokenProvider implements TokenProvider {
 
     private final SecurityJwtProperties props;
     private final Clock clock;
     private final Key key;
 
-    public JwtTokenProvider(SecurityJwtProperties props, Clock clock) {
+    JwtTokenProvider(SecurityJwtProperties props, Clock clock) {
         this.props = Objects.requireNonNull(props, "SecurityJwtProperties is required");
         this.clock = (clock != null) ? clock : Clock.systemUTC();
-        this.key = resolveKey(props);
+        this.key = resolveKey(props); 
     }
 
     @Override
@@ -33,7 +33,7 @@ public class JwtTokenProvider implements TokenProvider {
         Objects.requireNonNull(user, "user must not be null");
 
         Instant now = Instant.now(clock);
-        long nbfSkew = props.nbfSkewOrZero();            
+        long nbfSkew = props.nbfSkewOrZero();
         long expSecs = props.expirationSeconds();
 
         Instant nbf = now.plusSeconds(nbfSkew);
@@ -48,15 +48,15 @@ public class JwtTokenProvider implements TokenProvider {
         }
 
         return Jwts.builder()
-                .setId(UUID.randomUUID().toString())           
-                .setIssuer(props.issuer())                     
-                .setAudience(props.audience())                 
-                .setSubject(user.username())                   
-                .setIssuedAt(Date.from(now))                   
-                .setNotBefore(Date.from(nbf))                  
-                .setExpiration(Date.from(exp))                 
+                .setId(UUID.randomUUID().toString())
+                .setIssuer(props.issuer())
+                .setAudience(props.audience())
+                .setSubject(user.username())
+                .setIssuedAt(Date.from(now))
+                .setNotBefore(Date.from(nbf))
+                .setExpiration(Date.from(exp))
                 .addClaims(claims)
-                .signWith(key, SignatureAlgorithm.HS256)
+                .signWith(key, SignatureAlgorithm.HS256) 
                 .compact();
     }
 
@@ -71,12 +71,11 @@ public class JwtTokenProvider implements TokenProvider {
                     .setSigningKey(key)
                     .setClock(() -> Date.from(Instant.now(clock)));
 
-            long skew = props.clockSkewOrZero();              
+            long skew = props.clockSkewOrZero();
             if (skew > 0) builder.setAllowedClockSkewSeconds(skew);
 
             Jws<Claims> jws = builder.build().parseClaimsJws(token);
 
-            // Defensa adicional: verificar HS256 explícito
             JwsHeader<?> header = jws.getHeader();
             if (!SignatureAlgorithm.HS256.getValue().equals(header.getAlgorithm())) {
                 return Optional.empty();
@@ -104,7 +103,6 @@ public class JwtTokenProvider implements TokenProvider {
     // Helpers
     // -------------------------
     private static Key resolveKey(SecurityJwtProperties props) {
-        // 1) Base64
         if (props.hasSecretBase64()) {
             byte[] decoded = Base64.getDecoder().decode(props.secretBase64());
             if (decoded.length < 32) {
@@ -112,7 +110,6 @@ public class JwtTokenProvider implements TokenProvider {
             }
             return Keys.hmacShaKeyFor(decoded);
         }
-        // 2) Texto plano
         if (props.hasPlainSecret()) {
             byte[] raw = props.secret().getBytes(StandardCharsets.UTF_8);
             if (raw.length < 32) {
@@ -133,5 +130,3 @@ public class JwtTokenProvider implements TokenProvider {
         return Collections.emptySet();
     }
 }
-
-

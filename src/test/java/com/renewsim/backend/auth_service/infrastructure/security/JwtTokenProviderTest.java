@@ -300,6 +300,33 @@ class JwtTokenProviderTest {
         assertThat(assertUUID(claims.getId())).isTrue();
     }
 
+    @Test
+    @DisplayName("constructor → lanza excepción cuando faltan ambos secretos (plain y base64)")
+    void constructor_throws_whenBothSecretsMissing() {
+        var p = new SecurityJwtProperties(
+                "iss", "aud",
+                null,
+                null, 
+                3600L,
+                0L,
+                0L);
+        Clock clock = Clock.fixed(Instant.parse("2025-01-01T10:00:00Z"), ZoneOffset.UTC);
+
+        assertThatThrownBy(() -> new JwtTokenProvider(p, clock))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("No JWT secret configured");
+    }
+
+    @Test
+    @DisplayName("constructor → NO debe ser público (package-private)")
+    void constructor_isPackagePrivate() throws Exception {
+        var ctor = JwtTokenProvider.class.getDeclaredConstructor(SecurityJwtProperties.class, Clock.class);
+        int mod = ctor.getModifiers();
+        assertThat(java.lang.reflect.Modifier.isPublic(mod)).isFalse();
+        assertThat(java.lang.reflect.Modifier.isPrivate(mod)).isFalse();
+        assertThat(java.lang.reflect.Modifier.isProtected(mod)).isFalse();
+    }
+
     private static boolean assertUUID(String maybeUuid) {
         try {
             UUID.fromString(maybeUuid);
