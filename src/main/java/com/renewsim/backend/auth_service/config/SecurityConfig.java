@@ -2,6 +2,8 @@ package com.renewsim.backend.auth_service.config;
 
 import com.renewsim.backend.auth_service.infrastructure.AuthNoCacheFilter;
 import com.renewsim.backend.auth_service.infrastructure.security.JwtAuthenticationFilter;
+import com.renewsim.backend.auth_service.infrastructure.security.LoginRateLimitingFilter;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -32,6 +34,7 @@ import static org.springframework.security.config.Customizer.withDefaults;
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final LoginRateLimitingFilter loginRateLimitingFilter;
 
     @Value("${cors.allowed-origins}")
     private String allowedOrigins;
@@ -76,6 +79,7 @@ public class SecurityConfig {
                                 "geolocation=(), microphone=(), camera=()")))
 
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(loginRateLimitingFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterAfter(authNoCacheFilter(), UsernamePasswordAuthenticationFilter.class)
 
                 .exceptionHandling(ex -> ex
