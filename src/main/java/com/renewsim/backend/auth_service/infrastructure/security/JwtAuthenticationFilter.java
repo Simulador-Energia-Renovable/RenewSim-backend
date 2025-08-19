@@ -8,7 +8,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
@@ -28,7 +28,8 @@ import java.util.regex.Pattern;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private static final String BEARER = "Bearer ";
-    private static final Pattern BEARER_PATTERN = Pattern.compile("^Bearer\\s+(.+)$", Pattern.CASE_INSENSITIVE);
+    private static final Pattern BEARER_PATTERN =
+            Pattern.compile("^Bearer\\s+(.+)$", Pattern.CASE_INSENSITIVE);
 
     private final TokenProvider tokenProvider;
 
@@ -89,18 +90,18 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     private void setAuthentication(AuthenticatedUser user, HttpServletRequest request) {
-        Collection<SimpleGrantedAuthority> authorities = new ArrayList<>();
+        Collection<GrantedAuthority> authorities =
+                AuthorityMapper.mapToAuthorities(user.roles(), user.scopes());
 
-        Optional.ofNullable(user.roles()).orElse(Collections.emptySet())
-                .forEach(r -> authorities.add(new SimpleGrantedAuthority("ROLE_" + r)));
-
-        Optional.ofNullable(user.scopes()).orElse(Collections.emptySet())
-                .forEach(s -> authorities.add(new SimpleGrantedAuthority("SCOPE_" + s)));
-
-        var authentication = new UsernamePasswordAuthenticationToken(user.username(), null, authorities);
-
+        var authentication = new UsernamePasswordAuthenticationToken(user, null, authorities);
         authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
         SecurityContextHolder.getContext().setAuthentication(authentication);
+
+        if (log.isDebugEnabled()) {
+            log.debug("Authenticated user '{}' with authorities: {}", user.username(),
+                    authorities.stream().map(GrantedAuthority::getAuthority).toList());
+        }
     }
 }
+
 
