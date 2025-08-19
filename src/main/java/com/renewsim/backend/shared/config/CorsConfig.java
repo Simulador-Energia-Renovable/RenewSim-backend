@@ -1,26 +1,29 @@
 package com.renewsim.backend.shared.config;
 
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
-import org.springframework.web.servlet.config.annotation.CorsRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.annotation.Bean; import org.springframework.context.annotation.Configuration;
+import org.springframework.web.cors.CorsConfiguration; import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 @Configuration
-@Profile("dev")
+@EnableConfigurationProperties(CorsProperties.class)
+@ConditionalOnProperty(prefix = "cors", name = "enabled", havingValue = "true", matchIfMissing = true)
 public class CorsConfig {
 
     @Bean
-    public WebMvcConfigurer corsConfigurer() {
-        return new WebMvcConfigurer() {
-            @Override
-            public void addCorsMappings(CorsRegistry registry) {
-                registry.addMapping("/api/**")
-                        .allowedOrigins("https://localhost:5174")
-                        .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
-                        .allowedHeaders("*")
-                        .allowCredentials(true);
-            }
-        };
+    public CorsConfigurationSource corsConfigurationSource(CorsProperties props) {
+        CorsConfiguration cfg = new CorsConfiguration();
+        cfg.setAllowCredentials(props.isAllowCredentials());
+        cfg.setAllowedOrigins(props.getAllowedOrigins());     
+        cfg.setAllowedMethods(props.getAllowedMethods());
+        cfg.setAllowedHeaders(props.getAllowedHeaders());
+        cfg.setExposedHeaders(props.getExposedHeaders());    
+        cfg.setMaxAge(props.getMaxAgeSeconds());
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", cfg);
+        return source;
     }
 }
+
