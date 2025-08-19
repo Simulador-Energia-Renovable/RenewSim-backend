@@ -17,7 +17,7 @@ import org.springframework.web.util.ContentCachingRequestWrapper;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
-@Order(5) 
+@Order(5)
 public class LoginRateLimitingFilter extends OncePerRequestFilter {
 
     private final SecurityRateLimitProperties props;
@@ -33,9 +33,10 @@ public class LoginRateLimitingFilter extends OncePerRequestFilter {
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
-        if (!props.isEnabled()) return true;
-        String servletPath = request.getServletPath();
-        return !pathMatcher.match(props.getLoginPath(), servletPath);
+        if (!props.isEnabled())
+            return true;
+        String path = request.getRequestURI(); 
+        return !pathMatcher.match(props.getLoginPath(), path);
     }
 
     @Override
@@ -62,13 +63,12 @@ public class LoginRateLimitingFilter extends OncePerRequestFilter {
 
     private String buildKey(ContentCachingRequestWrapper req) {
         String ip = clientIp(req);
+
         if (props.getStrategy() == SecurityRateLimitProperties.Strategy.IP_USER) {
             try {
                 byte[] buf = req.getContentAsByteArray();
-                String body = buf.length == 0
-                        ? new String(req.getInputStream().readAllBytes(), StandardCharsets.UTF_8)
-                        : new String(buf, 0, buf.length, StandardCharsets.UTF_8);
-                if (body != null && !body.isBlank()) {
+                if (buf != null && buf.length > 0) {
+                    String body = new String(buf, StandardCharsets.UTF_8);
                     LoginUsernameProbe probe = objectMapper.readValue(body, LoginUsernameProbe.class);
                     String user = probe.getUsername();
                     if (user != null && !user.isBlank()) {
@@ -87,8 +87,6 @@ public class LoginRateLimitingFilter extends OncePerRequestFilter {
             int idx = xff.indexOf(',');
             return (idx > 0 ? xff.substring(0, idx) : xff).trim();
         }
-        String ip = request.getRemoteAddr();
-        return ip != null ? ip : "0.0.0.0";
+        return request.getRemoteAddr() != null ? request.getRemoteAddr() : "0.0.0.0";
     }
 }
-
